@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeCoding Workflow Start Guide</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --paper: #fffaf2;
+      --panel: rgba(255, 250, 242, 0.84);
+      --ink: #1f2a27;
+      --muted: #58655f;
+      --accent: #0f766e;
+      --accent-soft: #dff1ec;
+      --line: rgba(31, 42, 39, 0.12);
+      --shadow: 0 24px 70px rgba(39, 44, 38, 0.12);
+      --radius: 24px;
+      --mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
+      --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Georgia", serif;
+      --sans: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 32%),
+        radial-gradient(circle at top right, rgba(173, 119, 62, 0.18), transparent 28%),
+        linear-gradient(180deg, #efe7da 0%, var(--bg) 48%, #ece5d9 100%);
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 32px auto 56px;
+      animation: rise 520ms ease-out;
+    }
+
+    .hero,
+    .section {
+      background: var(--panel);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 42px;
+      margin-bottom: 22px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: -60px;
+      width: 220px;
+      height: 220px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(15, 118, 110, 0.22), transparent 70%);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: var(--serif);
+      font-weight: 700;
+      line-height: 1.08;
+    }
+
+    h1 {
+      font-size: clamp(2.3rem, 5vw, 4.2rem);
+      max-width: 11ch;
+    }
+
+    h2 {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      margin-bottom: 14px;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    .hero p {
+      margin-top: 16px;
+      max-width: 62ch;
+      font-size: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 22px;
+      margin-bottom: 22px;
+    }
+
+    .section {
+      padding: 28px;
+    }
+
+    .steps {
+      display: grid;
+      gap: 14px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid var(--line);
+    }
+
+    .step-index {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, #155e57, #0f766e);
+      color: #fff;
+      font-family: var(--serif);
+      font-size: 1.25rem;
+    }
+
+    .cards {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    code,
+    pre {
+      font-family: var(--mono);
+    }
+
+    pre {
+      margin: 14px 0 0;
+      padding: 18px;
+      border-radius: 18px;
+      overflow-x: auto;
+      background: #1d2725;
+      color: #eef7f2;
+      line-height: 1.65;
+      font-size: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .callout {
+      padding: 18px 20px;
+      border-left: 4px solid var(--accent);
+      background: rgba(223, 241, 236, 0.7);
+      color: #17453f;
+      border-radius: 16px;
+      margin-top: 16px;
+      line-height: 1.7;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .check {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid var(--line);
+    }
+
+    .check strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ink);
+    }
+
+    .footer {
+      margin-top: 22px;
+      padding: 26px 28px;
+      border-radius: var(--radius);
+      background: #1e2926;
+      color: rgba(255, 250, 242, 0.9);
+      box-shadow: var(--shadow);
+    }
+
+    .footer p {
+      color: rgba(255, 250, 242, 0.76);
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero,
+      .section,
+      .footer {
+        padding: 22px;
+      }
+
+      .step {
+        grid-template-columns: 42px 1fr;
+      }
+
+      .step-index {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow">VibeCoding Workflow</div>
+      <h1>新业务如何按这套流程开始</h1>
+      <p>
+        这套流程的核心不是“直接开始写代码”，而是先建立一个
+        <code>startup -&gt; memory -&gt; session</code> 的可恢复开发状态机。
+        新业务起手时，先按模板创建流程骨架，只做 Session 0，不写业务实现。
+      </p>
+    </section>
+
+    <section class="grid">
+      <section class="section">
+        <h2>标准起手顺序</h2>
+        <div class="steps">
+          <article class="step">
+            <div class="step-index">1</div>
+            <div>
+              <h3>确定项目名、路径、业务目标、技术栈</h3>
+              <p>只给最关键的业务上下文，不要一开始就讲实现细节。</p>
+            </div>
+          </article>
+          <article class="step">
+            <div class="step-index">2</div>
+            <div>
+              <h3>明确要求“按 vibecodingworkflow 模板创建”</h3>
+              <p>不要让模型自由发挥，否则容易跳过 PRD、design、memory 或 session 规划。</p>
+            </div>
+          </article>
+          <article class="step">
+            <div class="step-index">3</div>
+            <div>
+              <h3>本轮只做 Session 0</h3>
+              <p>只生成流程文档与 prompt 骨架，不写业务代码，不跨到 Session 1。</p>
+            </div>
+          </article>
+          <article class="step">
+            <div class="step-index">4</div>
+            <div>
+              <h3>先落 6 类控制文件</h3>
+              <p><code>PRD.md</code>、<code>design.md</code>、<code>work-plan.md</code>、<code>memory.md</code>、<code>startup-prompt.md</code>、<code>session-0~10-prompt.md</code>。</p>
+            </div>
+          </article>
+          <article class="step">
+            <div class="step-index">5</div>
+            <div>
+              <h3>后续开发永远从 startup 入口进入</h3>
+              <p>不要直接跑 <code>session-2-prompt.md</code>，而是每次都重新执行 <code>startup-prompt.md</code>。</p>
+            </div>
+          </article>
+          <article class="step">
+            <div class="step-index">6</div>
+            <div>
+              <h3>每个 Session 结束先更新 memory，再启动一个新 Session</h3>
+              <p>推荐做法不是在原聊天里自动续跑，而是结束当前会话，在新上下文里重新执行 <code>startup-prompt.md</code>。</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>一句话原则</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>先流程，后实现</h3>
+            <p>先把项目调度体系搭起来，再进入业务开发。</p>
+          </article>
+          <article class="card">
+            <h3>先 Session 0</h3>
+            <p>不在初始化阶段写业务代码，不让上下文从第一轮就失控。</p>
+          </article>
+          <article class="card">
+            <h3>只信文件</h3>
+            <p><code>memory.md</code> 是唯一状态源，<code>startup-prompt.md</code> 是唯一调度入口。</p>
+          </article>
+          <article class="card">
+            <h3>测试没过不推进</h3>
+            <p>每个 Session 都要有 Gate，不能把“写完但未测”视为完成。</p>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section class="section">
+      <h2>推荐起手提示词</h2>
+      <p>新业务开始时，最稳的做法是明确说“按 vibecodingworkflow 模板创建，只做 Session 0”。</p>
+      <pre>请按 /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow 的标准 workflow，
+为一个新的 &lt;项目名称&gt; 创建多 Session 开发骨架。
+
+要求：
+- 严格按 vibecodingworkflow 模板创建
+- 先只做 Session 0 / 规划阶段
+- 本轮不要写业务实现代码
+- 先产出：
+  - PRD.md
+  - design.md
+  - work-plan.md
+  - memory.md
+  - startup-prompt.md
+  - session-0-prompt.md 到 session-10-prompt.md
+- 项目根目录放在：&lt;目标路径&gt;
+
+业务背景：
+- &lt;业务目标&gt;
+- &lt;目标用户&gt;
+- &lt;核心功能&gt;
+- &lt;技术栈&gt;
+- &lt;本期不做什么&gt;</pre>
+      <div class="callout">
+        最短版本也可以：
+        <br>
+        <code>请按 vibecodingworkflow 模板初始化新的 &lt;项目名&gt;，本轮只做 Session 0，先生成 PRD、design、work-plan、memory、startup-prompt 和各 session prompt。</code>
+      </div>
+    </section>
+
+    <section class="grid">
+      <section class="section">
+        <h2>Session 0 应该做什么</h2>
+        <div class="checklist">
+          <div class="check">
+            <strong>PRD.md</strong>
+            明确业务问题、目标用户、核心目标、验收标准。
+          </div>
+          <div class="check">
+            <strong>design.md</strong>
+            明确模块边界、输入输出、技术方案和验证策略。
+          </div>
+          <div class="check">
+            <strong>work-plan.md</strong>
+            把业务拆成 Session 1 到 Session N，每个 Session 只做一个 Level 3 Task。
+          </div>
+          <div class="check">
+            <strong>memory.md</strong>
+            初始化状态机，设置 <code>next_session</code>、<code>session_gate</code> 和更新规则。
+          </div>
+          <div class="check">
+            <strong>startup-prompt.md</strong>
+            作为唯一入口，负责根据 <code>memory.md</code> 自动路由当前 Session。
+          </div>
+          <div class="check">
+            <strong>session-0~10-prompt.md</strong>
+            提前把边界写清楚，后续开发只需进入对应 Session 执行。
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>后续开发纪律</h2>
+        <ul>
+          <li>永远先执行 <code>startup-prompt.md</code>。</li>
+          <li>不要手动猜“现在该做 Session 3 还是 4”。</li>
+          <li>Session 完成后先更新 <code>memory.md</code>。</li>
+          <li>然后结束当前会话，启动一个新的 Session / 新上下文。</li>
+          <li>新会话再次执行 <code>startup-prompt.md</code>。</li>
+          <li>如果测试失败或阻塞，就留在当前 Session，不得推进。</li>
+        </ul>
+        <div class="callout">
+          真正的稳定点不在 prompt 长短，而在于：
+          <strong>调度权在文件，不在窗口记忆。</strong>
+        </div>
+        <div class="callout">
+          推荐模式：
+          <strong>一个 Session 完成一个 deliverable，然后重启一个新的 Session。</strong>
+          不把“在原聊天里自动 /clear 后继续跑”作为默认方案。
+        </div>
+      </section>
+    </section>
+
+    <section class="section">
+      <h2>常见错误</h2>
+      <div class="checklist">
+        <div class="check">
+          <strong>错误 1：直接开始写代码</strong>
+          结果是后面没有可恢复状态机，当前会话结束后很难稳定恢复。
+        </div>
+        <div class="check">
+          <strong>错误 2：不说“按模板创建”</strong>
+          模型可能会漏掉 <code>memory.md</code> 或 session prompt。
+        </div>
+        <div class="check">
+          <strong>错误 3：Session 结束不更新 memory</strong>
+          下一轮就不知道该进哪个 Session。
+        </div>
+        <div class="check">
+          <strong>错误 4：测试没过就推进</strong>
+          流程会失真，后面的 Session 会建立在不稳定前提上。
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>自动调度怎么做</h2>
+      <p>
+        推荐方式不是让同一个聊天窗口在内部自动续跑，而是使用一个
+        <strong>聊天外部的 session driver</strong>。
+        它负责读取 <code>memory.md</code>，判断是否可以推进，然后启动一个新的 Session，
+        再把 <code>startup-prompt.md</code> 喂给新的上下文。
+      </p>
+      <pre>Session N 完成
+-> 更新 memory.md
+-> 外部 driver 读取 memory.md
+-> 创建一个新的 Session
+-> 在新 Session 执行 startup-prompt.md
+-> startup 再决定是否进入 Session N+1</pre>
+      <div class="callout">
+        在这个仓库里，对应的原型脚本是：
+        <code>scripts/run-vibecoding-loop.py</code>
+      </div>
+    </section>
+
+    <section class="footer">
+      <h2>推荐固定说法</h2>
+      <p>
+        以后每次新业务开工，直接说：
+        <br><br>
+        <strong>“请按 /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow 模板创建，本轮只做 Session 0。”</strong>
+      </p>
+    </section>
+  </main>
+</body>
+</html>

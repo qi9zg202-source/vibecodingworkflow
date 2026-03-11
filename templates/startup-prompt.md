@@ -26,8 +26,16 @@
 6. 测试通过后更新 `memory.md`
 7. 输出收尾说明后停止
 
+每轮循环规则：
+- Session 完成后，必须先更新 `memory.md`
+- 更新完成后，结束当前会话
+- 推荐做法是启动一个新的 Session / 新上下文，而不是在原会话里自动续跑
+- 新会话里再次执行 `startup-prompt.md`
+- 不要直接执行 `session-N-prompt.md`
+- 下一轮该进入哪个 Session，只能由 `memory.md` 决定
+
 固定输出格式：
 - `Session X complete`
 - `Tests: passed` 或 `Tests: failed` 或 `Tests: blocked`
 - `Next: session-Y-prompt.md`
-- `Run /clear before starting the next session`
+- `Start a fresh session before running the next startup-prompt.md`

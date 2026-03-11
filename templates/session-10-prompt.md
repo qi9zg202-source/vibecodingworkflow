@@ -17,3 +17,7 @@ memory 更新：
 - `next_session: none`
 - `next_session_prompt: none`
 - `session_gate: done`
+
+完成策略：
+- 本 Session 完成后，结束当前会话
+- 流程到此结束，不再启动下一个 Session

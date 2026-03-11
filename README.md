@@ -12,13 +12,14 @@ source code, or any feature-specific runtime logic. It only provides:
 - session 0 to 10 prompt templates
 - reference docs for evidence, output shape, and testing
 - a bootstrap script to generate a new workflow-driven project
+- a fresh-session loop driver prototype for external orchestration
 
 ## Use Cases
 
 Use this project before or during webcoding development when you need:
 
 - a fixed `startup -> memory -> session` loop
-- a recoverable workflow after `/clear`
+- a recoverable workflow based on one fresh session per deliverable
 - session-level test gates
 - a reusable prompt/doc skeleton for new projects
 
@@ -31,6 +32,17 @@ cd /Users/beckliu/Documents/0agentproject2026/googledrivesyn/skills/vibecodingwo
 
 The generated project will contain its own workflow files and can be used
 independently from this template repository.
+
+## Fresh Session Driver
+
+This repository also includes:
+
+```bash
+python3 ./scripts/run-vibecoding-loop.py /path/to/project --print-startup
+```
+
+It is an external orchestration prototype that reads `memory.md`, checks whether
+the next session may start, and prepares a fresh-session handoff.
 
 ## Project Structure
 

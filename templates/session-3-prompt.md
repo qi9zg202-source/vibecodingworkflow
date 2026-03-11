@@ -17,3 +17,7 @@ memory 更新：
 - `next_session: 4`
 - `next_session_prompt: session-4-prompt.md`
 - `session_gate: ready`
+
+完成策略：
+- 本 Session 完成后，结束当前会话
+- 下一轮在新的 Session / 新上下文里重新执行 `startup-prompt.md`

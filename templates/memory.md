@@ -33,6 +33,21 @@
 - session_2_outputs:
 - session_3_outputs:
 
+## Session Progress Record
+- 每次 Session 结束时，至少记录：
+  - 本 Session 完成了什么
+  - 执行了哪些测试
+  - 测试结果是 `passed` / `failed` / `blocked`
+  - 下一 Session 依赖哪些文件、字段或产物
+- 若本 Session 未完成：
+  - 不推进 `next_session`
+  - 保持当前 Session 作为下一轮入口
+- 若本 Session 已完成：
+  - 先更新本文件
+  - 再结束当前会话
+  - 再启动新的 Session / 新上下文
+  - 再从 `startup-prompt.md` 重新进入
+
 ## Next Session Entry
 - 先读 `Session Status`
 - 再读 `design.md`
