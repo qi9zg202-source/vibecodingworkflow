@@ -1,0 +1,18 @@
+工作目录切到 __PROJECT_ROOT__
+
+本次只做 Session 6。
+目标：
+- 接入运行态集成与副作用层
+
+限制：
+- 不做最终流程收尾
+
+测试 Gate：
+- 最小真实环境验证
+- 失败场景验证
+
+memory 更新：
+- `last_completed_session: 6`
+- `next_session: 7`
+- `next_session_prompt: session-7-prompt.md`
+- `session_gate: ready`
