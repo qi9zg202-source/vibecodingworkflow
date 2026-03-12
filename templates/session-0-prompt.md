@@ -11,6 +11,9 @@
 - 关键文档存在
 - `memory.md` 状态有效
 
+summary：
+- 写 `artifacts/session-0-summary.md`
+
 memory 更新：
 - `last_completed_session: 0`
 - `next_session: 1`

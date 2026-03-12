@@ -1,0 +1,318 @@
+{
+  "entities": {
+    "projectContext": {
+      "projectId": "proj-smoke",
+      "projectName": "Session 8 Smoke Project",
+      "environment": "local",
+      "activeRunId": "run-001",
+      "lastSyncedAt": "2026-03-11T09:30:00Z"
+    },
+    "runRecord": [
+      {
+        "runId": "run-001",
+        "title": "Smoke validation baseline",
+        "status": "ready",
+        "startedAt": "2026-03-11T09:00:00Z",
+        "reportIds": ["report-001"],
+        "qualityCheckIds": ["check-001", "check-002"]
+      }
+    ],
+    "evidenceItem": [
+      {
+        "evidenceId": "evidence-001",
+        "runId": "run-001",
+        "layer": "business_context",
+        "title": "Baseline objective",
+        "sourcePath": "references/evidence-model.md",
+        "summary": "Defines the fixed evidence layers used by the UI.",
+        "capturedAt": "2026-03-11T09:05:00Z"
+      }
+    ],
+    "qualityCheck": [
+      {
+        "checkId": "check-001",
+        "label": "Page map linked",
+        "status": "pass",
+        "severity": "medium",
+        "ownerRouteId": "dashboard"
+      },
+      {
+        "checkId": "check-002",
+        "label": "Contract sample complete",
+        "status": "pass",
+        "severity": "low",
+        "ownerRouteId": "reports"
+      }
+    ],
+    "reportArtifact": [
+      {
+        "reportId": "report-001",
+        "runId": "run-001",
+        "title": "Session 2 contract map",
+        "status": "draft",
+        "updatedAt": "2026-03-11T09:20:00Z",
+        "outputPath": "outputs/reports/session-2-contract-map.md"
+      }
+    ],
+    "projectPreference": {
+      "preferenceId": "pref-001",
+      "projectId": "proj-smoke",
+      "defaultView": "dashboard",
+      "autoRefresh": false,
+      "preferredReportFormat": "markdown"
+    }
+  },
+  "views": {
+    "dashboardSnapshot": {
+      "context": {
+        "projectId": "proj-smoke",
+        "projectName": "Session 8 Smoke Project",
+        "environment": "local",
+        "activeRunId": "run-001",
+        "lastSyncedAt": "2026-03-11T09:30:00Z"
+      },
+      "activeRuns": [
+        {
+          "runId": "run-001",
+          "title": "Smoke validation baseline",
+          "status": "ready",
+          "startedAt": "2026-03-11T09:00:00Z",
+          "reportIds": ["report-001"],
+          "qualityCheckIds": ["check-001", "check-002"]
+        }
+      ],
+      "openChecks": [
+        {
+          "checkId": "check-001",
+          "label": "Page map linked",
+          "status": "pass",
+          "severity": "medium",
+          "ownerRouteId": "dashboard"
+        }
+      ],
+      "latestReport": {
+        "reportId": "report-001",
+        "runId": "run-001",
+        "title": "Session 2 contract map",
+        "status": "draft",
+        "updatedAt": "2026-03-11T09:20:00Z",
+        "outputPath": "outputs/reports/session-2-contract-map.md"
+      }
+    },
+    "runDetail": {
+      "run": {
+        "runId": "run-001",
+        "title": "Smoke validation baseline",
+        "status": "ready",
+        "startedAt": "2026-03-11T09:00:00Z",
+        "reportIds": ["report-001"],
+        "qualityCheckIds": ["check-001", "check-002"]
+      },
+      "evidence": [
+        {
+          "evidenceId": "evidence-001",
+          "runId": "run-001",
+          "layer": "business_context",
+          "title": "Baseline objective",
+          "sourcePath": "references/evidence-model.md",
+          "summary": "Defines the fixed evidence layers used by the UI.",
+          "capturedAt": "2026-03-11T09:05:00Z"
+        }
+      ],
+      "checks": [
+        {
+          "checkId": "check-001",
+          "label": "Page map linked",
+          "status": "pass",
+          "severity": "medium",
+          "ownerRouteId": "dashboard"
+        },
+        {
+          "checkId": "check-002",
+          "label": "Contract sample complete",
+          "status": "pass",
+          "severity": "low",
+          "ownerRouteId": "reports"
+        }
+      ],
+      "relatedReports": [
+        {
+          "reportId": "report-001",
+          "runId": "run-001",
+          "title": "Session 2 contract map",
+          "status": "draft",
+          "updatedAt": "2026-03-11T09:20:00Z",
+          "outputPath": "outputs/reports/session-2-contract-map.md"
+        }
+      ]
+    },
+    "reportLibrary": {
+      "context": {
+        "projectId": "proj-smoke",
+        "projectName": "Session 8 Smoke Project",
+        "environment": "local",
+        "activeRunId": "run-001",
+        "lastSyncedAt": "2026-03-11T09:30:00Z"
+      },
+      "reports": [
+        {
+          "reportId": "report-001",
+          "runId": "run-001",
+          "title": "Session 2 contract map",
+          "status": "draft",
+          "updatedAt": "2026-03-11T09:20:00Z",
+          "outputPath": "outputs/reports/session-2-contract-map.md"
+        }
+      ]
+    },
+    "settingsSnapshot": {
+      "context": {
+        "projectId": "proj-smoke",
+        "projectName": "Session 8 Smoke Project",
+        "environment": "local",
+        "activeRunId": "run-001",
+        "lastSyncedAt": "2026-03-11T09:30:00Z"
+      },
+      "preferences": {
+        "preferenceId": "pref-001",
+        "projectId": "proj-smoke",
+        "defaultView": "dashboard",
+        "autoRefresh": false,
+        "preferredReportFormat": "markdown"
+      }
+    }
+  },
+  "operations": {
+    "loadDashboard": {
+      "input": {
+        "projectId": "proj-smoke"
+      },
+      "output": {
+        "context": {
+          "projectId": "proj-smoke",
+          "projectName": "Session 8 Smoke Project",
+          "environment": "local",
+          "activeRunId": "run-001",
+          "lastSyncedAt": "2026-03-11T09:30:00Z"
+        },
+        "activeRuns": [
+          {
+            "runId": "run-001",
+            "title": "Smoke validation baseline",
+            "status": "ready",
+            "startedAt": "2026-03-11T09:00:00Z",
+            "reportIds": ["report-001"],
+            "qualityCheckIds": ["check-001", "check-002"]
+          }
+        ],
+        "openChecks": [
+          {
+            "checkId": "check-001",
+            "label": "Page map linked",
+            "status": "pass",
+            "severity": "medium",
+            "ownerRouteId": "dashboard"
+          }
+        ],
+        "latestReport": {
+          "reportId": "report-001",
+          "runId": "run-001",
+          "title": "Session 2 contract map",
+          "status": "draft",
+          "updatedAt": "2026-03-11T09:20:00Z",
+          "outputPath": "outputs/reports/session-2-contract-map.md"
+        }
+      }
+    },
+    "loadRunDetail": {
+      "input": {
+        "projectId": "proj-smoke",
+        "runId": "run-001"
+      },
+      "output": {
+        "run": {
+          "runId": "run-001",
+          "title": "Smoke validation baseline",
+          "status": "ready",
+          "startedAt": "2026-03-11T09:00:00Z",
+          "reportIds": ["report-001"],
+          "qualityCheckIds": ["check-001", "check-002"]
+        },
+        "evidence": [
+          {
+            "evidenceId": "evidence-001",
+            "runId": "run-001",
+            "layer": "business_context",
+            "title": "Baseline objective",
+            "sourcePath": "references/evidence-model.md",
+            "summary": "Defines the fixed evidence layers used by the UI.",
+            "capturedAt": "2026-03-11T09:05:00Z"
+          }
+        ],
+        "checks": [
+          {
+            "checkId": "check-001",
+            "label": "Page map linked",
+            "status": "pass",
+            "severity": "medium",
+            "ownerRouteId": "dashboard"
+          }
+        ],
+        "relatedReports": [
+          {
+            "reportId": "report-001",
+            "runId": "run-001",
+            "title": "Session 2 contract map",
+            "status": "draft",
+            "updatedAt": "2026-03-11T09:20:00Z",
+            "outputPath": "outputs/reports/session-2-contract-map.md"
+          }
+        ]
+      }
+    },
+    "listReports": {
+      "input": {
+        "projectId": "proj-smoke",
+        "status": "draft"
+      },
+      "output": {
+        "context": {
+          "projectId": "proj-smoke",
+          "projectName": "Session 8 Smoke Project",
+          "environment": "local",
+          "activeRunId": "run-001",
+          "lastSyncedAt": "2026-03-11T09:30:00Z"
+        },
+        "reports": [
+          {
+            "reportId": "report-001",
+            "runId": "run-001",
+            "title": "Session 2 contract map",
+            "status": "draft",
+            "updatedAt": "2026-03-11T09:20:00Z",
+            "outputPath": "outputs/reports/session-2-contract-map.md"
+          }
+        ]
+      }
+    },
+    "saveProjectSettings": {
+      "input": {
+        "projectId": "proj-smoke",
+        "preferences": {
+          "preferenceId": "pref-001",
+          "projectId": "proj-smoke",
+          "defaultView": "dashboard",
+          "autoRefresh": false,
+          "preferredReportFormat": "markdown"
+        }
+      },
+      "output": {
+        "preferenceId": "pref-001",
+        "projectId": "proj-smoke",
+        "defaultView": "dashboard",
+        "autoRefresh": false,
+        "preferredReportFormat": "markdown"
+      }
+    }
+  }
+}

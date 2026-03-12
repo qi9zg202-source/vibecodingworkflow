@@ -11,6 +11,9 @@
 - 语法检查
 - 最小启动验证
 
+summary：
+- 写 `artifacts/session-1-summary.md`
+
 memory 更新：
 - `last_completed_session: 1`
 - `next_session: 2`

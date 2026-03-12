@@ -1,6 +1,9 @@
 工作目录切到 __PROJECT_ROOT__
 
 本次只做 Session 7。
+开始前若存在上一轮 summary，先读：
+- `artifacts/session-6-summary.md`
+
 目标：
 - 补齐错误处理与降级路径
 
@@ -10,6 +13,9 @@
 测试 Gate：
 - 错误场景验证
 - 降级路径验证
+
+summary：
+- 写 `artifacts/session-7-summary.md`
 
 memory 更新：
 - `last_completed_session: 7`

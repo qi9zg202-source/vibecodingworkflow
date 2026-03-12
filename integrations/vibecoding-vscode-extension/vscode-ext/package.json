@@ -1,0 +1,148 @@
+{
+  "name": "vibecoding-vscode-extension",
+  "displayName": "VibeCoding Workflow",
+  "description": "VS Code UI shell for the vibecoding fresh-session workflow",
+  "version": "0.1.10",
+  "publisher": "beckliu",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onView:vibeCodingDashboardView",
+    "onCommand:vibeCoding.openDashboard",
+    "onCommand:vibeCoding.refreshWorkflowStatus",
+    "onCommand:vibeCoding.openMemory",
+    "onCommand:vibeCoding.openStartupPrompt",
+    "onCommand:vibeCoding.openNextSessionPrompt",
+    "onCommand:vibeCoding.prepareFreshSession",
+    "onCommand:vibeCoding.startRunnerInTerminal",
+    "onCommand:vibeCoding.openLoopLog",
+    "onCommand:vibeCoding.configurePythonDriverPath"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vibeCoding.openDashboard",
+        "title": "VibeCoding: Open Dashboard"
+      },
+      {
+        "command": "vibeCoding.refreshWorkflowStatus",
+        "title": "VibeCoding: Refresh Workflow Status"
+      },
+      {
+        "command": "vibeCoding.openMemory",
+        "title": "VibeCoding: Open Memory"
+      },
+      {
+        "command": "vibeCoding.openStartupPrompt",
+        "title": "VibeCoding: Open Startup Prompt"
+      },
+      {
+        "command": "vibeCoding.openNextSessionPrompt",
+        "title": "VibeCoding: Open Next Session Prompt"
+      },
+      {
+        "command": "vibeCoding.prepareFreshSession",
+        "title": "VibeCoding: Prepare Fresh Session"
+      },
+      {
+        "command": "vibeCoding.startRunnerInTerminal",
+        "title": "VibeCoding: Start Runner In Terminal"
+      },
+      {
+        "command": "vibeCoding.openLoopLog",
+        "title": "VibeCoding: Open Loop Log"
+      },
+      {
+        "command": "vibeCoding.configurePythonDriverPath",
+        "title": "VibeCoding: Configure Python Driver Path"
+      }
+    ],
+    "configuration": {
+      "title": "VibeCoding Workflow",
+      "properties": {
+        "vibeCoding.pythonPath": {
+          "type": "string",
+          "default": "python3",
+          "description": "用于执行 vibecoding Python driver 的 Python 命令。"
+        },
+        "vibeCoding.driverPath": {
+          "type": "string",
+          "default": "",
+          "description": "run-vibecoding-loop.py 的绝对路径。留空表示后续版本自动推断。"
+        },
+        "vibeCoding.defaultProjectRoot": {
+          "type": "string",
+          "default": "",
+          "description": "默认 vibecoding workflow 项目根目录。留空优先使用当前 workspace。"
+        },
+        "vibeCoding.runnerCommandTemplate": {
+          "type": "string",
+          "default": "",
+          "description": "用于 fresh session 启动的 runner 命令模板，占位符约定将在后续 Session 固化。"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vibeCodingDashboard",
+          "title": "VibeCoding",
+          "icon": "media/vibe-dashboard.svg"
+        }
+      ]
+    },
+    "views": {
+      "vibeCodingDashboard": [
+        {
+          "type": "webview",
+          "id": "vibeCodingDashboardView",
+          "name": "Workflow Dashboard"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "vibeCoding.refreshWorkflowStatus",
+          "when": "view == vibeCodingDashboardView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "vibeCoding.openDashboard",
+          "when": "view == vibeCodingDashboardView",
+          "group": "navigation@2"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "vibeCoding.refreshWorkflowStatus",
+          "when": "activeWebviewPanelId == vibeCodingDashboard",
+          "group": "navigation@1"
+        },
+        {
+          "command": "vibeCoding.prepareFreshSession",
+          "when": "activeWebviewPanelId == vibeCodingDashboard",
+          "group": "navigation@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "smoke:session8": "node ./scripts/session8_smoke.js",
+    "regression:session9": "node ./scripts/session9_regression.js",
+    "smoke:session11": "node ./scripts/session11_real_scenario.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}

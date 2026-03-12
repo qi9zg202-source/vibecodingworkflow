@@ -1,6 +1,9 @@
 工作目录切到 __PROJECT_ROOT__
 
 本次只做 Session 6。
+开始前若存在上一轮 summary，先读：
+- `artifacts/session-5-summary.md`
+
 目标：
 - 接入运行态集成与副作用层
 
@@ -10,6 +13,9 @@
 测试 Gate：
 - 最小真实环境验证
 - 失败场景验证
+
+summary：
+- 写 `artifacts/session-6-summary.md`
 
 memory 更新：
 - `last_completed_session: 6`

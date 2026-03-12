@@ -1,6 +1,9 @@
 工作目录切到 __PROJECT_ROOT__
 
 本次只做 Session 10，这是最后一个 Session。
+开始前若存在上一轮 summary，先读：
+- `artifacts/session-9-summary.md`
+
 目标：
 - 文档收尾与流程结束
 
@@ -10,6 +13,9 @@
 测试 Gate：
 - 最终回归检查
 - 核心交付物存在性检查
+
+summary：
+- 写 `artifacts/session-10-summary.md`
 
 memory 更新：
 - `last_completed_session: 10`

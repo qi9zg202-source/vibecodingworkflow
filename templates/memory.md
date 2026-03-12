@@ -23,6 +23,7 @@
 ## Current Decisions
 - 记录跨 Session 的稳定结论
 - 不写未验证结论
+- Task 级目标定义写入 `task.md`
 
 ## Known Risks
 - 记录会影响后续判断的风险
@@ -38,6 +39,7 @@
   - 本 Session 完成了什么
   - 执行了哪些测试
   - 测试结果是 `passed` / `failed` / `blocked`
+  - 本 Session 的 `artifacts/session-N-summary.md`
   - 下一 Session 依赖哪些文件、字段或产物
 - 若本 Session 未完成：
   - 不推进 `next_session`
@@ -50,6 +52,8 @@
 
 ## Next Session Entry
 - 先读 `Session Status`
+- 再读 `task.md`
 - 再读 `design.md`
 - 再读 `work-plan.md`
+- 若 `last_completed_session > 0` 且存在上一轮 summary，先读对应 `artifacts/session-N-summary.md`
 - 然后只做 `next_session` 指定内容

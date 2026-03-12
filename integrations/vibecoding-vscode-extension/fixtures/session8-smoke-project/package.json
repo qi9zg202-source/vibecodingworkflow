@@ -1,0 +1,16 @@
+{
+  "name": "session8-smoke-project",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/main.js && node --check src/contracts/page-map.js && node --check src/contracts/data-model.js && node --check src/contracts/interface-contracts.js && node --check src/config/app-config.js && node --check src/data/session-seed.js && node --check src/runtime/app-context.js && node --check src/runtime/data-loader.js && node --check src/runtime/session-runtime.js && node --check src/features/workspace-api.js && node --check src/features/workspace-controller.js && node --check src/features/workspace-view.js && node --check scripts/dev-server.mjs && node --check scripts/run-minimal-input.mjs && node --check scripts/smoke-start.mjs && node --check scripts/validate-structure.mjs && node --check scripts/validate-samples.mjs && node --check scripts/validate-session4-unit.mjs && node --check scripts/validate-session4-flow.mjs",
+    "dev": "node scripts/dev-server.mjs",
+    "run:minimal": "node scripts/run-minimal-input.mjs",
+    "smoke": "node scripts/smoke-start.mjs",
+    "validate:session4:flow": "node scripts/validate-session4-flow.mjs",
+    "validate:session4:unit": "node scripts/validate-session4-unit.mjs",
+    "validate:samples": "node scripts/validate-samples.mjs",
+    "validate:structure": "node scripts/validate-structure.mjs"
+  }
+}

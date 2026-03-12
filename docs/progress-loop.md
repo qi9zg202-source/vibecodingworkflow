@@ -6,11 +6,17 @@ Multi-session development fails when the next step depends on chat memory instea
 This workflow avoids that by using a fixed loop:
 
 1. finish one session
-2. record progress in `memory.md`
-3. end the current session
-4. start a fresh session / fresh context
-5. re-enter through `startup-prompt.md`
-6. continue from the session selected by `memory.md`
+2. write `artifacts/session-N-summary.md`
+3. record progress in `memory.md`
+4. end the current session
+5. start a fresh session / fresh context
+6. re-enter through `startup-prompt.md`
+7. continue from the session selected by `memory.md`
+
+This loop now has two handoff layers:
+
+- `memory.md`: machine routing truth
+- `artifacts/session-N-summary.md`: human/model handoff evidence
 
 ## What Must Be Recorded Every Session
 
@@ -29,12 +35,24 @@ Also record a short progress note:
 - whether tests passed, failed, or were blocked
 - what the next session needs to read
 
+And persist a session summary file:
+
+- `artifacts/session-N-summary.md`
+- completed work
+- changed files
+- tests
+- decisions
+- risks
+- next session inputs
+
 ## Why Startup Must Run Every Time
 
 After a session ends, the model should not guess which session comes next.
 `startup-prompt.md` exists to:
 
 - read `memory.md`
+- read `task.md`
+- read the previous session summary when it exists
 - validate `session_gate`
 - route to the correct `session-N-prompt.md`
 - block unsafe forward movement
@@ -44,6 +62,7 @@ After a session ends, the model should not guess which session comes next.
 - do not jump directly into `session-2-prompt.md` or later
 - do not continue based on previous chat memory
 - do not push `next_session` forward if tests failed
+- do not skip writing `artifacts/session-N-summary.md`
 - do not end a session before updating `memory.md`
 - do not treat "auto-continue inside the same chat" as the preferred mode
 
@@ -71,6 +90,8 @@ Example responsibilities:
 
 - inspect `memory.md`
 - confirm `session_gate = ready`
+- resolve the previous session summary
+- emit `outputs/session-specs/session-N-spec.json`
 - launch one fresh session
 - feed `startup-prompt.md`
 - wait for session completion
@@ -81,11 +102,13 @@ Example responsibilities:
 ```text
 Session N work
 -> tests
+-> write session-N-summary.md
 -> update memory.md
 -> end current session
 -> start fresh session
 -> run startup-prompt.md
 -> startup reads memory.md
+-> startup reads previous summary
 -> Session N+1 or stay on Session N
 ```
 

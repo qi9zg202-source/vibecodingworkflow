@@ -1,6 +1,9 @@
 工作目录切到 __PROJECT_ROOT__
 
 本次只做 Session 5。
+开始前若存在上一轮 summary，先读：
+- `artifacts/session-4-summary.md`
+
 目标：
 - 实现核心 UI / API 逻辑 B
 
@@ -10,6 +13,9 @@
 测试 Gate：
 - 单元验证
 - A+B 最小联调验证
+
+summary：
+- 写 `artifacts/session-5-summary.md`
 
 memory 更新：
 - `last_completed_session: 5`

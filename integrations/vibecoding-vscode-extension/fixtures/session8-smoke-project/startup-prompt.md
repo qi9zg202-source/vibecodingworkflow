@@ -1,0 +1,41 @@
+工作目录切到 /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/integrations/vibecoding-vscode-extension/fixtures/session8-smoke-project
+
+你现在进入的是一个多 Session webcoding 开发流程。
+
+启动规则：
+- 先读取 `memory.md` 的 `Session Status`
+- 若未指定 Session，则按 `next_session` 执行
+- 只有 `session_gate = ready` 才允许进入下一 Session
+- 若 `session_gate != ready`，必须停止并报告原因
+- 若 `next_session = none` 且 `session_gate = done`，说明流程结束
+- 若 `memory.md` 无有效状态，默认从 Session 1 开始
+
+必须先读取：
+- `/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/integrations/vibecoding-vscode-extension/fixtures/session8-smoke-project/CLAUDE.md`
+- `/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/integrations/vibecoding-vscode-extension/fixtures/session8-smoke-project/PRD.md`
+- `/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/integrations/vibecoding-vscode-extension/fixtures/session8-smoke-project/design.md`
+- `/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/integrations/vibecoding-vscode-extension/fixtures/session8-smoke-project/work-plan.md`
+- `/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/integrations/vibecoding-vscode-extension/fixtures/session8-smoke-project/memory.md`
+
+执行方式：
+1. 读取 `Session Status`
+2. 判断当前 Session
+3. 读取对应 `session-X-prompt.md`
+4. 严格只完成该 Session
+5. 执行本 Session 测试 Gate
+6. 测试通过后更新 `memory.md`
+7. 输出收尾说明后停止
+
+每轮循环规则：
+- Session 完成后，必须先更新 `memory.md`
+- 更新完成后，结束当前会话
+- 推荐做法是启动一个新的 Session / 新上下文，而不是在原会话里自动续跑
+- 新会话里再次执行 `startup-prompt.md`
+- 不要直接执行 `session-N-prompt.md`
+- 下一轮该进入哪个 Session，只能由 `memory.md` 决定
+
+固定输出格式：
+- `Session X complete`
+- `Tests: passed` 或 `Tests: failed` 或 `Tests: blocked`
+- `Next: session-Y-prompt.md`
+- `Start a fresh session before running the next startup-prompt.md`

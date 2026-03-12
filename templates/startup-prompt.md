@@ -12,22 +12,30 @@
 
 必须先读取：
 - `__PROJECT_ROOT__/CLAUDE.md`
+- `__PROJECT_ROOT__/task.md`
 - `__PROJECT_ROOT__/PRD.md`
 - `__PROJECT_ROOT__/design.md`
 - `__PROJECT_ROOT__/work-plan.md`
 - `__PROJECT_ROOT__/memory.md`
 
+补充规则：
+- 若 `last_completed_session > 0` 且存在 `artifacts/session-{last_completed_session}-summary.md`，必须在进入下一轮前读取上一轮 summary
+- 不允许只凭上一轮聊天历史继续推进
+
 执行方式：
 1. 读取 `Session Status`
 2. 判断当前 Session
-3. 读取对应 `session-X-prompt.md`
-4. 严格只完成该 Session
-5. 执行本 Session 测试 Gate
-6. 测试通过后更新 `memory.md`
-7. 输出收尾说明后停止
+3. 若存在上一轮 summary，先读取上一轮 summary
+4. 读取对应 `session-X-prompt.md`
+5. 严格只完成该 Session
+6. 执行本 Session 测试 Gate
+7. 先写本轮 `artifacts/session-X-summary.md`
+8. 再更新 `memory.md`
+9. 输出收尾说明后停止
 
 每轮循环规则：
 - Session 完成后，必须先更新 `memory.md`
+- Session 完成后，必须同步写入本轮 `session summary`
 - 更新完成后，结束当前会话
 - 推荐做法是启动一个新的 Session / 新上下文，而不是在原会话里自动续跑
 - 新会话里再次执行 `startup-prompt.md`
@@ -38,4 +46,5 @@
 - `Session X complete`
 - `Tests: passed` 或 `Tests: failed` 或 `Tests: blocked`
 - `Next: session-Y-prompt.md`
+- `Summary: artifacts/session-X-summary.md`
 - `Start a fresh session before running the next startup-prompt.md`

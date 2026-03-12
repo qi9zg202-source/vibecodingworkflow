@@ -1,6 +1,9 @@
 工作目录切到 __PROJECT_ROOT__
 
 本次只做 Session 8。
+开始前若存在上一轮 summary，先读：
+- `artifacts/session-7-summary.md`
+
 目标：
 - 模块集成与接口收口
 
@@ -10,6 +13,9 @@
 测试 Gate：
 - 集成测试
 - 主路径完整验证
+
+summary：
+- 写 `artifacts/session-8-summary.md`
 
 memory 更新：
 - `last_completed_session: 8`

@@ -1,0 +1,22 @@
+{
+  "status": "ready",
+  "inputs": {
+    "projectId": "proj-smoke",
+    "routeId": "dashboard"
+  },
+  "artifacts": {
+    "config": "src/config/app-config.js",
+    "context": "src/runtime/app-context.js",
+    "dataLoader": "src/runtime/data-loader.js"
+  },
+  "checks": [
+    "local-config-loaded",
+    "route-context-created",
+    "dashboard-data-loaded-without-network"
+  ],
+  "risks": [
+    "real-network-paths-not-enabled",
+    "quality-metrics-remain-stubbed"
+  ],
+  "next_action": "session-4-prompt.md"
+}

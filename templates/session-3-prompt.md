@@ -1,6 +1,9 @@
 工作目录切到 __PROJECT_ROOT__
 
 本次只做 Session 3。
+开始前若存在上一轮 summary，先读：
+- `artifacts/session-2-summary.md`
+
 目标：
 - 实现配置、上下文、数据加载
 
@@ -11,6 +14,9 @@
 - 语法检查
 - 最小输入运行
 - 结构校验
+
+summary：
+- 写 `artifacts/session-3-summary.md`
 
 memory 更新：
 - `last_completed_session: 3`

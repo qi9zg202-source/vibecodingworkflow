@@ -52,14 +52,18 @@ mkdir -p "$target_dir"
 cp -R "$template_root/." "$target_dir/"
 mkdir -p \
   "$target_dir/scripts" \
+  "$target_dir/artifacts" \
   "$target_dir/references" \
   "$target_dir/outputs/samples" \
   "$target_dir/outputs/reports" \
+  "$target_dir/outputs/session-specs" \
   "$target_dir/outputs/session-logs"
 touch \
   "$target_dir/scripts/.gitkeep" \
+  "$target_dir/artifacts/.gitkeep" \
   "$target_dir/outputs/samples/.gitkeep" \
   "$target_dir/outputs/reports/.gitkeep" \
+  "$target_dir/outputs/session-specs/.gitkeep" \
   "$target_dir/outputs/session-logs/.gitkeep"
 
 export FEATURE_NAME="$feature_name"

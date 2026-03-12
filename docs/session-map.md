@@ -1,5 +1,9 @@
 # Session Map
 
+This map describes a recommended session split for one task.
+Use one `startup-prompt.md` and one `memory.md` per task, then let multiple
+sessions advance that task one deliverable at a time.
+
 ## Recommended Webcoding Split
 
 0. planning and control docs

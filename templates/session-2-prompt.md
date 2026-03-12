@@ -1,6 +1,9 @@
 工作目录切到 __PROJECT_ROOT__
 
 本次只做 Session 2。
+开始前若存在上一轮 summary，先读：
+- `artifacts/session-1-summary.md`
+
 目标：
 - 定义页面地图、数据结构、接口契约
 
@@ -10,6 +13,9 @@
 测试 Gate：
 - 结构校验
 - 最小样例验证
+
+summary：
+- 写 `artifacts/session-2-summary.md`
 
 memory 更新：
 - `last_completed_session: 2`
