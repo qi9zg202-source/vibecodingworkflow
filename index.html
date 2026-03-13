@@ -21,9 +21,7 @@
       --sans: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -37,13 +35,12 @@
     }
 
     .page {
-      width: min(1120px, calc(100% - 32px));
+      width: min(1200px, calc(100% - 32px));
       margin: 32px auto 56px;
       animation: rise 520ms ease-out;
     }
 
-    .hero,
-    .section {
+    .hero, .section {
       background: var(--panel);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.45);
@@ -61,10 +58,8 @@
     .hero::after {
       content: "";
       position: absolute;
-      right: -60px;
-      top: -60px;
-      width: 220px;
-      height: 220px;
+      right: -60px; top: -60px;
+      width: 220px; height: 220px;
       border-radius: 999px;
       background: radial-gradient(circle, rgba(15, 118, 110, 0.22), transparent 70%);
     }
@@ -81,42 +76,13 @@
       margin-bottom: 14px;
     }
 
-    h1,
-    h2,
-    h3 {
-      margin: 0;
-      font-family: var(--serif);
-      font-weight: 700;
-      line-height: 1.08;
-    }
+    h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 700; line-height: 1.08; }
+    h1 { font-size: clamp(2.3rem, 5vw, 4.2rem); max-width: 11ch; }
+    h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 14px; }
+    h3 { font-size: 1.1rem; margin-bottom: 10px; }
 
-    h1 {
-      font-size: clamp(2.3rem, 5vw, 4.2rem);
-      max-width: 11ch;
-    }
-
-    h2 {
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      margin-bottom: 14px;
-    }
-
-    h3 {
-      font-size: 1.1rem;
-      margin-bottom: 10px;
-    }
-
-    p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.75;
-      font-size: 16px;
-    }
-
-    .hero p {
-      margin-top: 16px;
-      max-width: 62ch;
-      font-size: 18px;
-    }
+    p { margin: 0; color: var(--muted); line-height: 1.75; font-size: 16px; }
+    .hero p { margin-top: 16px; max-width: 62ch; font-size: 18px; }
 
     .grid {
       display: grid;
@@ -125,14 +91,10 @@
       margin-bottom: 22px;
     }
 
-    .section {
-      padding: 28px;
-    }
+    .section { padding: 28px; }
+    .mb22 { margin-bottom: 22px; }
 
-    .steps {
-      display: grid;
-      gap: 14px;
-    }
+    .steps { display: grid; gap: 14px; }
 
     .step {
       display: grid;
@@ -145,21 +107,16 @@
     }
 
     .step-index {
-      width: 54px;
-      height: 54px;
+      width: 54px; height: 54px;
       border-radius: 16px;
-      display: grid;
-      place-items: center;
+      display: grid; place-items: center;
       background: linear-gradient(145deg, #155e57, #0f766e);
       color: #fff;
       font-family: var(--serif);
       font-size: 1.25rem;
     }
 
-    .cards {
-      display: grid;
-      gap: 14px;
-    }
+    .cards { display: grid; gap: 14px; }
 
     .card {
       padding: 18px;
@@ -168,17 +125,9 @@
       background: rgba(255, 255, 255, 0.55);
     }
 
-    ul {
-      margin: 10px 0 0;
-      padding-left: 18px;
-      color: var(--muted);
-      line-height: 1.75;
-    }
+    ul { margin: 10px 0 0; padding-left: 18px; color: var(--muted); line-height: 1.75; }
 
-    code,
-    pre {
-      font-family: var(--mono);
-    }
+    code, pre { font-family: var(--mono); }
 
     pre {
       margin: 14px 0 0;
@@ -216,15 +165,9 @@
       background: rgba(255, 255, 255, 0.58);
     }
 
-    .command-card p {
-      margin-top: 8px;
-    }
+    .command-card p { margin-top: 8px; }
 
-    .checklist {
-      display: grid;
-      gap: 12px;
-      margin-top: 14px;
-    }
+    .checklist { display: grid; gap: 12px; margin-top: 14px; }
 
     .check {
       padding: 14px 16px;
@@ -233,29 +176,51 @@
       border: 1px solid var(--line);
     }
 
-    .check strong {
-      display: block;
-      margin-bottom: 4px;
-      color: var(--ink);
-    }
+    .check strong { display: block; margin-bottom: 4px; color: var(--ink); }
 
-    .diagram {
-      margin-top: 16px;
-      padding: 20px;
-      border-radius: 18px;
+    /* ── SVG Diagram containers ── */
+    .diagram-wrap {
+      margin-top: 20px;
+      border-radius: 20px;
       border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.58);
+      background: rgba(255,255,255,0.6);
+      padding: 24px 16px;
       overflow-x: auto;
     }
 
-    .diagram pre {
-      margin: 0;
-      background: transparent;
-      color: var(--ink);
-      border: 0;
-      padding: 0;
+    .diagram-wrap svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+
+    .diagram-label {
       font-size: 13px;
-      line-height: 1.8;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
     }
 
     .footer {
@@ -267,191 +232,535 @@
       box-shadow: var(--shadow);
     }
 
-    .footer p {
-      color: rgba(255, 250, 242, 0.76);
-    }
+    .footer p { color: rgba(255, 250, 242, 0.76); }
 
     @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translateY(18px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     @media (max-width: 860px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .command-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero,
-      .section,
-      .footer {
-        padding: 22px;
-      }
-
-      .step {
-        grid-template-columns: 42px 1fr;
-      }
-
-      .step-index {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        font-size: 1rem;
-      }
+      .grid { grid-template-columns: 1fr; }
+      .command-grid { grid-template-columns: 1fr; }
+      .hero, .section, .footer { padding: 22px; }
+      .step { grid-template-columns: 42px 1fr; }
+      .step-index { width: 42px; height: 42px; border-radius: 12px; font-size: 1rem; }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <section class="hero">
-      <div class="eyebrow">VibeCoding Workflow</div>
-      <h1>任务驱动、多 Session、可迁移的工作流骨架</h1>
-      <p>
-        这套仓库现在不只是“新业务起手模板”，还包含
-        <code>task.md</code>、summary handoff、legacy migration、fresh-session driver，
-        以及一套已迁移完成的 VS Code integration。核心原则仍然不变：
-        <code>startup -&gt; memory -&gt; session</code>，调度权在文件，不在聊天窗口记忆。
-      </p>
-      <div class="callout">
-        最新状态：2026-03-12 已完成 core workflow 验证、fixture 校验、VS Code extension
-        `compile / smoke:session8 / regression:session9 / smoke:session11`，并修复了集成脚本
-        `passed` 后未及时退出的问题。
+<main class="page">
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero">
+    <div class="eyebrow">VibeCoding Workflow</div>
+    <h1>任务驱动、多 Session、可迁移的工作流骨架</h1>
+    <p>
+      这套仓库不只是"新业务起手模板"，还包含
+      <code>task.md</code>、summary handoff、legacy migration、fresh-session driver，
+      以及一套已迁移完成的 VS Code integration。核心原则：
+      <code>startup → memory → session</code>，调度权在文件，不在聊天窗口记忆。
+    </p>
+    <div class="callout">
+      最新状态：2026-03-12 已完成 core workflow 验证、fixture 校验、VS Code extension
+      <code>compile / smoke:session8 / regression:session9 / smoke:session11</code>，并修复了集成脚本
+      <code>passed</code> 后未及时退出的问题。
+    </div>
+  </section>
+
+  <!-- ═══ WORKFLOW FLOW DIAGRAM ═══ -->
+  <section class="section mb22">
+    <h2>完整工作流流程图</h2>
+    <p>从项目初始化到每轮 Session 循环执行的完整链路，以及 VS Code 集成的位置。</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 960 720" xmlns="http://www.w3.org/2000/svg" font-family="'PingFang SC','Avenir Next',sans-serif">
+        <defs>
+          <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#0f766e"/>
+          </marker>
+          <marker id="arr-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#94a3a0"/>
+          </marker>
+          <marker id="arr-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#c2410c"/>
+          </marker>
+        </defs>
+
+        <!-- ── Column A: Init ── -->
+        <!-- Business Project box -->
+        <rect x="30" y="20" width="180" height="56" rx="12" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="120" y="44" text-anchor="middle" font-size="13" fill="#155e57" font-weight="600">Business / Legacy</text>
+        <text x="120" y="62" text-anchor="middle" font-size="13" fill="#155e57" font-weight="600">Project</text>
+
+        <!-- arrow down -->
+        <line x1="120" y1="76" x2="120" y2="108" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- Init scripts box -->
+        <rect x="20" y="108" width="200" height="64" rx="12" fill="#1d2725" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="120" y="132" text-anchor="middle" font-size="12" fill="#6ee7b7" font-weight="600">init-web-vibecoding-</text>
+        <text x="120" y="150" text-anchor="middle" font-size="12" fill="#6ee7b7" font-weight="600">project.sh</text>
+        <text x="120" y="165" text-anchor="middle" font-size="10" fill="#94a3a0">或 migrate-vibecoding-project.sh</text>
+
+        <!-- arrow down -->
+        <line x1="120" y1="172" x2="120" y2="204" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- Task-centered project box -->
+        <rect x="10" y="204" width="220" height="56" rx="12" fill="#0f766e" stroke="#0d5e57" stroke-width="1.5"/>
+        <text x="120" y="227" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">Task-Centered</text>
+        <text x="120" y="247" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">Workflow Project</text>
+
+        <!-- arrow right to file layer -->
+        <line x1="230" y1="232" x2="298" y2="232" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- ── Column B: File Layer ── -->
+        <text x="480" y="18" text-anchor="middle" font-size="13" fill="#58655f" font-weight="600">── 文件层（真相源）──</text>
+
+        <!-- memory.md - center top -->
+        <rect x="370" y="30" width="220" height="48" rx="12" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+        <text x="480" y="52" text-anchor="middle" font-size="14" fill="#92400e" font-weight="700">memory.md</text>
+        <text x="480" y="68" text-anchor="middle" font-size="11" fill="#b45309">唯一状态路由真相源</text>
+
+        <!-- startup-prompt.md -->
+        <rect x="300" y="112" width="180" height="44" rx="10" fill="#fffaf2" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="390" y="133" text-anchor="middle" font-size="12" fill="#155e57" font-weight="600">startup-prompt.md</text>
+        <text x="390" y="149" text-anchor="middle" font-size="10" fill="#58655f">唯一入口，读取 memory 路由</text>
+
+        <!-- arrow from memory to startup -->
+        <line x1="440" y1="78" x2="400" y2="112" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-orange)"/>
+
+        <!-- task.md -->
+        <rect x="520" y="100" width="120" height="36" rx="10" fill="#fffaf2" stroke="#94a3a0" stroke-width="1.2"/>
+        <text x="580" y="116" text-anchor="middle" font-size="11" fill="#1f2a27" font-weight="600">task.md</text>
+        <text x="580" y="130" text-anchor="middle" font-size="10" fill="#58655f">任务边界 &amp; 目标</text>
+
+        <!-- CLAUDE.md -->
+        <rect x="660" y="100" width="120" height="36" rx="10" fill="#fffaf2" stroke="#94a3a0" stroke-width="1.2"/>
+        <text x="720" y="116" text-anchor="middle" font-size="11" fill="#1f2a27" font-weight="600">CLAUDE.md</text>
+        <text x="720" y="130" text-anchor="middle" font-size="10" fill="#58655f">项目上下文背景</text>
+
+        <!-- PRD.md -->
+        <rect x="520" y="152" width="120" height="36" rx="10" fill="#fffaf2" stroke="#94a3a0" stroke-width="1.2"/>
+        <text x="580" y="168" text-anchor="middle" font-size="11" fill="#1f2a27" font-weight="600">PRD.md</text>
+        <text x="580" y="182" text-anchor="middle" font-size="10" fill="#58655f">产品需求文档</text>
+
+        <!-- design.md -->
+        <rect x="660" y="152" width="120" height="36" rx="10" fill="#fffaf2" stroke="#94a3a0" stroke-width="1.2"/>
+        <text x="720" y="168" text-anchor="middle" font-size="11" fill="#1f2a27" font-weight="600">design.md</text>
+        <text x="720" y="182" text-anchor="middle" font-size="10" fill="#58655f">架构 &amp; 模块设计</text>
+
+        <!-- work-plan.md -->
+        <rect x="520" y="204" width="120" height="36" rx="10" fill="#fffaf2" stroke="#94a3a0" stroke-width="1.2"/>
+        <text x="580" y="220" text-anchor="middle" font-size="11" fill="#1f2a27" font-weight="600">work-plan.md</text>
+        <text x="580" y="234" text-anchor="middle" font-size="10" fill="#58655f">Session 拆分计划</text>
+
+        <!-- session-N-prompt.md -->
+        <rect x="660" y="204" width="120" height="36" rx="10" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="720" y="220" text-anchor="middle" font-size="11" fill="#155e57" font-weight="600">session-N-prompt.md</text>
+        <text x="720" y="234" text-anchor="middle" font-size="10" fill="#58655f">当前 Session 规格</text>
+
+        <!-- arrows from startup to context files -->
+        <line x1="480" y1="156" x2="530" y2="104" stroke="#94a3a0" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+        <line x1="480" y1="156" x2="665" y2="104" stroke="#94a3a0" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+        <line x1="480" y1="156" x2="530" y2="156" stroke="#94a3a0" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+        <line x1="480" y1="156" x2="665" y2="156" stroke="#94a3a0" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+        <line x1="480" y1="156" x2="530" y2="208" stroke="#94a3a0" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+
+        <!-- startup selects session -->
+        <line x1="480" y1="156" x2="660" y2="220" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr)"/>
+        <text x="590" y="198" font-size="11" fill="#0f766e">选择当前 Session</text>
+
+        <!-- ── Row: Python Driver ── -->
+        <text x="480" y="272" text-anchor="middle" font-size="13" fill="#58655f" font-weight="600">── 调度层 ──</text>
+
+        <!-- Python driver box -->
+        <rect x="300" y="284" width="360" height="52" rx="12" fill="#1d2725" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="480" y="307" text-anchor="middle" font-size="13" fill="#6ee7b7" font-weight="600">scripts/run-vibecoding-loop.py</text>
+        <text x="480" y="325" text-anchor="middle" font-size="11" fill="#94a3a0">读取 memory.md → inspect / prepare / run → 输出 spec.json + loop.jsonl</text>
+
+        <!-- arrow from file layer to driver -->
+        <line x1="480" y1="240" x2="480" y2="284" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- outputs -->
+        <rect x="680" y="284" width="160" height="52" rx="10" fill="#fffaf2" stroke="#94a3a0" stroke-width="1.2"/>
+        <text x="760" y="306" text-anchor="middle" font-size="11" fill="#1f2a27" font-weight="600">outputs/</text>
+        <text x="760" y="320" text-anchor="middle" font-size="10" fill="#58655f">session-N-spec.json</text>
+        <text x="760" y="332" text-anchor="middle" font-size="10" fill="#58655f">vibecoding-loop.jsonl</text>
+
+        <!-- arrow driver to outputs -->
+        <line x1="660" y1="310" x2="680" y2="310" stroke="#94a3a0" stroke-width="1.4" marker-end="url(#arr-gray)"/>
+
+        <!-- ── Fresh Session box ── -->
+        <text x="480" y="366" text-anchor="middle" font-size="13" fill="#58655f" font-weight="600">── 执行层 ──</text>
+
+        <rect x="310" y="378" width="340" height="56" rx="12" fill="#0f766e" stroke="#0d5e57" stroke-width="1.5"/>
+        <text x="480" y="402" text-anchor="middle" font-size="14" fill="#fff" font-weight="700">Fresh Session / Fresh Context</text>
+        <text x="480" y="422" text-anchor="middle" font-size="12" fill="#dff1ec">新聊天窗口，零历史负担</text>
+
+        <!-- arrow driver to fresh session -->
+        <line x1="480" y1="336" x2="480" y2="378" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- startup re-entry -->
+        <rect x="310" y="454" width="340" height="44" rx="10" fill="#fffaf2" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="480" y="474" text-anchor="middle" font-size="12" fill="#155e57" font-weight="600">re-execute startup-prompt.md</text>
+        <text x="480" y="490" text-anchor="middle" font-size="11" fill="#58655f">读取最新 memory → 路由到正确 Session</text>
+
+        <line x1="480" y1="434" x2="480" y2="454" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- Session work -->
+        <rect x="310" y="514" width="340" height="56" rx="12" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="480" y="536" text-anchor="middle" font-size="13" fill="#155e57" font-weight="700">执行 Session N 工作 + 测试</text>
+        <text x="480" y="552" text-anchor="middle" font-size="11" fill="#58655f">实现一个 deliverable，运行测试门控</text>
+
+        <line x1="480" y1="498" x2="480" y2="514" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- Artifacts box -->
+        <rect x="310" y="590" width="160" height="60" rx="10" fill="#fffaf2" stroke="#94a3a0" stroke-width="1.2"/>
+        <text x="390" y="613" text-anchor="middle" font-size="11" fill="#1f2a27" font-weight="600">artifacts/</text>
+        <text x="390" y="628" text-anchor="middle" font-size="10" fill="#58655f">session-N-summary.md</text>
+        <text x="390" y="642" text-anchor="middle" font-size="10" fill="#58655f">session-N-manifest.json</text>
+
+        <!-- Update memory box -->
+        <rect x="490" y="590" width="160" height="60" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+        <text x="570" y="613" text-anchor="middle" font-size="12" fill="#92400e" font-weight="700">更新 memory.md</text>
+        <text x="570" y="630" text-anchor="middle" font-size="10" fill="#b45309">next_session, session_gate</text>
+        <text x="570" y="645" text-anchor="middle" font-size="10" fill="#b45309">last_completed_session</text>
+
+        <line x1="480" y1="570" x2="420" y2="590" stroke="#94a3a0" stroke-width="1.4" marker-end="url(#arr-gray)"/>
+        <line x1="480" y1="570" x2="540" y2="590" stroke="#d97706" stroke-width="1.8" marker-end="url(#arr-orange)"/>
+
+        <!-- Loop back arrow -->
+        <path d="M 650 620 Q 860 620 860 310 Q 860 48 660 48" stroke="#0f766e" stroke-width="1.8" fill="none" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+        <text x="880" y="320" text-anchor="middle" font-size="11" fill="#0f766e" transform="rotate(-90,880,320)">下一轮循环</text>
+
+        <!-- VS Code integration -->
+        <rect x="70" y="420" width="180" height="56" rx="12" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="160" y="444" text-anchor="middle" font-size="12" fill="#4338ca" font-weight="600">VS Code Extension</text>
+        <text x="160" y="460" text-anchor="middle" font-size="10" fill="#6366f1">UI shell only</text>
+        <text x="160" y="472" text-anchor="middle" font-size="10" fill="#6366f1">integrations/vibecoding-vscode-extension/</text>
+
+        <!-- vscode connects to driver and fresh session -->
+        <line x1="250" y1="448" x2="310" y2="400" stroke="#6366f1" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#arr-gray)"/>
+        <line x1="250" y1="460" x2="310" y2="490" stroke="#6366f1" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#arr-gray)"/>
+
+        <!-- verify script -->
+        <rect x="70" y="510" width="180" height="44" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+        <text x="160" y="530" text-anchor="middle" font-size="11" fill="#92400e" font-weight="600">verify-vibecoding-workflow.sh</text>
+        <text x="160" y="546" text-anchor="middle" font-size="10" fill="#b45309">模板一致性校验</text>
+      </svg>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#0f766e;"></div> 核心执行路径</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d97706;"></div> 状态更新路径</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#94a3a0;"></div> 读取 / 参考关系</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6366f1;"></div> VS Code UI 集成</div>
+    </div>
+
+    <div class="callout">
+      核心约束只有三条：<strong>memory.md 是唯一状态源</strong>、<strong>startup-prompt.md 是唯一入口</strong>、<strong>Python driver 是唯一调度核心</strong>。
+    </div>
+  </section>
+
+  <!-- ═══ CONFIG FILE RELATIONSHIP DIAGRAM ═══ -->
+  <section class="section mb22">
+    <h2>配置文件关系图</h2>
+    <p>每个文件的职责、所有者以及相互依赖关系。</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg" font-family="'PingFang SC','Avenir Next',sans-serif">
+        <defs>
+          <marker id="arr2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#0f766e"/>
+          </marker>
+          <marker id="arr2g" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#94a3a0"/>
+          </marker>
+          <marker id="arr2o" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#c2410c"/>
+          </marker>
+          <marker id="arr2b" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#6366f1"/>
+          </marker>
+        </defs>
+
+        <!-- ── Layer labels ── -->
+        <rect x="8" y="8" width="120" height="24" rx="6" fill="#1d2725"/>
+        <text x="68" y="24" text-anchor="middle" font-size="11" fill="#6ee7b7" font-weight="600">业务定义层</text>
+
+        <rect x="8" y="160" width="120" height="24" rx="6" fill="#1d2725"/>
+        <text x="68" y="176" text-anchor="middle" font-size="11" fill="#6ee7b7" font-weight="600">状态路由层</text>
+
+        <rect x="8" y="300" width="120" height="24" rx="6" fill="#1d2725"/>
+        <text x="68" y="316" text-anchor="middle" font-size="11" fill="#6ee7b7" font-weight="600">执行规格层</text>
+
+        <rect x="8" y="420" width="120" height="24" rx="6" fill="#1d2725"/>
+        <text x="68" y="436" text-anchor="middle" font-size="11" fill="#6ee7b7" font-weight="600">证据 / 输出层</text>
+
+        <!-- ── LAYER 1: Business Definition ── -->
+        <!-- task.md -->
+        <rect x="145" y="8" width="140" height="60" rx="10" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="215" y="30" text-anchor="middle" font-size="13" fill="#155e57" font-weight="700">task.md</text>
+        <text x="215" y="48" text-anchor="middle" font-size="10" fill="#58655f">任务边界</text>
+        <text x="215" y="62" text-anchor="middle" font-size="10" fill="#58655f">业务目标 · 成功标准</text>
+
+        <!-- CLAUDE.md -->
+        <rect x="305" y="8" width="140" height="60" rx="10" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="375" y="30" text-anchor="middle" font-size="13" fill="#155e57" font-weight="700">CLAUDE.md</text>
+        <text x="375" y="48" text-anchor="middle" font-size="10" fill="#58655f">项目上下文</text>
+        <text x="375" y="62" text-anchor="middle" font-size="10" fill="#58655f">技术栈 · 约束 · 背景</text>
+
+        <!-- PRD.md -->
+        <rect x="465" y="8" width="140" height="60" rx="10" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="535" y="30" text-anchor="middle" font-size="13" fill="#155e57" font-weight="700">PRD.md</text>
+        <text x="535" y="48" text-anchor="middle" font-size="10" fill="#58655f">产品需求</text>
+        <text x="535" y="62" text-anchor="middle" font-size="10" fill="#58655f">验收标准 · 用户故事</text>
+
+        <!-- design.md -->
+        <rect x="625" y="8" width="140" height="60" rx="10" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="695" y="30" text-anchor="middle" font-size="13" fill="#155e57" font-weight="700">design.md</text>
+        <text x="695" y="48" text-anchor="middle" font-size="10" fill="#58655f">架构设计</text>
+        <text x="695" y="62" text-anchor="middle" font-size="10" fill="#58655f">模块边界 · 技术方案</text>
+
+        <!-- work-plan.md -->
+        <rect x="785" y="8" width="160" height="60" rx="10" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="865" y="30" text-anchor="middle" font-size="13" fill="#155e57" font-weight="700">work-plan.md</text>
+        <text x="865" y="48" text-anchor="middle" font-size="10" fill="#58655f">Session 拆分</text>
+        <text x="865" y="62" text-anchor="middle" font-size="10" fill="#58655f">每 Session 一个 deliverable</text>
+
+        <!-- ── LAYER 2: State Routing ── -->
+        <!-- memory.md - CENTER STAR -->
+        <rect x="370" y="155" width="220" height="72" rx="14" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/>
+        <text x="480" y="182" text-anchor="middle" font-size="15" fill="#92400e" font-weight="700">memory.md</text>
+        <text x="480" y="200" text-anchor="middle" font-size="11" fill="#b45309">唯一状态路由真相源</text>
+        <text x="480" y="216" text-anchor="middle" font-size="10" fill="#b45309">next_session · session_gate · last_completed</text>
+
+        <!-- startup-prompt.md -->
+        <rect x="145" y="160" width="180" height="62" rx="10" fill="#fffaf2" stroke="#0f766e" stroke-width="2"/>
+        <text x="235" y="184" text-anchor="middle" font-size="13" fill="#155e57" font-weight="700">startup-prompt.md</text>
+        <text x="235" y="202" text-anchor="middle" font-size="10" fill="#58655f">唯一入口</text>
+        <text x="235" y="216" text-anchor="middle" font-size="10" fill="#58655f">读 memory → 路由 session</text>
+
+        <!-- arrows: all business files → memory -->
+        <line x1="215" y1="68" x2="420" y2="155" stroke="#94a3a0" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr2g)"/>
+        <line x1="375" y1="68" x2="450" y2="155" stroke="#94a3a0" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr2g)"/>
+        <line x1="535" y1="68" x2="490" y2="155" stroke="#94a3a0" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr2g)"/>
+        <line x1="695" y1="68" x2="530" y2="155" stroke="#94a3a0" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr2g)"/>
+        <line x1="865" y1="68" x2="570" y2="155" stroke="#94a3a0" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr2g)"/>
+
+        <!-- memory → startup (reads) -->
+        <line x1="370" y1="191" x2="325" y2="191" stroke="#d97706" stroke-width="2" marker-end="url(#arr2o)"/>
+        <text x="347" y="186" text-anchor="middle" font-size="10" fill="#b45309">路由</text>
+
+        <!-- ── LAYER 3: Execution Spec ── -->
+        <!-- session-0~10-prompt.md -->
+        <rect x="145" y="295" width="200" height="62" rx="10" fill="#fffaf2" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="245" y="319" text-anchor="middle" font-size="13" fill="#155e57" font-weight="700">session-N-prompt.md</text>
+        <text x="245" y="337" text-anchor="middle" font-size="10" fill="#58655f">Session 0 ~ 10</text>
+        <text x="245" y="351" text-anchor="middle" font-size="10" fill="#58655f">当前轮次执行规格</text>
+
+        <!-- run-vibecoding-loop.py -->
+        <rect x="370" y="292" width="220" height="68" rx="12" fill="#1d2725" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="480" y="316" text-anchor="middle" font-size="12" fill="#6ee7b7" font-weight="600">run-vibecoding-loop.py</text>
+        <text x="480" y="334" text-anchor="middle" font-size="10" fill="#94a3a0">inspect / prepare / run</text>
+        <text x="480" y="350" text-anchor="middle" font-size="10" fill="#94a3a0">唯一调度核心</text>
+
+        <!-- verify script -->
+        <rect x="620" y="295" width="180" height="62" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+        <text x="710" y="319" text-anchor="middle" font-size="11" fill="#92400e" font-weight="600">verify-vibecoding-</text>
+        <text x="710" y="335" text-anchor="middle" font-size="11" fill="#92400e" font-weight="600">workflow.sh</text>
+        <text x="710" y="351" text-anchor="middle" font-size="10" fill="#b45309">模板一致性 &amp; 集成校验</text>
+
+        <!-- startup → session prompt -->
+        <line x1="235" y1="222" x2="235" y2="295" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr2)"/>
+        <text x="218" y="260" font-size="10" fill="#0f766e">选择</text>
+
+        <!-- memory → loop.py -->
+        <line x1="480" y1="227" x2="480" y2="292" stroke="#d97706" stroke-width="2" marker-end="url(#arr2o)"/>
+        <text x="492" y="262" font-size="10" fill="#b45309">驱动</text>
+
+        <!-- session prompt → loop.py (feeds) -->
+        <line x1="345" y1="326" x2="370" y2="326" stroke="#0f766e" stroke-width="1.4" marker-end="url(#arr2)"/>
+
+        <!-- ── LAYER 4: Artifacts / Output ── -->
+        <!-- session-N-summary.md -->
+        <rect x="145" y="415" width="185" height="66" rx="10" fill="#fffaf2" stroke="#94a3a0" stroke-width="1.2"/>
+        <text x="237" y="439" text-anchor="middle" font-size="12" fill="#1f2a27" font-weight="600">session-N-summary.md</text>
+        <text x="237" y="456" text-anchor="middle" font-size="10" fill="#58655f">人类可读 handoff</text>
+        <text x="237" y="470" text-anchor="middle" font-size="10" fill="#58655f">artifacts/ 目录</text>
+
+        <!-- session-N-manifest.json -->
+        <rect x="350" y="415" width="185" height="66" rx="10" fill="#fffaf2" stroke="#94a3a0" stroke-width="1.2"/>
+        <text x="442" y="439" text-anchor="middle" font-size="12" fill="#1f2a27" font-weight="600">session-N-manifest.json</text>
+        <text x="442" y="456" text-anchor="middle" font-size="10" fill="#58655f">机器可验证 handoff</text>
+        <text x="442" y="470" text-anchor="middle" font-size="10" fill="#58655f">artifacts/ 目录</text>
+
+        <!-- session-N-spec.json -->
+        <rect x="555" y="415" width="175" height="66" rx="10" fill="#1d2725" stroke="#0f766e" stroke-width="1.2"/>
+        <text x="642" y="439" text-anchor="middle" font-size="12" fill="#6ee7b7" font-weight="600">session-N-spec.json</text>
+        <text x="642" y="456" text-anchor="middle" font-size="10" fill="#94a3a0">driver 输出规格</text>
+        <text x="642" y="470" text-anchor="middle" font-size="10" fill="#94a3a0">outputs/session-specs/</text>
+
+        <!-- vibecoding-loop.jsonl -->
+        <rect x="750" y="415" width="185" height="66" rx="10" fill="#1d2725" stroke="#0f766e" stroke-width="1.2"/>
+        <text x="842" y="439" text-anchor="middle" font-size="12" fill="#6ee7b7" font-weight="600">vibecoding-loop.jsonl</text>
+        <text x="842" y="456" text-anchor="middle" font-size="10" fill="#94a3a0">调度历史日志</text>
+        <text x="842" y="470" text-anchor="middle" font-size="10" fill="#94a3a0">outputs/session-logs/</text>
+
+        <!-- arrows: session prompt execution → artifacts -->
+        <line x1="245" y1="357" x2="237" y2="415" stroke="#94a3a0" stroke-width="1.4" marker-end="url(#arr2g)"/>
+        <line x1="280" y1="357" x2="390" y2="415" stroke="#94a3a0" stroke-width="1.4" marker-end="url(#arr2g)"/>
+
+        <!-- loop.py → spec.json & jsonl -->
+        <line x1="540" y1="348" x2="610" y2="415" stroke="#0f766e" stroke-width="1.4" marker-end="url(#arr2)"/>
+        <line x1="560" y1="348" x2="800" y2="415" stroke="#0f766e" stroke-width="1.4" marker-end="url(#arr2)"/>
+
+        <!-- artifacts → update memory (loop back) -->
+        <path d="M 237 481 Q 237 530 480 530 Q 700 530 700 227" stroke="#d97706" stroke-width="1.8" fill="none" stroke-dasharray="6,4" marker-end="url(#arr2o)"/>
+        <text x="480" y="545" text-anchor="middle" font-size="11" fill="#b45309">完成后更新 memory.md → 触发下一轮</text>
+
+        <!-- VS Code ext (side) -->
+        <rect x="820" y="155" width="125" height="72" rx="10" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="882" y="179" text-anchor="middle" font-size="11" fill="#4338ca" font-weight="600">VS Code Ext</text>
+        <text x="882" y="196" text-anchor="middle" font-size="10" fill="#6366f1">UI shell only</text>
+        <text x="882" y="212" text-anchor="middle" font-size="10" fill="#6366f1">读 memory</text>
+        <text x="882" y="224" text-anchor="middle" font-size="10" fill="#6366f1">调用 driver</text>
+
+        <!-- vscode ↔ memory -->
+        <line x1="820" y1="185" x2="590" y2="185" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr2b)"/>
+        <!-- vscode ↔ loop.py -->
+        <line x1="820" y1="210" x2="640" y2="330" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr2b)"/>
+      </svg>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#0f766e;"></div> 核心控制流</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d97706;"></div> 状态读写（memory.md）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#94a3a0;"></div> 读取 / 参考</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6366f1;"></div> VS Code UI 集成</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dff1ec; border:1px solid #0f766e;"></div> 业务定义文件（Session 0 产出）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fef3c7; border:1px solid #d97706;"></div> 状态 / 路由文件</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1d2725;"></div> 脚本 / 机器输出</div>
+    </div>
+  </section>
+
+  <!-- ═══ FILE DIRECTORY MAP ═══ -->
+  <section class="section mb22">
+    <h2>仓库目录与文件职责速查</h2>
+    <p>所有文件分层一览，括号内为文件职责定位。</p>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" font-family="'SFMono-Regular','Menlo','Consolas',monospace">
+        <!-- background -->
+        <rect width="960" height="420" rx="14" fill="#1d2725"/>
+
+        <!-- Column 1: Core files -->
+        <text x="24" y="32" font-size="13" fill="#6ee7b7" font-weight="600">vibecodingworkflow/</text>
+
+        <text x="36" y="56"  font-size="12" fill="#94a3a0">├── </text><text x="72" y="56"  font-size="12" fill="#fbbf24">templates/</text>
+        <text x="90" y="74"  font-size="11" fill="#64748b">│   ├── </text><text x="138" y="74"  font-size="11" fill="#a5f3fc">CLAUDE.md</text>     <text x="300" y="74"  font-size="11" fill="#475569">← 项目上下文模板</text>
+        <text x="90" y="90"  font-size="11" fill="#64748b">│   ├── </text><text x="138" y="90"  font-size="11" fill="#a5f3fc">task.md</text>       <text x="300" y="90"  font-size="11" fill="#475569">← 任务边界模板</text>
+        <text x="90" y="106" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="106" font-size="11" fill="#a5f3fc">PRD.md</text>        <text x="300" y="106" font-size="11" fill="#475569">← 产品需求模板</text>
+        <text x="90" y="122" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="122" font-size="11" fill="#a5f3fc">design.md</text>     <text x="300" y="122" font-size="11" fill="#475569">← 架构设计模板</text>
+        <text x="90" y="138" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="138" font-size="11" fill="#a5f3fc">work-plan.md</text>  <text x="300" y="138" font-size="11" fill="#475569">← Session 拆分模板</text>
+        <text x="90" y="154" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="154" font-size="11" fill="#fbbf24">memory.md</text>     <text x="300" y="154" font-size="11" fill="#475569">← 状态路由模板 ★唯一真相源</text>
+        <text x="90" y="170" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="170" font-size="11" fill="#6ee7b7">startup-prompt.md</text> <text x="300" y="170" font-size="11" fill="#475569">← 唯一入口模板</text>
+        <text x="90" y="186" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="186" font-size="11" fill="#6ee7b7">session-0~10-prompt.md</text> <text x="370" y="186" font-size="11" fill="#475569">← Session 执行规格模板</text>
+        <text x="90" y="202" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="202" font-size="11" fill="#a5f3fc">onboarding-prompt.md</text>
+        <text x="90" y="218" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="218" font-size="11" fill="#fbbf24">artifacts/</text>    <text x="300" y="218" font-size="11" fill="#475569">← session-summary-template.md</text>
+        <text x="90" y="234" font-size="11" fill="#64748b">│   └── </text><text x="138" y="234" font-size="11" fill="#a5f3fc">references/</text>   <text x="300" y="234" font-size="11" fill="#475569">← output-schema / evidence-model / test-strategy</text>
+
+        <text x="36" y="258" font-size="12" fill="#94a3a0">├── </text><text x="72" y="258" font-size="12" fill="#fbbf24">scripts/</text>
+        <text x="90" y="276" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="276" font-size="11" fill="#6ee7b7">init-web-vibecoding-project.sh</text>  <text x="430" y="276" font-size="11" fill="#475569">← 新项目初始化</text>
+        <text x="90" y="292" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="292" font-size="11" fill="#6ee7b7">migrate-vibecoding-project.sh</text>  <text x="430" y="292" font-size="11" fill="#475569">← 旧项目迁移</text>
+        <text x="90" y="308" font-size="11" fill="#64748b">│   ├── </text><text x="138" y="308" font-size="11" fill="#6ee7b7">run-vibecoding-loop.py</text>         <text x="430" y="308" font-size="11" fill="#475569">← ★唯一调度核心</text>
+        <text x="90" y="324" font-size="11" fill="#64748b">│   └── </text><text x="138" y="324" font-size="11" fill="#fbbf24">verify-vibecoding-workflow.sh</text>  <text x="430" y="324" font-size="11" fill="#475569">← 模板一致性校验</text>
+
+        <text x="36" y="348" font-size="12" fill="#94a3a0">├── </text><text x="72" y="348" font-size="12" fill="#fbbf24">docs/</text>                <text x="200" y="348" font-size="11" fill="#475569">← workflow-standard / progress-loop / session-map / user-guide</text>
+        <text x="36" y="368" font-size="12" fill="#94a3a0">├── </text><text x="72" y="368" font-size="12" fill="#fbbf24">demo/</text>                <text x="200" y="368" font-size="11" fill="#475569">← stic-fab-chiller-strategy/ (Session 3→4 handoff 示例)</text>
+        <text x="36" y="388" font-size="12" fill="#94a3a0">└── </text><text x="72" y="388" font-size="12" fill="#c4b5fd">integrations/</text>        <text x="200" y="388" font-size="11" fill="#475569">← vibecoding-vscode-extension/ (UI shell only)</text>
+        <text x="36" y="408" font-size="12" fill="#94a3a0">    </text><text x="72" y="408" font-size="12" fill="#fef9c3">index.html</text>           <text x="200" y="408" font-size="11" fill="#475569">← 本文档（可视化总览）</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ═══ STANDARD STARTUP STEPS ═══ -->
+  <section class="grid mb22">
+    <section class="section">
+      <h2>标准起手顺序</h2>
+      <div class="steps">
+        <article class="step">
+          <div class="step-index">1</div>
+          <div>
+            <h3>确定项目名、路径、业务目标、技术栈</h3>
+            <p>只给最关键的业务上下文，不要一开始就讲实现细节。</p>
+          </div>
+        </article>
+        <article class="step">
+          <div class="step-index">2</div>
+          <div>
+            <h3>明确要求"按 vibecodingworkflow 模板创建"</h3>
+            <p>不要让模型自由发挥，否则容易跳过 PRD、design、memory 或 session 规划。</p>
+          </div>
+        </article>
+        <article class="step">
+          <div class="step-index">3</div>
+          <div>
+            <h3>本轮只做 Session 0</h3>
+            <p>只生成流程文档与 prompt 骨架，不写业务代码，不跨到 Session 1。</p>
+          </div>
+        </article>
+        <article class="step">
+          <div class="step-index">4</div>
+          <div>
+            <h3>先落 task-centered 控制文件</h3>
+            <p><code>task.md</code>、<code>PRD.md</code>、<code>design.md</code>、<code>work-plan.md</code>、<code>memory.md</code>、<code>startup-prompt.md</code>、<code>session-0~10-prompt.md</code>、<code>artifacts/session-summary-template.md</code>。</p>
+          </div>
+        </article>
+        <article class="step">
+          <div class="step-index">5</div>
+          <div>
+            <h3>后续开发永远从 startup 入口进入</h3>
+            <p>不要直接跑 <code>session-2-prompt.md</code>，而是每次都重新执行 <code>startup-prompt.md</code>。</p>
+          </div>
+        </article>
+        <article class="step">
+          <div class="step-index">6</div>
+          <div>
+            <h3>每个 Session 结束先更新 memory，再启动新 Session</h3>
+            <p>推荐做法是结束当前会话，在新上下文里重新执行 <code>startup-prompt.md</code>。</p>
+          </div>
+        </article>
       </div>
-    </section>
-
-    <section class="grid">
-      <section class="section">
-        <h2>标准起手顺序</h2>
-        <div class="steps">
-          <article class="step">
-            <div class="step-index">1</div>
-            <div>
-              <h3>确定项目名、路径、业务目标、技术栈</h3>
-              <p>只给最关键的业务上下文，不要一开始就讲实现细节。</p>
-            </div>
-          </article>
-          <article class="step">
-            <div class="step-index">2</div>
-            <div>
-              <h3>明确要求“按 vibecodingworkflow 模板创建”</h3>
-              <p>不要让模型自由发挥，否则容易跳过 PRD、design、memory 或 session 规划。</p>
-            </div>
-          </article>
-          <article class="step">
-            <div class="step-index">3</div>
-            <div>
-              <h3>本轮只做 Session 0</h3>
-              <p>只生成流程文档与 prompt 骨架，不写业务代码，不跨到 Session 1。</p>
-            </div>
-          </article>
-          <article class="step">
-            <div class="step-index">4</div>
-            <div>
-              <h3>先落 task-centered 控制文件</h3>
-              <p><code>task.md</code>、<code>PRD.md</code>、<code>design.md</code>、<code>work-plan.md</code>、<code>memory.md</code>、<code>startup-prompt.md</code>、<code>session-0~10-prompt.md</code>、<code>artifacts/session-summary-template.md</code>。</p>
-            </div>
-          </article>
-          <article class="step">
-            <div class="step-index">5</div>
-            <div>
-              <h3>后续开发永远从 startup 入口进入</h3>
-              <p>不要直接跑 <code>session-2-prompt.md</code>，而是每次都重新执行 <code>startup-prompt.md</code>。</p>
-            </div>
-          </article>
-          <article class="step">
-            <div class="step-index">6</div>
-            <div>
-              <h3>每个 Session 结束先更新 memory，再启动一个新 Session</h3>
-              <p>推荐做法不是在原聊天里自动续跑，而是结束当前会话，在新上下文里重新执行 <code>startup-prompt.md</code>。</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="section">
-        <h2>当前仓库能力</h2>
-        <div class="cards">
-          <article class="card">
-            <h3>新项目初始化</h3>
-            <p>通过 <code>scripts/init-web-vibecoding-project.sh</code> 生成完整 workflow 骨架。</p>
-          </article>
-          <article class="card">
-            <h3>旧项目迁移</h3>
-            <p>通过 <code>scripts/migrate-vibecoding-project.sh</code> 为旧 prompt-only 项目补上 <code>task.md</code> 与 artifacts。</p>
-          </article>
-          <article class="card">
-            <h3>外部 session driver</h3>
-            <p><code>scripts/run-vibecoding-loop.py</code> 读取 <code>memory.md</code> 并输出 machine-readable handoff。</p>
-          </article>
-          <article class="card">
-            <h3>VS Code integration</h3>
-            <p><code>integrations/vibecoding-vscode-extension/</code> 已迁移完成，覆盖 smoke、regression 与真实场景验证。</p>
-          </article>
-        </div>
-      </section>
     </section>
 
     <section class="section">
-      <h2>整体流程架构图</h2>
-      <p>当前仓库的真实运行链路可以压缩成下面这张图：初始化或迁移进入 task-centered workflow，文件层提供真相，Python driver 负责调度，fresh session 负责执行，IDE 集成只提供 UI 壳。</p>
-      <div class="diagram">
-        <pre>Business / Legacy Project
-        |
-        v
-init-web-vibecoding-project.sh
-or migrate-vibecoding-project.sh
-        |
-        v
-Task-Centered Workflow Project
-        |
-        +--> task.md
-        +--> memory.md
-        +--> startup-prompt.md
-        +--> session-N-prompt.md
-        +--> artifacts/session-N-summary.md
-        |
-        v
-scripts/run-vibecoding-loop.py
-  inspect / prepare / run
-        |
-        +--> outputs/session-specs/session-N-spec.json
-        +--> outputs/session-logs/vibecoding-loop.jsonl
-        |
-        v
-Fresh Session / Fresh Context
-        |
-        v
-startup-prompt.md re-entry
-        |
-        v
-Current Session deliverable + tests
-        |
-        v
-update memory.md + write summary
-        |
-        +--> next round driver call
-        |
-        +--> VS Code UI shell
-             integrations/vibecoding-vscode-extension</pre>
-      </div>
-      <div class="callout">
-        核心约束只有三条：<strong>memory.md 是唯一状态源</strong>、<strong>startup-prompt.md 是唯一入口</strong>、<strong>Python driver 是唯一调度核心</strong>。
+      <h2>当前仓库能力</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>新项目初始化</h3>
+          <p>通过 <code>scripts/init-web-vibecoding-project.sh</code> 生成完整 workflow 骨架。</p>
+        </article>
+        <article class="card">
+          <h3>旧项目迁移</h3>
+          <p>通过 <code>scripts/migrate-vibecoding-project.sh</code> 为旧 prompt-only 项目补上 <code>task.md</code> 与 artifacts。</p>
+        </article>
+        <article class="card">
+          <h3>外部 session driver</h3>
+          <p><code>scripts/run-vibecoding-loop.py</code> 读取 <code>memory.md</code> 并输出 machine-readable handoff。</p>
+        </article>
+        <article class="card">
+          <h3>VS Code integration</h3>
+          <p><code>integrations/vibecoding-vscode-extension/</code> 已迁移完成，覆盖 smoke、regression 与真实场景验证。</p>
+        </article>
       </div>
     </section>
+  </section>
 
-    <section class="section">
-      <h2>推荐起手提示词</h2>
-      <p>新业务开始时，最稳的做法仍然是明确说“按 vibecodingworkflow 模板创建，只做 Session 0”。如果是旧项目，则优先先迁移，再进入新的 session loop。</p>
-      <pre>请按 /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow 的标准 workflow，
+  <!-- ═══ STARTER PROMPT ═══ -->
+  <section class="section mb22">
+    <h2>推荐起手提示词</h2>
+    <p>新业务开始时，最稳的做法是明确说"按 vibecodingworkflow 模板创建，只做 Session 0"。如果是旧项目，则优先先迁移，再进入新的 session loop。</p>
+    <pre>请按 /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow 的标准 workflow，
 为一个新的 &lt;项目名称&gt; 创建多 Session 开发骨架。
 
 要求：
@@ -475,166 +784,133 @@ update memory.md + write summary
 - &lt;核心功能&gt;
 - &lt;技术栈&gt;
 - &lt;本期不做什么&gt;</pre>
-      <div class="callout">
-        最短版本也可以：
-        <br>
-        <code>请按 vibecodingworkflow 模板初始化新的 &lt;项目名&gt;，本轮只做 Session 0，先生成 PRD、design、work-plan、memory、startup-prompt 和各 session prompt。</code>
-      </div>
-    </section>
+    <div class="callout">
+      最短版本：
+      <br>
+      <code>请按 vibecodingworkflow 模板初始化新的 &lt;项目名&gt;，本轮只做 Session 0，先生成 PRD、design、work-plan、memory、startup-prompt 和各 session prompt。</code>
+    </div>
+  </section>
 
+  <!-- ═══ COMMANDS ═══ -->
+  <section class="section mb22">
+    <h2>常用命令入口</h2>
+    <p>初始化、迁移、校验、调度、集成验证五类入口。</p>
+    <div class="command-grid">
+      <article class="command-card">
+        <h3>初始化新项目</h3>
+        <pre>./scripts/init-web-vibecoding-project.sh my-project /path/to/parent --git-init</pre>
+        <p>生成新的 task-centered workflow 项目骨架。</p>
+      </article>
+      <article class="command-card">
+        <h3>迁移旧项目</h3>
+        <pre>./scripts/migrate-vibecoding-project.sh /path/to/legacy-project</pre>
+        <p>为旧项目补齐 <code>task.md</code>、artifacts 和 session-spec 输出目录。</p>
+      </article>
+      <article class="command-card">
+        <h3>验证 workflow</h3>
+        <pre>./scripts/verify-vibecoding-workflow.sh</pre>
+        <p>校验模板、driver、references 和生成约束是否一致。</p>
+      </article>
+      <article class="command-card">
+        <h3>运行 fresh-session driver</h3>
+        <pre>python3 ./scripts/run-vibecoding-loop.py /path/to/project --action inspect --json</pre>
+        <p>读取 <code>memory.md</code> 并返回 machine-readable workflow 状态。</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ═══ SESSION 0 CHECKLIST + DISCIPLINE ═══ -->
+  <section class="grid mb22">
     <section class="section">
-      <h2>常用命令入口</h2>
-      <p>当前仓库已经形成“初始化、迁移、校验、调度、集成验证”五类入口，首页应直接反映这些真实能力。</p>
-      <div class="command-grid">
-        <article class="command-card">
-          <h3>初始化新项目</h3>
-          <pre>./scripts/init-web-vibecoding-project.sh my-project /path/to/parent --git-init</pre>
-          <p>生成新的 task-centered workflow 项目骨架。</p>
-        </article>
-        <article class="command-card">
-          <h3>迁移旧项目</h3>
-          <pre>./scripts/migrate-vibecoding-project.sh /path/to/legacy-project</pre>
-          <p>为旧项目补齐 <code>task.md</code>、artifacts 和 session-spec 输出目录。</p>
-        </article>
-        <article class="command-card">
-          <h3>验证 workflow</h3>
-          <pre>./scripts/verify-vibecoding-workflow.sh</pre>
-          <p>校验模板、driver、references 和生成约束是否一致。</p>
-        </article>
-        <article class="command-card">
-          <h3>运行 fresh-session driver</h3>
-          <pre>python3 ./scripts/run-vibecoding-loop.py /path/to/project --action inspect --json</pre>
-          <p>读取 <code>memory.md</code> 并返回 machine-readable workflow 状态。</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="grid">
-      <section class="section">
-        <h2>Session 0 应该做什么</h2>
-        <div class="checklist">
-          <div class="check">
-            <strong>task.md</strong>
-            定义当前任务边界、业务目标、成功标准和当前轮次真正要交付的对象。
-          </div>
-          <div class="check">
-            <strong>PRD.md</strong>
-            明确业务问题、目标用户、核心目标、验收标准。
-          </div>
-          <div class="check">
-            <strong>design.md</strong>
-            明确模块边界、输入输出、技术方案和验证策略。
-          </div>
-          <div class="check">
-            <strong>work-plan.md</strong>
-            把业务拆成 Session 1 到 Session N，每个 Session 只做一个 Level 3 Task。
-          </div>
-          <div class="check">
-            <strong>memory.md</strong>
-            初始化状态机，设置 <code>next_session</code>、<code>session_gate</code> 和更新规则。
-          </div>
-          <div class="check">
-            <strong>startup-prompt.md</strong>
-            作为唯一入口，负责根据 <code>memory.md</code> 自动路由当前 Session。
-          </div>
-          <div class="check">
-            <strong>session-0~10-prompt.md</strong>
-            提前把边界写清楚，后续开发只需进入对应 Session 执行。
-          </div>
-          <div class="check">
-            <strong>session summary artifacts</strong>
-            每轮结束后把 handoff 证据写入 <code>artifacts/session-N-summary.md</code>，不要只留在窗口记忆里。
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <h2>后续开发纪律</h2>
-        <ul>
-          <li>永远先执行 <code>startup-prompt.md</code>。</li>
-          <li>不要手动猜“现在该做 Session 3 还是 4”。</li>
-          <li>Session 完成后先更新 <code>memory.md</code>。</li>
-          <li>然后结束当前会话，启动一个新的 Session / 新上下文。</li>
-          <li>新会话再次执行 <code>startup-prompt.md</code>。</li>
-          <li>如果测试失败或阻塞，就留在当前 Session，不得推进。</li>
-        </ul>
-        <div class="callout">
-          真正的稳定点不在 prompt 长短，而在于：
-          <strong>调度权在文件，不在窗口记忆。</strong>
-        </div>
-        <div class="callout">
-          推荐模式：
-          <strong>一个 Session 完成一个 deliverable，然后重启一个新的 Session。</strong>
-          不把“在原聊天里自动 /clear 后继续跑”作为默认方案。
-        </div>
-      </section>
-    </section>
-
-    <section class="section">
-      <h2>常见错误</h2>
+      <h2>Session 0 应该做什么</h2>
       <div class="checklist">
-        <div class="check">
-          <strong>错误 1：直接开始写代码</strong>
-          结果是后面没有可恢复状态机，当前会话结束后很难稳定恢复。
-        </div>
-        <div class="check">
-          <strong>错误 2：不说“按模板创建”</strong>
-          模型可能会漏掉 <code>memory.md</code> 或 session prompt。
-        </div>
-        <div class="check">
-          <strong>错误 3：Session 结束不更新 memory</strong>
-          下一轮就不知道该进哪个 Session。
-        </div>
-        <div class="check">
-          <strong>错误 4：测试没过就推进</strong>
-          流程会失真，后面的 Session 会建立在不稳定前提上。
-        </div>
-        <div class="check">
-          <strong>错误 5：旧项目不迁移，直接假设兼容</strong>
-          当前 contract 已经把 <code>task.md</code> 和 session summary 作为一等资产，建议显式迁移，不做模糊 fallback。
-        </div>
+        <div class="check"><strong>task.md</strong>定义当前任务边界、业务目标、成功标准和当前轮次真正要交付的对象。</div>
+        <div class="check"><strong>PRD.md</strong>明确业务问题、目标用户、核心目标、验收标准。</div>
+        <div class="check"><strong>design.md</strong>明确模块边界、输入输出、技术方案和验证策略。</div>
+        <div class="check"><strong>work-plan.md</strong>把业务拆成 Session 1 到 Session N，每个 Session 只做一个 Level 3 Task。</div>
+        <div class="check"><strong>memory.md</strong>初始化状态机，设置 <code>next_session</code>、<code>session_gate</code> 和更新规则。</div>
+        <div class="check"><strong>startup-prompt.md</strong>作为唯一入口，负责根据 <code>memory.md</code> 自动路由当前 Session。</div>
+        <div class="check"><strong>session-0~10-prompt.md</strong>提前把边界写清楚，后续开发只需进入对应 Session 执行。</div>
+        <div class="check"><strong>session summary artifacts</strong>每轮结束后把 handoff 证据写入 <code>artifacts/session-N-summary.md</code>，不要只留在窗口记忆里。</div>
       </div>
     </section>
 
     <section class="section">
-      <h2>自动调度与集成怎么做</h2>
-      <p>
-        推荐方式不是让同一个聊天窗口在内部自动续跑，而是使用一个
-        <strong>聊天外部的 session driver</strong>。
-        它负责读取 <code>memory.md</code>，判断是否可以推进，然后启动一个新的 Session，
-        再把 <code>startup-prompt.md</code> 喂给新的上下文。
-      </p>
-      <pre>Session N 完成
+      <h2>后续开发纪律</h2>
+      <ul>
+        <li>永远先执行 <code>startup-prompt.md</code>。</li>
+        <li>不要手动猜"现在该做 Session 3 还是 4"。</li>
+        <li>Session 完成后先更新 <code>memory.md</code>。</li>
+        <li>然后结束当前会话，启动一个新的 Session / 新上下文。</li>
+        <li>新会话再次执行 <code>startup-prompt.md</code>。</li>
+        <li>如果测试失败或阻塞，就留在当前 Session，不得推进。</li>
+      </ul>
+      <div class="callout">
+        真正的稳定点不在 prompt 长短，而在于：
+        <strong>调度权在文件，不在窗口记忆。</strong>
+      </div>
+      <div class="callout">
+        推荐模式：
+        <strong>一个 Session 完成一个 deliverable，然后重启一个新的 Session。</strong>
+        不把"在原聊天里自动 /clear 后继续跑"作为默认方案。
+      </div>
+    </section>
+  </section>
+
+  <!-- ═══ COMMON ERRORS ═══ -->
+  <section class="section mb22">
+    <h2>常见错误</h2>
+    <div class="checklist">
+      <div class="check"><strong>错误 1：直接开始写代码</strong>结果是后面没有可恢复状态机，当前会话结束后很难稳定恢复。</div>
+      <div class="check"><strong>错误 2：不说"按模板创建"</strong>模型可能会漏掉 <code>memory.md</code> 或 session prompt。</div>
+      <div class="check"><strong>错误 3：Session 结束不更新 memory</strong>下一轮就不知道该进哪个 Session。</div>
+      <div class="check"><strong>错误 4：测试没过就推进</strong>流程会失真，后面的 Session 会建立在不稳定前提上。</div>
+      <div class="check"><strong>错误 5：旧项目不迁移，直接假设兼容</strong>当前 contract 已经把 <code>task.md</code> 和 session summary 作为一等资产，建议显式迁移，不做模糊 fallback。</div>
+    </div>
+  </section>
+
+  <!-- ═══ AUTO SCHEDULING ═══ -->
+  <section class="section mb22">
+    <h2>自动调度与集成怎么做</h2>
+    <p>
+      推荐方式不是让同一个聊天窗口在内部自动续跑，而是使用一个
+      <strong>聊天外部的 session driver</strong>。
+      它负责读取 <code>memory.md</code>，判断是否可以推进，然后启动一个新的 Session，
+      再把 <code>startup-prompt.md</code> 喂给新的上下文。
+    </p>
+    <pre>Session N 完成
 -> 更新 memory.md
 -> 外部 driver 读取 memory.md
 -> 创建一个新的 Session
 -> 在新 Session 执行 startup-prompt.md
 -> startup 再决定是否进入 Session N+1</pre>
-      <div class="callout">
-        在这个仓库里，对应的原型脚本是：
-        <code>scripts/run-vibecoding-loop.py</code>
-      </div>
-      <div class="callout">
-        如果希望在 IDE 内完成 refresh、prepare、open files 和 runner control，
-        当前配套实现位于
-        <code>integrations/vibecoding-vscode-extension/</code>，
-        架构固定为 <strong>Python core + VS Code UI shell</strong>。
-      </div>
-    </section>
+    <div class="callout">
+      在这个仓库里，对应的原型脚本是：
+      <code>scripts/run-vibecoding-loop.py</code>
+    </div>
+    <div class="callout">
+      如果希望在 IDE 内完成 refresh、prepare、open files 和 runner control，
+      当前配套实现位于
+      <code>integrations/vibecoding-vscode-extension/</code>，
+      架构固定为 <strong>Python core + VS Code UI shell</strong>。
+    </div>
+  </section>
 
-    <section class="footer">
-      <h2>推荐固定说法</h2>
-      <p>
-        以后每次新业务开工，直接说：
-        <br><br>
-        <strong>“请按 /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow 模板创建，本轮只做 Session 0。”</strong>
-      </p>
-      <p style="margin-top: 14px;">
-        旧项目则直接说：
-        <br><br>
-        <strong>“先按 vibecodingworkflow 当前 contract 迁移这个 legacy workflow，再继续后续 Session。”</strong>
-      </p>
-    </section>
-  </main>
+  <!-- ═══ FOOTER ═══ -->
+  <section class="footer">
+    <h2>推荐固定说法</h2>
+    <p>
+      以后每次新业务开工，直接说：
+      <br><br>
+      <strong>"请按 /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow 模板创建，本轮只做 Session 0。"</strong>
+    </p>
+    <p style="margin-top: 14px;">
+      旧项目则直接说：
+      <br><br>
+      <strong>"先按 vibecodingworkflow 当前 contract 迁移这个 legacy workflow，再继续后续 Session。"</strong>
+    </p>
+  </section>
+
+</main>
 </body>
 </html>
