@@ -32,6 +32,29 @@
 - `paths`
 - `instructions`
 
+## `session_manifest` Schema
+
+文件路径：
+
+- `artifacts/session-N-manifest.json`
+
+必需字段：
+
+- `schema_version`: 固定为 "1.0"
+- `session`: session 编号（整数）
+- `status`: "completed" | "blocked" | "failed"
+- `timestamp`: ISO8601 格式时间戳
+- `produced_artifacts`: 数组，每项包含：
+  - `path`: 相对于 task root 的路径
+  - `type`: "source_code" | "type_definition" | "config" | "doc"
+  - `description`: 简短描述
+- `next_session_requirements`: 对象，包含：
+  - `session`: 下一 session 编号
+  - `required_artifacts`: 数组，必须存在的 artifact 路径
+  - `context_to_read`: 数组，必须先读取的文件路径
+- `tests`: 对象，包含：
+  - `status`: "passed" | "failed" | "blocked"
+
 当前 driver 写出的结构：
 
 ```json

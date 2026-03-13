@@ -16,7 +16,8 @@ This workflow avoids that by using a fixed loop:
 This loop now has two handoff layers:
 
 - `memory.md`: machine routing truth
-- `artifacts/session-N-summary.md`: human/model handoff evidence
+- `artifacts/session-N-summary.md`: human/model handoff evidence (human-readable)
+- `artifacts/session-N-manifest.json`: machine-verifiable session completion record
 
 ## What Must Be Recorded Every Session
 
@@ -45,6 +46,14 @@ And persist a session summary file:
 - risks
 - next session inputs
 
+And persist a session manifest file:
+
+- `artifacts/session-N-manifest.json`
+- session number and status
+- produced artifacts list
+- next session requirements
+- test status
+
 ## Why Startup Must Run Every Time
 
 After a session ends, the model should not guess which session comes next.
@@ -63,6 +72,7 @@ After a session ends, the model should not guess which session comes next.
 - do not continue based on previous chat memory
 - do not push `next_session` forward if tests failed
 - do not skip writing `artifacts/session-N-summary.md`
+- do not skip writing `artifacts/session-N-manifest.json`
 - do not end a session before updating `memory.md`
 - do not treat "auto-continue inside the same chat" as the preferred mode
 
@@ -103,6 +113,7 @@ Example responsibilities:
 Session N work
 -> tests
 -> write session-N-summary.md
+-> write session-N-manifest.json
 -> update memory.md
 -> end current session
 -> start fresh session

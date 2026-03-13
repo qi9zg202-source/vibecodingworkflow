@@ -33,6 +33,37 @@ The recommended model is:
 - `artifacts/session-N-summary.md` carries the previous session handoff
 - a single task is usually completed across multiple sessions, not one giant chat
 
+```mermaid
+flowchart TB
+    A["Project / Legacy Project"] --> B["Init or Migration"]
+    B --> B1["init-web-vibecoding-project.sh"]
+    B --> B2["migrate-vibecoding-project.sh"]
+
+    B1 --> C["Workflow Task Skeleton"]
+    B2 --> C
+
+    C --> D["Workflow Truth Files"]
+    D --> D1["task.md"]
+    D --> D2["memory.md"]
+    D --> D3["startup-prompt.md"]
+    D --> D4["session-N-prompt.md"]
+    D --> D5["artifacts/session-N-summary.md"]
+
+    D --> E["External Orchestration"]
+    E --> E1["run-vibecoding-loop.py"]
+    E1 --> E2["inspect / prepare / run"]
+    E2 --> F["JSON spec + loop log"]
+
+    D --> G["Fresh Session Execution"]
+    G --> G1["startup-prompt.md re-entry"]
+    G1 --> G2["Current session delivery"]
+    G2 --> G3["tests + memory update + summary"]
+    G3 --> E
+
+    E1 --> H["VS Code UI Shell"]
+    H --> H1["integrations/vibecoding-vscode-extension"]
+```
+
 See [docs/workflow-standard.md](./docs/workflow-standard.md) for the full `Project / Task / Session / Artifact / Memory` model and diagram.
 
 ## Use Cases

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VibeCoding Workflow Start Guide</title>
+  <title>VibeCoding Workflow Kit</title>
   <style>
     :root {
       --bg: #f4efe6;
@@ -202,6 +202,24 @@
       line-height: 1.7;
     }
 
+    .command-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .command-card {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.58);
+    }
+
+    .command-card p {
+      margin-top: 8px;
+    }
+
     .checklist {
       display: grid;
       gap: 12px;
@@ -219,6 +237,25 @@
       display: block;
       margin-bottom: 4px;
       color: var(--ink);
+    }
+
+    .diagram {
+      margin-top: 16px;
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.58);
+      overflow-x: auto;
+    }
+
+    .diagram pre {
+      margin: 0;
+      background: transparent;
+      color: var(--ink);
+      border: 0;
+      padding: 0;
+      font-size: 13px;
+      line-height: 1.8;
     }
 
     .footer {
@@ -250,6 +287,10 @@
         grid-template-columns: 1fr;
       }
 
+      .command-grid {
+        grid-template-columns: 1fr;
+      }
+
       .hero,
       .section,
       .footer {
@@ -273,12 +314,18 @@
   <main class="page">
     <section class="hero">
       <div class="eyebrow">VibeCoding Workflow</div>
-      <h1>新业务如何按这套流程开始</h1>
+      <h1>任务驱动、多 Session、可迁移的工作流骨架</h1>
       <p>
-        这套流程的核心不是“直接开始写代码”，而是先建立一个
-        <code>startup -&gt; memory -&gt; session</code> 的可恢复开发状态机。
-        新业务起手时，先按模板创建流程骨架，只做 Session 0，不写业务实现。
+        这套仓库现在不只是“新业务起手模板”，还包含
+        <code>task.md</code>、summary handoff、legacy migration、fresh-session driver，
+        以及一套已迁移完成的 VS Code integration。核心原则仍然不变：
+        <code>startup -&gt; memory -&gt; session</code>，调度权在文件，不在聊天窗口记忆。
       </p>
+      <div class="callout">
+        最新状态：2026-03-12 已完成 core workflow 验证、fixture 校验、VS Code extension
+        `compile / smoke:session8 / regression:session9 / smoke:session11`，并修复了集成脚本
+        `passed` 后未及时退出的问题。
+      </div>
     </section>
 
     <section class="grid">
@@ -309,8 +356,8 @@
           <article class="step">
             <div class="step-index">4</div>
             <div>
-              <h3>先落 6 类控制文件</h3>
-              <p><code>PRD.md</code>、<code>design.md</code>、<code>work-plan.md</code>、<code>memory.md</code>、<code>startup-prompt.md</code>、<code>session-0~10-prompt.md</code>。</p>
+              <h3>先落 task-centered 控制文件</h3>
+              <p><code>task.md</code>、<code>PRD.md</code>、<code>design.md</code>、<code>work-plan.md</code>、<code>memory.md</code>、<code>startup-prompt.md</code>、<code>session-0~10-prompt.md</code>、<code>artifacts/session-summary-template.md</code>。</p>
             </div>
           </article>
           <article class="step">
@@ -331,31 +378,79 @@
       </section>
 
       <section class="section">
-        <h2>一句话原则</h2>
+        <h2>当前仓库能力</h2>
         <div class="cards">
           <article class="card">
-            <h3>先流程，后实现</h3>
-            <p>先把项目调度体系搭起来，再进入业务开发。</p>
+            <h3>新项目初始化</h3>
+            <p>通过 <code>scripts/init-web-vibecoding-project.sh</code> 生成完整 workflow 骨架。</p>
           </article>
           <article class="card">
-            <h3>先 Session 0</h3>
-            <p>不在初始化阶段写业务代码，不让上下文从第一轮就失控。</p>
+            <h3>旧项目迁移</h3>
+            <p>通过 <code>scripts/migrate-vibecoding-project.sh</code> 为旧 prompt-only 项目补上 <code>task.md</code> 与 artifacts。</p>
           </article>
           <article class="card">
-            <h3>只信文件</h3>
-            <p><code>memory.md</code> 是唯一状态源，<code>startup-prompt.md</code> 是唯一调度入口。</p>
+            <h3>外部 session driver</h3>
+            <p><code>scripts/run-vibecoding-loop.py</code> 读取 <code>memory.md</code> 并输出 machine-readable handoff。</p>
           </article>
           <article class="card">
-            <h3>测试没过不推进</h3>
-            <p>每个 Session 都要有 Gate，不能把“写完但未测”视为完成。</p>
+            <h3>VS Code integration</h3>
+            <p><code>integrations/vibecoding-vscode-extension/</code> 已迁移完成，覆盖 smoke、regression 与真实场景验证。</p>
           </article>
         </div>
       </section>
     </section>
 
     <section class="section">
+      <h2>整体流程架构图</h2>
+      <p>当前仓库的真实运行链路可以压缩成下面这张图：初始化或迁移进入 task-centered workflow，文件层提供真相，Python driver 负责调度，fresh session 负责执行，IDE 集成只提供 UI 壳。</p>
+      <div class="diagram">
+        <pre>Business / Legacy Project
+        |
+        v
+init-web-vibecoding-project.sh
+or migrate-vibecoding-project.sh
+        |
+        v
+Task-Centered Workflow Project
+        |
+        +--> task.md
+        +--> memory.md
+        +--> startup-prompt.md
+        +--> session-N-prompt.md
+        +--> artifacts/session-N-summary.md
+        |
+        v
+scripts/run-vibecoding-loop.py
+  inspect / prepare / run
+        |
+        +--> outputs/session-specs/session-N-spec.json
+        +--> outputs/session-logs/vibecoding-loop.jsonl
+        |
+        v
+Fresh Session / Fresh Context
+        |
+        v
+startup-prompt.md re-entry
+        |
+        v
+Current Session deliverable + tests
+        |
+        v
+update memory.md + write summary
+        |
+        +--> next round driver call
+        |
+        +--> VS Code UI shell
+             integrations/vibecoding-vscode-extension</pre>
+      </div>
+      <div class="callout">
+        核心约束只有三条：<strong>memory.md 是唯一状态源</strong>、<strong>startup-prompt.md 是唯一入口</strong>、<strong>Python driver 是唯一调度核心</strong>。
+      </div>
+    </section>
+
+    <section class="section">
       <h2>推荐起手提示词</h2>
-      <p>新业务开始时，最稳的做法是明确说“按 vibecodingworkflow 模板创建，只做 Session 0”。</p>
+      <p>新业务开始时，最稳的做法仍然是明确说“按 vibecodingworkflow 模板创建，只做 Session 0”。如果是旧项目，则优先先迁移，再进入新的 session loop。</p>
       <pre>请按 /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow 的标准 workflow，
 为一个新的 &lt;项目名称&gt; 创建多 Session 开发骨架。
 
@@ -364,11 +459,13 @@
 - 先只做 Session 0 / 规划阶段
 - 本轮不要写业务实现代码
 - 先产出：
+  - task.md
   - PRD.md
   - design.md
   - work-plan.md
   - memory.md
   - startup-prompt.md
+  - artifacts/session-summary-template.md
   - session-0-prompt.md 到 session-10-prompt.md
 - 项目根目录放在：&lt;目标路径&gt;
 
@@ -385,10 +482,41 @@
       </div>
     </section>
 
+    <section class="section">
+      <h2>常用命令入口</h2>
+      <p>当前仓库已经形成“初始化、迁移、校验、调度、集成验证”五类入口，首页应直接反映这些真实能力。</p>
+      <div class="command-grid">
+        <article class="command-card">
+          <h3>初始化新项目</h3>
+          <pre>./scripts/init-web-vibecoding-project.sh my-project /path/to/parent --git-init</pre>
+          <p>生成新的 task-centered workflow 项目骨架。</p>
+        </article>
+        <article class="command-card">
+          <h3>迁移旧项目</h3>
+          <pre>./scripts/migrate-vibecoding-project.sh /path/to/legacy-project</pre>
+          <p>为旧项目补齐 <code>task.md</code>、artifacts 和 session-spec 输出目录。</p>
+        </article>
+        <article class="command-card">
+          <h3>验证 workflow</h3>
+          <pre>./scripts/verify-vibecoding-workflow.sh</pre>
+          <p>校验模板、driver、references 和生成约束是否一致。</p>
+        </article>
+        <article class="command-card">
+          <h3>运行 fresh-session driver</h3>
+          <pre>python3 ./scripts/run-vibecoding-loop.py /path/to/project --action inspect --json</pre>
+          <p>读取 <code>memory.md</code> 并返回 machine-readable workflow 状态。</p>
+        </article>
+      </div>
+    </section>
+
     <section class="grid">
       <section class="section">
         <h2>Session 0 应该做什么</h2>
         <div class="checklist">
+          <div class="check">
+            <strong>task.md</strong>
+            定义当前任务边界、业务目标、成功标准和当前轮次真正要交付的对象。
+          </div>
           <div class="check">
             <strong>PRD.md</strong>
             明确业务问题、目标用户、核心目标、验收标准。
@@ -412,6 +540,10 @@
           <div class="check">
             <strong>session-0~10-prompt.md</strong>
             提前把边界写清楚，后续开发只需进入对应 Session 执行。
+          </div>
+          <div class="check">
+            <strong>session summary artifacts</strong>
+            每轮结束后把 handoff 证据写入 <code>artifacts/session-N-summary.md</code>，不要只留在窗口记忆里。
           </div>
         </div>
       </section>
@@ -457,11 +589,15 @@
           <strong>错误 4：测试没过就推进</strong>
           流程会失真，后面的 Session 会建立在不稳定前提上。
         </div>
+        <div class="check">
+          <strong>错误 5：旧项目不迁移，直接假设兼容</strong>
+          当前 contract 已经把 <code>task.md</code> 和 session summary 作为一等资产，建议显式迁移，不做模糊 fallback。
+        </div>
       </div>
     </section>
 
     <section class="section">
-      <h2>自动调度怎么做</h2>
+      <h2>自动调度与集成怎么做</h2>
       <p>
         推荐方式不是让同一个聊天窗口在内部自动续跑，而是使用一个
         <strong>聊天外部的 session driver</strong>。
@@ -478,6 +614,12 @@
         在这个仓库里，对应的原型脚本是：
         <code>scripts/run-vibecoding-loop.py</code>
       </div>
+      <div class="callout">
+        如果希望在 IDE 内完成 refresh、prepare、open files 和 runner control，
+        当前配套实现位于
+        <code>integrations/vibecoding-vscode-extension/</code>，
+        架构固定为 <strong>Python core + VS Code UI shell</strong>。
+      </div>
     </section>
 
     <section class="footer">
@@ -486,6 +628,11 @@
         以后每次新业务开工，直接说：
         <br><br>
         <strong>“请按 /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow 模板创建，本轮只做 Session 0。”</strong>
+      </p>
+      <p style="margin-top: 14px;">
+        旧项目则直接说：
+        <br><br>
+        <strong>“先按 vibecodingworkflow 当前 contract 迁移这个 legacy workflow，再继续后续 Session。”</strong>
       </p>
     </section>
   </main>
