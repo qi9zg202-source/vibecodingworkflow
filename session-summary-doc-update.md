@@ -69,11 +69,11 @@
 5. ✅ `templates/memory.md` - 增加 manifest 字段说明
 6. ✅ `templates/artifacts/session-summary-template.md` - 增加 manifest 产出要求
 
-### 待完成更新
-7. ⏳ `templates/references/evidence-model.md` - 对齐双轨制
-8. ⏳ `templates/references/output-schema.md` - 增加 manifest schema
-9. ⏳ `docs/progress-loop.md` - 增加 manifest 写入步骤
-10. ⏳ `SKILL.md` - 对齐最新功能描述
+### 追加完成更新
+7. ✅ `templates/references/evidence-model.md` - 已对齐双轨制
+8. ✅ `templates/references/output-schema.md` - 已增加 manifest schema
+9. ✅ `docs/progress-loop.md` - 已增加 manifest 写入步骤
+10. ✅ `SKILL.md` - 已对齐最新功能描述
 
 ---
 

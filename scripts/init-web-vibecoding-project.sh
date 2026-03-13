@@ -49,11 +49,38 @@ if [[ -e "$target_dir" ]]; then
 fi
 
 mkdir -p "$target_dir"
-cp -R "$template_root/." "$target_dir/"
+
+# Copy only the files a workflow project needs.
+# Excluded: references/ (framework docs, not runtime files)
+#           onboarding-prompt.md (lives in vibecodingworkflow repo, not in generated projects)
+for f in \
+  CLAUDE.md \
+  task.md \
+  memory.md \
+  startup-prompt.md \
+  design.md \
+  PRD.md \
+  work-plan.md \
+  session-0-prompt.md \
+  session-1-prompt.md \
+  session-2-prompt.md \
+  session-3-prompt.md \
+  session-4-prompt.md \
+  session-5-prompt.md \
+  session-6-prompt.md \
+  session-7-prompt.md \
+  session-8-prompt.md \
+  session-9-prompt.md \
+  session-10-prompt.md \
+; do
+  cp "$template_root/$f" "$target_dir/$f"
+done
+
+# Copy artifacts directory (contains session-summary-template.md)
+cp -R "$template_root/artifacts" "$target_dir/artifacts"
+
 mkdir -p \
   "$target_dir/scripts" \
-  "$target_dir/artifacts" \
-  "$target_dir/references" \
   "$target_dir/outputs/samples" \
   "$target_dir/outputs/reports" \
   "$target_dir/outputs/session-specs" \

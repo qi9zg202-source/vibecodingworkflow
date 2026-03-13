@@ -15,8 +15,9 @@
 - 最小输入运行
 - 结构校验
 
-summary：
-- 写 `artifacts/session-3-summary.md`
+产出要求：
+- 写 `artifacts/session-3-summary.md`（人类可读）
+- 写 `artifacts/session-3-manifest.json`（机器可验证）
 
 memory 更新：
 - `last_completed_session: 3`

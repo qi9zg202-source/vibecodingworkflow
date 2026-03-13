@@ -14,8 +14,9 @@
 - 单元验证
 - A+B 最小联调验证
 
-summary：
-- 写 `artifacts/session-5-summary.md`
+产出要求：
+- 写 `artifacts/session-5-summary.md`（人类可读）
+- 写 `artifacts/session-5-manifest.json`（机器可验证）
 
 memory 更新：
 - `last_completed_session: 5`

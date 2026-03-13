@@ -29,13 +29,15 @@
 4. 读取对应 `session-X-prompt.md`
 5. 严格只完成该 Session
 6. 执行本 Session 测试 Gate
-7. 先写本轮 `artifacts/session-X-summary.md`
-8. 再更新 `memory.md`
-9. 输出收尾说明后停止
+7. 先写本轮 `artifacts/session-X-summary.md`（人类可读）
+8. 再写本轮 `artifacts/session-X-manifest.json`（机器可验证）
+9. 再更新 `memory.md`
+10. 输出收尾说明后停止
 
 每轮循环规则：
-- Session 完成后，必须先更新 `memory.md`
-- Session 完成后，必须同步写入本轮 `session summary`
+- Session 完成后，必须先写本轮 `session summary`（artifacts/session-X-summary.md）
+- Session 完成后，必须同步写入本轮 `session manifest`（artifacts/session-X-manifest.json）
+- 再更新 `memory.md`
 - 更新完成后，结束当前会话
 - 推荐做法是启动一个新的 Session / 新上下文，而不是在原会话里自动续跑
 - 新会话里再次执行 `startup-prompt.md`
@@ -45,6 +47,7 @@
 固定输出格式：
 - `Session X complete`
 - `Tests: passed` 或 `Tests: failed` 或 `Tests: blocked`
-- `Next: session-Y-prompt.md`
 - `Summary: artifacts/session-X-summary.md`
+- `Manifest: artifacts/session-X-manifest.json`
+- `Next: session-Y-prompt.md`
 - `Start a fresh session before running the next startup-prompt.md`

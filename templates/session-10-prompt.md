@@ -14,8 +14,9 @@
 - 最终回归检查
 - 核心交付物存在性检查
 
-summary：
-- 写 `artifacts/session-10-summary.md`
+产出要求：
+- 写 `artifacts/session-10-summary.md`（人类可读）
+- 写 `artifacts/session-10-manifest.json`（机器可验证）
 
 memory 更新：
 - `last_completed_session: 10`
