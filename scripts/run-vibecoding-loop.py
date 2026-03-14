@@ -13,8 +13,10 @@ as an external session driver:
 6. log the loop state to JSONL
 
 Workflow contract (from memory.md and progress-loop.md):
-- session_gate valid values  : ready | blocked | in_progress | done
+- current_phase valid values  : design | development | done
+- session_gate valid values   : ready | blocked | in_progress | done
 - last_completed_session_tests valid values: passed | failed | blocked
+- phase transitions: design → development (after Session 0 passes), development → done (after Session 10 passes)
 - must_read order per session: memory.md → task.md → design.md → work-plan.md → previous summary
 - startup-prompt.md is the entry point, not a context file to read directly
 - after runner exits, driver must re-check memory.md
@@ -46,6 +48,7 @@ STATUS_KEYS = {
 }
 
 # Enum values enforced by the workflow contract (memory.md "Session Update Rule")
+VALID_PHASES = {"design", "development", "done"}
 VALID_SESSION_GATES = {"ready", "blocked", "in_progress", "done"}
 VALID_TEST_RESULTS = {"passed", "failed", "blocked"}
 
@@ -82,7 +85,19 @@ class SessionStatus:
 
     @property
     def is_done(self) -> bool:
-        return self.next_session == "none" and self.session_gate == "done"
+        return self.current_phase == "done" or (
+            self.next_session == "none" and self.session_gate == "done"
+        )
+
+    @property
+    def is_design_phase(self) -> bool:
+        """current_phase is 'design' — only Session 0 should run."""
+        return self.current_phase == "design"
+
+    @property
+    def is_development_phase(self) -> bool:
+        """current_phase is 'development' — Sessions 1-10."""
+        return self.current_phase == "development"
 
     @property
     def is_in_progress(self) -> bool:
@@ -168,6 +183,18 @@ def parse_memory(memory_path: Path) -> SessionStatus:
             message=f"memory.md missing required Session Status keys: {', '.join(sorted(missing))}",
             error_code="memory_missing_status_keys",
             details={"missing_keys": sorted(missing)},
+        )
+
+    # Validate current_phase against the two-phase design contract enum
+    phase = values["current_phase"]
+    if phase not in VALID_PHASES:
+        raise WorkflowError(
+            message=(
+                f"Invalid current_phase value '{phase}'. "
+                f"Allowed: {', '.join(sorted(VALID_PHASES))}"
+            ),
+            error_code="invalid_current_phase",
+            details={"value": phase, "allowed": sorted(VALID_PHASES)},
         )
 
     # Validate session_gate against the design contract enum

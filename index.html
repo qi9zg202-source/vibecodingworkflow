@@ -462,6 +462,133 @@
     </div>
   </section>
 
+  <!-- ═══ TWO-PHASE ARCHITECTURE DIAGRAM ═══ -->
+  <section class="section mb22">
+    <h2>两阶段架构</h2>
+    <p>每个 Task 分为两个阶段：设计阶段（Session 0）产出全部规划文档；开发阶段（Sessions 1–10）逐步实现功能。阶段转换由 <code>memory.md</code> 的 <code>current_phase</code> 字段控制。</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 960 400" xmlns="http://www.w3.org/2000/svg" font-family="'PingFang SC','Avenir Next',sans-serif">
+        <defs>
+          <marker id="arrp" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#0f766e"/>
+          </marker>
+          <marker id="arrp-o" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#d97706"/>
+          </marker>
+        </defs>
+
+        <!-- ── Phase 1 box ── -->
+        <rect x="30" y="60" width="260" height="280" rx="18" fill="#f0fdf4" stroke="#0f766e" stroke-width="2"/>
+        <text x="160" y="92" text-anchor="middle" font-size="14" fill="#0f766e" font-weight="700" letter-spacing="0.04em">Phase 1 — 设计阶段</text>
+        <text x="160" y="112" text-anchor="middle" font-size="12" fill="#6b7280">current_phase: design</text>
+
+        <!-- Session 0 node -->
+        <rect x="70" y="130" width="180" height="64" rx="12" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="160" y="157" text-anchor="middle" font-size="13" fill="#155e57" font-weight="600">Session 0</text>
+        <text x="160" y="175" text-anchor="middle" font-size="12" fill="#155e57">📄 规划文档</text>
+
+        <!-- Outputs -->
+        <text x="160" y="222" text-anchor="middle" font-size="11" fill="#6b7280">CLAUDE.md · task.md · PRD.md</text>
+        <text x="160" y="238" text-anchor="middle" font-size="11" fill="#6b7280">design.md · work-plan.md · memory.md</text>
+
+        <!-- Gate label -->
+        <rect x="90" y="268" width="140" height="28" rx="8" fill="#d97706" opacity="0.15"/>
+        <text x="160" y="287" text-anchor="middle" font-size="12" fill="#92400e" font-weight="600">tests: passed → 阶段转换</text>
+
+        <!-- ── Phase transition arrow ── -->
+        <line x1="290" y1="200" x2="370" y2="200" stroke="#d97706" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrp-o)"/>
+        <text x="330" y="192" text-anchor="middle" font-size="11" fill="#d97706" font-weight="600">design</text>
+        <text x="330" y="208" text-anchor="middle" font-size="11" fill="#d97706" font-weight="600">→ development</text>
+
+        <!-- ── Phase 2 box ── -->
+        <rect x="370" y="60" width="480" height="280" rx="18" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+        <text x="610" y="92" text-anchor="middle" font-size="14" fill="#1d4ed8" font-weight="700" letter-spacing="0.04em">Phase 2 — 开发阶段</text>
+        <text x="610" y="112" text-anchor="middle" font-size="12" fill="#6b7280">current_phase: development</text>
+
+        <!-- Session nodes row 1 -->
+        <rect x="390" y="130" width="68" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+        <text x="424" y="151" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">S1</text>
+        <text x="424" y="167" text-anchor="middle" font-size="10" fill="#1e40af">骨架</text>
+
+        <rect x="470" y="130" width="68" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+        <text x="504" y="151" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">S2</text>
+        <text x="504" y="167" text-anchor="middle" font-size="10" fill="#1e40af">Schema</text>
+
+        <rect x="550" y="130" width="68" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+        <text x="584" y="151" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">S3</text>
+        <text x="584" y="167" text-anchor="middle" font-size="10" fill="#1e40af">数据层</text>
+
+        <rect x="630" y="130" width="68" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+        <text x="664" y="151" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">S4</text>
+        <text x="664" y="167" text-anchor="middle" font-size="10" fill="#1e40af">逻辑A</text>
+
+        <rect x="710" y="130" width="68" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+        <text x="744" y="151" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">S5</text>
+        <text x="744" y="167" text-anchor="middle" font-size="10" fill="#1e40af">逻辑B</text>
+
+        <!-- arrows row 1 -->
+        <line x1="458" y1="154" x2="468" y2="154" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#arrp)"/>
+        <line x1="538" y1="154" x2="548" y2="154" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#arrp)"/>
+        <line x1="618" y1="154" x2="628" y2="154" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#arrp)"/>
+        <line x1="698" y1="154" x2="708" y2="154" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#arrp)"/>
+
+        <!-- Session nodes row 2 -->
+        <rect x="390" y="210" width="68" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+        <text x="424" y="231" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">S6</text>
+        <text x="424" y="247" text-anchor="middle" font-size="10" fill="#1e40af">集成</text>
+
+        <rect x="470" y="210" width="68" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+        <text x="504" y="231" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">S7</text>
+        <text x="504" y="247" text-anchor="middle" font-size="10" fill="#1e40af">容错</text>
+
+        <rect x="550" y="210" width="68" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+        <text x="584" y="231" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">S8</text>
+        <text x="584" y="247" text-anchor="middle" font-size="10" fill="#1e40af">E2E</text>
+
+        <rect x="630" y="210" width="68" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+        <text x="664" y="231" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">S9</text>
+        <text x="664" y="247" text-anchor="middle" font-size="10" fill="#1e40af">验证</text>
+
+        <rect x="710" y="210" width="68" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+        <text x="744" y="231" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">S10</text>
+        <text x="744" y="247" text-anchor="middle" font-size="10" fill="#1e40af">收尾</text>
+
+        <!-- arrows row 2 -->
+        <line x1="458" y1="234" x2="468" y2="234" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#arrp)"/>
+        <line x1="538" y1="234" x2="548" y2="234" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#arrp)"/>
+        <line x1="618" y1="234" x2="628" y2="234" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#arrp)"/>
+        <line x1="698" y1="234" x2="708" y2="234" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#arrp)"/>
+
+        <!-- S5 → S6 wrap arrow -->
+        <path d="M744 178 Q744 196 610 196 Q490 196 424 208" fill="none" stroke="#3b82f6" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrp)"/>
+
+        <!-- Gate label row 2 -->
+        <rect x="430" y="278" width="200" height="28" rx="8" fill="#d97706" opacity="0.15"/>
+        <text x="530" y="297" text-anchor="middle" font-size="12" fill="#92400e" font-weight="600">S10 passed → phase: done</text>
+
+        <!-- ── Done node ── -->
+        <rect x="870" y="176" width="70" height="48" rx="12" fill="#1d2725" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="905" y="197" text-anchor="middle" font-size="12" fill="#6ee7b7" font-weight="700">✅</text>
+        <text x="905" y="214" text-anchor="middle" font-size="11" fill="#6ee7b7">done</text>
+
+        <line x1="850" y1="200" x2="868" y2="200" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arrp)"/>
+
+        <!-- ── memory.md label ── -->
+        <rect x="380" y="348" width="480" height="30" rx="8" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="620" y="368" text-anchor="middle" font-size="12" fill="#92400e">memory.md — current_phase 字段控制阶段转换，session_gate 控制 Session 推进</text>
+      </svg>
+      <p class="diagram-label">两阶段结构：设计阶段（Session 0）→ 开发阶段（Sessions 1–10）→ done</p>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#0f766e"></div> 设计阶段 / 核心流</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> 开发阶段 Sessions</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div> 阶段转换 / 状态更新</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1d2725"></div> 完成状态</div>
+    </div>
+  </section>
+
   <!-- ═══ CONFIG FILE RELATIONSHIP DIAGRAM ═══ -->
   <section class="section mb22">
     <h2>配置文件关系图</h2>

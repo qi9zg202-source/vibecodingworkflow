@@ -1,5 +1,43 @@
 # Workflow Standard
 
+## Two-Phase Architecture
+
+This workflow is structured as **two distinct phases**:
+
+| Phase | current_phase | Sessions | 目标 | 结束条件 |
+|-------|--------------|----------|------|----------|
+| **设计阶段** | `design` | Session 0 | 产出全部规划文档，不写业务代码 | Session 0 tests: passed |
+| **开发阶段** | `development` | Session 1–10 | 按 Session 逐步实现功能 | Session 10 tests: passed |
+| **完成** | `done` | — | 流程全部结束 | — |
+
+```mermaid
+stateDiagram-v2
+    [*] --> design : Task 初始化
+    design --> development : Session 0 通过\n所有规划文档就绪
+    development --> done : Session 10 通过\n所有功能交付完成
+    done --> [*]
+
+    state design {
+        [*] --> S0
+        S0 : Session 0 规划
+        S0 --> [*] : 文档测试通过
+    }
+
+    state development {
+        [*] --> S1_10
+        S1_10 : Sessions 1-10 实现
+        S1_10 --> [*] : 所有功能完成
+    }
+```
+
+### Phase Transition Rules
+
+- **design → development**: Session 0 完成且 `tests: passed` → `current_phase: development`, `next_session: 1`
+- **development → done**: Session 10 完成且 `tests: passed` → `current_phase: done`, `session_gate: done`
+- 任意 Session 未通过 → 不转换阶段，不推进 `next_session`
+
+---
+
 ## Execution Model
 
 This workflow is best understood as five layers:

@@ -32,11 +32,24 @@ Before Session 0, complete the two required alignment steps:
 
 Then trigger Session 0 to generate all planning documents.
 
-## Recommended Webcoding Split
+## Phase 1 — 设计阶段（Design Phase）
+
+`current_phase: design` | 只含 Session 0 | 产出全部规划文档，不写业务代码
 
 | Session | Focus | Deliverable | Test Gate |
 |---------|-------|-------------|-----------|
 | 0 | Planning | `CLAUDE.md`, `task.md`, `PRD.md`, `design.md`, `work-plan.md`, `memory.md` | Key docs exist, `memory.md` valid |
+
+Session 0 通过后 → `current_phase` 转为 `development`，`next_session: 1`
+
+---
+
+## Phase 2 — 开发阶段（Development Phase）
+
+`current_phase: development` | Sessions 1–10 | 按 Session 逐步实现功能
+
+| Session | Focus | Deliverable | Test Gate |
+|---------|-------|-------------|-----------|
 | 1 | Scaffold | Project skeleton, routing, minimal entry point | Project starts, structure verifiable |
 | 2 | Schema | Page map, data models, interface contracts | Types correct, aligned with PRD |
 | 3 | Data | Config, context, data loading layer | Data loading callable, context accessible |
@@ -48,33 +61,47 @@ Then trigger Session 0 to generate all planning documents.
 | 9 | Verification | Real-environment validation, edge cases | Business edge cases pass, risks covered |
 | 10 | Closeout | Final docs, `session_gate: done` | All docs complete, memory marked done |
 
+Session 10 通过后 → `current_phase` 转为 `done`
+
+---
+
 ```mermaid
 graph LR
-    S0["0\n📄 规划"]
-    S1["1\n🏗 骨架"]
-    S2["2\n📐 Schema"]
-    S3["3\n💾 数据层"]
-    S4["4\n⚙️ 逻辑A"]
-    S5["5\n⚙️ 逻辑B"]
-    S6["6\n🔌 集成"]
-    S7["7\n🛡 容错"]
-    S8["8\n🔗 E2E"]
-    S9["9\n✅ 验证"]
-    S10["10\n📦 收尾"]
+    subgraph DESIGN["Phase 1 — 设计阶段 (design)"]
+        S0["0\n📄 规划"]
+    end
+
+    subgraph DEV["Phase 2 — 开发阶段 (development)"]
+        S1["1\n🏗 骨架"]
+        S2["2\n📐 Schema"]
+        S3["3\n💾 数据层"]
+        S4["4\n⚙️ 逻辑A"]
+        S5["5\n⚙️ 逻辑B"]
+        S6["6\n🔌 集成"]
+        S7["7\n🛡 容错"]
+        S8["8\n🔗 E2E"]
+        S9["9\n✅ 验证"]
+        S10["10\n📦 收尾"]
+    end
+
     END(["🎉 done"])
 
-    S0 -->|gate✓| S1 -->|gate✓| S2 -->|gate✓| S3 -->|gate✓| S4
+    S0 -->|"phase→development\ngate✓"| S1
+    S1 -->|gate✓| S2 -->|gate✓| S3 -->|gate✓| S4
     S4 -->|gate✓| S5 -->|gate✓| S6 -->|gate✓| S7 -->|gate✓| S8
-    S8 -->|gate✓| S9 -->|gate✓| S10 -->|gate:done| END
+    S8 -->|gate✓| S9 -->|gate✓| S10 -->|"phase→done"| END
 
     style S0 fill:#dff1ec,stroke:#0f766e,color:#155e57
+    style DESIGN fill:#f0fdf4,stroke:#0f766e
+    style DEV fill:#eff6ff,stroke:#3b82f6
     style END fill:#1d2725,color:#6ee7b7,stroke:#0f766e
 ```
 
 ## Rules
 
 - Session 0 produces documents only — no business implementation code
+- Phase transition only happens when `tests: passed`
 - Each session advances exactly one deliverable
 - `session_gate` must be `ready` before the next session starts
-- A failed or blocked session keeps `next_session` unchanged until resolved
+- A failed or blocked session keeps `next_session` and `current_phase` unchanged until resolved
 - Always re-enter through `startup-prompt.md` — never jump directly to `session-N-prompt.md`

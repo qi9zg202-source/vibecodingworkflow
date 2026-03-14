@@ -1,5 +1,31 @@
 # Progress Loop
 
+## Two-Phase Structure
+
+This workflow operates in **two distinct phases**:
+
+| Phase | current_phase | Sessions | 目标 |
+|-------|--------------|----------|------|
+| 设计阶段 | `design` | Session 0 | 产出全部规划文档，不写业务代码 |
+| 开发阶段 | `development` | Session 1–10 | 按 Session 逐步实现功能 |
+| 完成 | `done` | — | 流程全部结束 |
+
+### Phase Transition Rules
+
+- **design → development**: Session 0 完成且 `tests: passed` → `current_phase: development`, `next_session: 1`
+- **development → done**: Session 10 完成且 `tests: passed` → `current_phase: done`, `session_gate: done`
+- 任意 Session 未通过 → 不转换阶段，不推进 `next_session`
+
+```mermaid
+stateDiagram-v2
+    [*] --> design : Task 初始化
+    design --> development : Session 0 通过
+    development --> done : Session 10 通过
+    done --> [*]
+```
+
+---
+
 ## Why This Exists
 
 Multi-session development fails when the next step depends on chat memory instead of files.
