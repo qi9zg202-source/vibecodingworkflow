@@ -36,6 +36,8 @@ stateDiagram-v2
 - **development → done**: Session 10 完成且 `tests: passed` → `current_phase: done`, `session_gate: done`
 - 任意 Session 未通过 → 不转换阶段，不推进 `next_session`
 
+详细流程图和常见误解澄清见 [`docs/two-phase-architecture.md`](two-phase-architecture.md)。
+
 ---
 
 ## Execution Model
