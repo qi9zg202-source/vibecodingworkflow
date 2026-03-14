@@ -7,15 +7,56 @@ Claude 在生成任何文档类文件时应优先遵守本文件中的规则。
 
 ## 图表规范
 
-### 首选：SVG 内联图
+### 按场景选择最佳方案
 
-- **所有有向关系图、流程图、文件依赖图、架构图** 一律使用 SVG 内联（`<svg>` 写在 HTML 里）
-- 禁止用 ASCII art 替代结构图（`-->`、`+---+` 等），仅允许在纯 Markdown 文件的简单示意中使用
-- SVG 图优势：
-  - 精确控制布局、节点位置、箭头方向
-  - 颜色编码区分不同类型的关系（控制流 / 状态更新 / 读取引用 / UI 集成等）
-  - 可加图例（legend），让读者一眼看懂颜色含义
-  - 支持 `viewBox` 自适应宽度，移动端也清晰
+图表技术选型取决于**文件类型**，不是一刀切：
+
+| 场景 | 最佳方案 | 原因 |
+|------|----------|------|
+| `.html` 展示页（如 `index.html`） | **SVG 内联** | 精确布局、颜色、箭头，视觉效果最强 |
+| `docs/*.md` 或任意 `.md` 中的流程图 | **Mermaid.js** | 文本语法、GitHub 原生渲染、好维护 |
+| `session-N-prompt.md` 等简单示意 | **ASCII art** | 够用，不引入额外依赖 |
+
+---
+
+### SVG 内联图（HTML 展示页专用）
+
+适用场景：`index.html`、汇报页、landing page
+
+- 精确控制节点位置、箭头方向、颜色编码
+- 可加图例（legend），每张图下方必须附 legend
+- 支持 `viewBox` 自适应宽度，移动端清晰
+- 每种箭头颜色配独立 `<marker>` id，避免混用
+
+---
+
+### Mermaid.js（Markdown 文档专用）
+
+适用场景：`docs/*.md`、`design.md`、`work-plan.md` 等需要嵌入图的 Markdown 文件
+
+````markdown
+```mermaid
+graph TD
+  A[memory.md] -->|路由| B[startup-prompt.md]
+  B --> C[session-N-prompt.md]
+  C --> D[artifacts/]
+  D -->|更新| A
+```
+````
+
+优势：
+- GitHub 原生渲染，无需额外工具
+- 文本语法，我生成快、你好维护、git diff 清晰
+- 自动布局，不用手写坐标
+- 支持 `graph TD/LR`、`sequenceDiagram`、`classDiagram` 等多种图类型
+
+---
+
+### ASCII art（简单示意专用）
+
+适用场景：`session-N-prompt.md`、注释、临时说明
+
+仅用于无需精确表达依赖关系的简单示意，不替代 SVG 或 Mermaid。
 
 ### 颜色编码约定（与 index.html 保持一致）
 
@@ -79,9 +120,9 @@ pre {
 ## Markdown 文档规范
 
 - 所有工作流控制文件（`task.md` / `CLAUDE.md` / `PRD.md` / `design.md` / `work-plan.md` / `memory.md` / `session-N-prompt.md`）**一律用 Markdown**，不用 HTML
-- 结构图在 Markdown 中允许简单 ASCII 示意，但若需精确表达依赖关系，建议在对应 HTML 页面（如 `index.html`）中补 SVG 图
+- Markdown 中的流程图优先用 **Mermaid.js**，简单示意用 ASCII art
 - 表格用标准 GFM 语法
-- 代码块标注语言（` ```bash ` / ` ```json ` 等）
+- 代码块标注语言（` ```bash ` / ` ```json ` / ` ```mermaid ` 等）
 
 ---
 
@@ -117,7 +158,8 @@ SVG 图中多层结构要用深色标签条标注层名，示例：
 | 场景 | 格式 |
 |------|------|
 | workflow 控制文件（task / memory / session prompt 等） | `.md` |
-| 可视化总览 / 汇报页 / landing page | `.html`（含 SVG 内联图） |
-| 架构图 / 流程图 / 文件关系图 | SVG 内联（禁用 ASCII） |
+| 可视化总览 / 汇报页 / landing page | `.html`（SVG 内联图） |
+| `.html` 页中的架构图 / 流程图 / 文件关系图 | **SVG 内联** |
+| `.md` 文件中的流程图 / 依赖图 | **Mermaid.js** |
+| 简单示意（prompt 内、注释内） | ASCII art |
 | 代码示例 | Markdown 代码块 或 HTML `<pre>` |
-| 简单列表 / 说明 | Markdown |
