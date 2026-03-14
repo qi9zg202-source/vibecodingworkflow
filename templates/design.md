@@ -20,6 +20,20 @@
 - Runtime Layer：业务逻辑与副作用
 - Integration Layer：外部系统对接
 
+```mermaid
+graph TD
+    UI["UI Layer\n用户界面 / 交互组件"]
+    DATA["Data Layer\n数据模型 / 状态管理"]
+    RUNTIME["Runtime Layer\n业务逻辑 / 副作用"]
+    INTEGRATION["Integration Layer\n外部系统 / API 对接"]
+
+    UI -->|"用户操作 / 事件"| RUNTIME
+    RUNTIME -->|"读写状态"| DATA
+    RUNTIME -->|"调用外部接口"| INTEGRATION
+    DATA -->|"驱动渲染"| UI
+    INTEGRATION -->|"返回数据"| RUNTIME
+```
+
 ### 模块边界
 - 描述各模块的职责和边界
 - 定义模块间的接口契约
@@ -34,16 +48,29 @@
 
 ## Execution Model
 
-```
-Project（代码仓库）
-└── CLAUDE.md（项目级背景，跨 Task 共享）
-    └── Task（二级功能点）
-        ├── task.md（Task 目标与范围）
-        ├── design.md（本文件，Task 技术设计）
-        ├── memory.md（workflow 状态真相源）
-        ├── startup-prompt.md（每轮 fresh session 统一入口）
-        └── Session（具体交付物，每轮一个）
-            └── artifacts/session-N-summary.md + session-N-manifest.json
+```mermaid
+graph TD
+    PROJ["Project（代码仓库）"]
+    CLAUDE["CLAUDE.md\n项目级背景，跨 Task 共享"]
+    TASK["Task（二级功能点）"]
+    TM["task.md — Task 目标与范围"]
+    DM["design.md — Task 技术设计（本文件）"]
+    MM["memory.md — workflow 状态真相源"]
+    SP["startup-prompt.md — 每轮统一入口"]
+    SN["Session（具体交付物，每轮一个）"]
+    ART["artifacts/\nsession-N-summary.md\nsession-N-manifest.json"]
+
+    PROJ --> CLAUDE
+    CLAUDE --> TASK
+    TASK --> TM
+    TASK --> DM
+    TASK --> MM
+    TASK --> SP
+    TASK --> SN
+    SN --> ART
+    MM -->|"路由"| SP
+    SP -->|"选择"| SN
+    ART -->|"更新"| MM
 ```
 
 - `Task` 是业务目标单位（一个二级功能点）

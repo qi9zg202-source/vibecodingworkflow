@@ -2,6 +2,15 @@
 
 > 每个 Session = 一个可测试的具体交付物。Session 0 只产文档，不写业务代码。
 
+```mermaid
+graph LR
+    S0["0 规划"] --> S1["1 骨架"] --> S2["2 Schema"] --> S3["3 数据层"] --> S4["4 逻辑A"]
+    S4 --> S5["5 逻辑B"] --> S6["6 集成"] --> S7["7 容错"] --> S8["8 E2E"] --> S9["9 验证"] --> S10["10 收尾"]
+    S10 --> DONE(["✅ done"])
+    style S0 fill:#dff1ec,stroke:#0f766e,color:#155e57
+    style DONE fill:#1d2725,color:#6ee7b7,stroke:#0f766e
+```
+
 ## Session 0 — 规划与控制文档
 - **Deliverable**: `CLAUDE.md`, `task.md`, `PRD.md`, `design.md`, `work-plan.md`, `memory.md`
 - **Test Gate**: 关键文档存在且内容完整，`memory.md` 状态有效

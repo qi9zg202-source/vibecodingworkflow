@@ -48,6 +48,29 @@ Then trigger Session 0 to generate all planning documents.
 | 9 | Verification | Real-environment validation, edge cases | Business edge cases pass, risks covered |
 | 10 | Closeout | Final docs, `session_gate: done` | All docs complete, memory marked done |
 
+```mermaid
+graph LR
+    S0["0\n📄 规划"]
+    S1["1\n🏗 骨架"]
+    S2["2\n📐 Schema"]
+    S3["3\n💾 数据层"]
+    S4["4\n⚙️ 逻辑A"]
+    S5["5\n⚙️ 逻辑B"]
+    S6["6\n🔌 集成"]
+    S7["7\n🛡 容错"]
+    S8["8\n🔗 E2E"]
+    S9["9\n✅ 验证"]
+    S10["10\n📦 收尾"]
+    END(["🎉 done"])
+
+    S0 -->|gate✓| S1 -->|gate✓| S2 -->|gate✓| S3 -->|gate✓| S4
+    S4 -->|gate✓| S5 -->|gate✓| S6 -->|gate✓| S7 -->|gate✓| S8
+    S8 -->|gate✓| S9 -->|gate✓| S10 -->|gate:done| END
+
+    style S0 fill:#dff1ec,stroke:#0f766e,color:#155e57
+    style END fill:#1d2725,color:#6ee7b7,stroke:#0f766e
+```
+
 ## Rules
 
 - Session 0 produces documents only — no business implementation code

@@ -20,6 +20,22 @@ Why:
 - lets the driver stay strict and machine-checkable
 - avoids guessing task-level intent from prompt files
 
+```mermaid
+graph TD
+    L["旧项目\n(prompt-only\n无 task.md)"]
+    N["新项目\n(task-centered\n完整 contract)"]
+    M["migrate-vibecoding-project.sh"]
+
+    L --> M
+    M --> A1["✅ 补充 task.md"]
+    M --> A2["✅ 补充 artifacts/"]
+    M --> A3["✅ 补充 outputs/session-specs/"]
+    M --> A4["✅ 补充 outputs/session-logs/"]
+    M --> A5["🚫 不覆盖已有文件\nmemory.md / startup-prompt.md\nsession prompts / product docs"]
+    A1 & A2 & A3 & A4 --> N
+    A5 -.->|"保留原内容"| N
+```
+
 ## Migration Command
 
 From this repository root:
@@ -59,6 +75,16 @@ Recommended verification:
 
 ```bash
 python3 ./scripts/run-vibecoding-loop.py /path/to/legacy-project --action inspect --json
+```
+
+```mermaid
+flowchart LR
+    MIG["迁移完成"] --> V1["运行 driver inspect\n验证 task.title"]
+    V1 --> V2["检查 spec 路径\noutputs/session-specs/"]
+    V2 --> V3{"旧 startup/memory\n措辞是否过时?"}
+    V3 -->|"是"| FIX["手动更新\nstartup-prompt.md\nmemory.md"]
+    V3 -->|"否"| OK["✅ 迁移验证通过\n可继续 Session 循环"]
+    FIX --> OK
 ```
 
 ## Why No Fallback
