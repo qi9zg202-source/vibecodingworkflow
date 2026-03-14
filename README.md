@@ -66,6 +66,8 @@ flowchart TB
 
 See [docs/workflow-standard.md](./docs/workflow-standard.md) for the full `Project / Task / Session / Artifact / Memory` model and diagram.
 
+See [docs/real-world-guide.md](./docs/real-world-guide.md) for the **real-world execution guide** — how to handle multi-round review cycles, context window switching with `nss))`, and when to advance `memory.md`.
+
 ## Use Cases
 
 Use this project before or during webcoding development when you need:
