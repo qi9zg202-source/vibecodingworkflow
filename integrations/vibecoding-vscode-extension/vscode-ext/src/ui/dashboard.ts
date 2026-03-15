@@ -403,6 +403,13 @@ function getDashboardHtml(state: DashboardState, mode: DashboardRenderMode): str
       font-family: var(--vscode-font-family);
     }
     .debug-btn:hover { opacity: 1; }
+    .sync-btn {
+      padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;
+      background: transparent; color: var(--vscode-textLink-foreground);
+      border: 1px solid var(--vscode-textLink-foreground); cursor: pointer; opacity: 0.85;
+      font-family: var(--vscode-font-family);
+    }
+    .sync-btn:hover { opacity: 1; background: color-mix(in srgb, var(--vscode-textLink-foreground) 12%, transparent); }
     .debug-panel {
       display: none; font-size: 11px; font-family: var(--vscode-editor-font-family);
       background: rgba(255,200,0,0.08); border: 1px solid rgba(255,200,0,0.35);
@@ -633,6 +640,7 @@ function getDashboardHtml(state: DashboardState, mode: DashboardRenderMode): str
       ${currentPhase ? `<span class="pill pill-phase-${escapeHtml(currentPhase)}">Phase: ${escapeHtml(currentPhase)}</span>` : ''}
       ${renderGatePill(sessionGate)}
       ${renderRunnerStatePill(processTableRunnerState)}
+      <button class="sync-btn" data-command="vibeCoding.syncAndReload">⟳ Sync & Reload</button>
       <button class="debug-btn" id="debugToggleBtn">Debug</button>
     </div>
   </header>
