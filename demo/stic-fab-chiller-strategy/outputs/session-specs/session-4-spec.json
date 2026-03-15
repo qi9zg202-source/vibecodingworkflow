@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "project_root": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy",
+  "task": {
+    "path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/task.md",
+    "title": "STIC 北方创新中心 Fab 厂务机械课高效制冷机房策略优化建议管理功能"
+  },
+  "session_status": {
+    "current_phase": "implementation",
+    "last_completed_session": "3",
+    "last_completed_session_tests": "passed",
+    "next_session": "4",
+    "next_session_prompt": "session-4-prompt.md",
+    "session_gate": "ready"
+  },
+  "paths": {
+    "task_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/task.md",
+    "startup_prompt_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/startup-prompt.md",
+    "memory_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/memory.md",
+    "design_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/design.md",
+    "work_plan_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/work-plan.md",
+    "next_session_prompt_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/session-4-prompt.md",
+    "previous_session_summary_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/artifacts/session-3-summary.md",
+    "expected_session_summary_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/artifacts/session-4-summary.md"
+  },
+  "instructions": {
+    "entry_point": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/startup-prompt.md",
+    "must_read": [
+      "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/memory.md",
+      "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/task.md",
+      "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/design.md",
+      "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/demo/stic-fab-chiller-strategy/work-plan.md"
+    ],
+    "read_previous_summary_first": true,
+    "write_summary_before_memory_update": true
+  }
+}

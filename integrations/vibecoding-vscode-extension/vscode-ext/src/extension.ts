@@ -431,14 +431,26 @@ async function rejectSession(workflowRoot: string) {
  * 完成后提示用户 Reload Window。
  */
 async function syncAndReload() {
-    // build-and-sync.sh 位于 integrations/vibecoding-vscode-extension/
-    // 从 __dirname（out/）往上两级即可定位
-    const scriptPath = path.join(__dirname, '..', '..', '..', 'build-and-sync.sh');
+    // build-and-sync.sh 是源码目录里的开发脚本，必须从 workspace 里查找
+    // 不能用 __dirname（那是已安装扩展的 out/ 目录）
+    const scriptRelative = path.join('integrations', 'vibecoding-vscode-extension', 'build-and-sync.sh');
+    let scriptPath: string | undefined;
+    for (const folder of vscode.workspace.workspaceFolders ?? []) {
+        const candidate = path.join(folder.uri.fsPath, scriptRelative);
+        if (fs.existsSync(candidate)) {
+            scriptPath = candidate;
+            break;
+        }
+    }
 
-    if (!fs.existsSync(scriptPath)) {
-        void vscode.window.showErrorMessage(`build-and-sync.sh not found at: ${scriptPath}`);
+    if (!scriptPath) {
+        void vscode.window.showErrorMessage(
+            `build-and-sync.sh not found. Expected: <workspaceRoot>/${scriptRelative}`
+        );
         return;
     }
+
+    void vscode.window.showInformationMessage('⟳ Sync & Reload: building and syncing extension…');
 
     outputChannel?.show(true);
     outputChannel?.appendLine('');
@@ -448,8 +460,8 @@ async function syncAndReload() {
         name: 'VibeCoding: Sync & Reload',
         cwd: path.dirname(scriptPath),
     });
-    terminal.show(true);
-    // 执行脚本；完成后提示用户手动 Reload（VSCode 不允许扩展自动触发自身重载）
+    // preserveFocus=false 让 terminal 获得焦点，用户能直接看到执行过程
+    terminal.show(false);
     terminal.sendText(`bash "${scriptPath}" && echo "" && echo "✅ Sync done. Now run: Cmd+Shift+P → Developer: Reload Window"`, true);
 }
 

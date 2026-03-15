@@ -6,7 +6,7 @@
 - last_completed_session_tests: passed
 - next_session: 4
 - next_session_prompt: `session-4-prompt.md`
-- session_gate: pending_review
+- session_gate: ready
 
 ## Session Update Rule
 - 必须更新：

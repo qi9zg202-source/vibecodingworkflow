@@ -73,8 +73,16 @@
         },
         "vibeCoding.runnerCommandTemplate": {
           "type": "string",
-          "default": "",
-          "description": "用于 fresh session 启动的 runner 命令模板，占位符约定将在后续 Session 固化。"
+          "default": "claude --dangerously-skip-permissions",
+          "enum": [
+            "claude --dangerously-skip-permissions",
+            "codex --dangerously-skip-permissions"
+          ],
+          "enumDescriptions": [
+            "Claude Code（Anthropic）— 跳过权限确认",
+            "Codex（OpenAI）— 跳过权限确认"
+          ],
+          "description": "用于 fresh session 启动的 runner 命令。"
         }
       }
     },
