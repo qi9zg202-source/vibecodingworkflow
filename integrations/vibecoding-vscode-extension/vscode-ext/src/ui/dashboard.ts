@@ -1,6 +1,11 @@
 import * as vscode from 'vscode';
 import { DriverResult } from '../driver/driverTypes';
 
+// ─── REDESIGNED UI ───────────────────────────────────────────────────────────
+// Two-phase architecture (design → development → done)
+// HITL Review Gate: ready → in_progress → pending_review → ready/blocked → done
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const DASHBOARD_PANEL_VIEW_TYPE = 'vibeCodingDashboard';
 export const DASHBOARD_SIDEBAR_VIEW_ID = 'vibeCodingDashboardView';
 
@@ -30,6 +35,7 @@ export interface DashboardWorkflowSummary {
     lastCompletedSession: number | null;
     nextSession: number | null;
     totalSessionCount: number;
+    sessionGate: string | null;
     files: DashboardWorkflowFile[];
 }
 
@@ -83,6 +89,7 @@ export class WorkflowDashboardPanel implements vscode.Disposable {
         if (WorkflowDashboardPanel.currentPanel) {
             WorkflowDashboardPanel.currentPanel.panel.reveal(vscode.ViewColumn.One);
             WorkflowDashboardPanel.currentPanel.update(initialState);
+            void vscode.commands.executeCommand('workbench.action.moveEditorToNewWindow');
             return WorkflowDashboardPanel.currentPanel;
         }
 
@@ -97,6 +104,7 @@ export class WorkflowDashboardPanel implements vscode.Disposable {
         );
 
         WorkflowDashboardPanel.currentPanel = new WorkflowDashboardPanel(panel, initialState, onCommand);
+        void vscode.commands.executeCommand('workbench.action.moveEditorToNewWindow');
         return WorkflowDashboardPanel.currentPanel;
     }
 
@@ -146,12 +154,18 @@ export class WorkflowDashboardPanel implements vscode.Disposable {
 export class WorkflowDashboardViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
     private readonly disposables: vscode.Disposable[] = [];
     private readonly onCommand: DashboardCommandHandler;
+    private readonly onVisible: (() => void) | undefined;
     private state: DashboardState;
     private view: vscode.WebviewView | undefined;
 
-    constructor(initialState: DashboardState, onCommand: DashboardCommandHandler) {
+    constructor(
+        initialState: DashboardState,
+        onCommand: DashboardCommandHandler,
+        onVisible?: () => void,
+    ) {
         this.state = initialState;
         this.onCommand = onCommand;
+        this.onVisible = onVisible;
     }
 
     resolveWebviewView(webviewView: vscode.WebviewView) {
@@ -161,6 +175,19 @@ export class WorkflowDashboardViewProvider implements vscode.WebviewViewProvider
         };
         attachDashboardMessageListener(webviewView.webview, this.onCommand, this.disposables);
         this.render();
+
+        // When the sidebar panel becomes visible, immediately open the full-screen panel
+        // and keep the sidebar as a minimal launcher placeholder.
+        if (this.onVisible) {
+            this.onVisible();
+        }
+        this.disposables.push(
+            webviewView.onDidChangeVisibility(() => {
+                if (webviewView.visible && this.onVisible) {
+                    this.onVisible();
+                }
+            }),
+        );
     }
 
     update(state: DashboardState) {
@@ -179,8 +206,95 @@ export class WorkflowDashboardViewProvider implements vscode.WebviewViewProvider
         if (!this.view) {
             return;
         }
-        this.view.webview.html = getDashboardHtml(this.state, 'sidebar');
+        this.view.webview.html = getSidebarLauncherHtml();
     }
+}
+
+/** Minimal sidebar HTML — just a launch button. The real UI lives in the full-screen panel. */
+function getSidebarLauncherHtml(): string {
+    return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    padding: 16px 12px;
+    font-family: var(--vscode-font-family);
+    font-size: var(--vscode-font-size);
+    color: var(--vscode-foreground);
+    background: var(--vscode-sideBar-background);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0 6px;
+  }
+  .brand-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #49b470;
+    box-shadow: 0 0 6px rgba(73,180,112,0.6);
+  }
+  .brand-name {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--vscode-foreground);
+    opacity: 0.85;
+  }
+  .open-btn {
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--vscode-font-family);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: opacity 0.15s;
+  }
+  .open-btn:hover { opacity: 0.88; }
+  .hint {
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    text-align: center;
+    line-height: 1.6;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <span class="brand-name">VibeCoding</span>
+  </div>
+  <button class="open-btn" data-command="vibeCoding.openDashboard">
+    ⬡ Open Dashboard
+  </button>
+  <div class="hint">在全屏面板中打开工作流控制台</div>
+</body>
+<script>
+  const vscodeApi = acquireVsCodeApi();
+  document.querySelectorAll('[data-command]').forEach(el => {
+    el.addEventListener('click', () => {
+      vscodeApi.postMessage({ type: 'runCommand', command: el.getAttribute('data-command') });
+    });
+  });
+</script>
+</html>`;
 }
 
 function mergeDashboardState(currentState: DashboardState, nextState: DashboardState): DashboardState {
@@ -230,6 +344,17 @@ function getDashboardHtml(state: DashboardState, mode: DashboardRenderMode): str
     const nextSessionPromptLabel = result?.next_session_prompt || basename(nextSessionPromptPath) || fallbackNextSessionLabel;
     const isPanelMode = mode === 'panel';
 
+    // Derive phase and gate from result/workflow
+    const currentPhase: string = (result as any)?.current_phase ?? '';
+    const sessionGate: string = result?.session_gate ?? selectedWorkflow?.sessionGate ?? '';
+    const projectRoot: string = result?.project_root ?? (state.projectRoot ?? '');
+    const lastCompletedSession = parseNumericValue(result?.last_completed_session) ?? selectedWorkflow?.lastCompletedSession ?? null;
+    const nextSession = parseNumericValue(result?.next_session) ?? selectedWorkflow?.nextSession ?? null;
+    const totalSessions = selectedWorkflow?.totalSessionCount ?? 0;
+    const progressPct = totalSessions > 0 && lastCompletedSession !== null
+        ? Math.round((lastCompletedSession / totalSessions) * 100)
+        : 0;
+
     return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -237,758 +362,495 @@ function getDashboardHtml(state: DashboardState, mode: DashboardRenderMode): str
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VibeCoding Workflow Dashboard</title>
   <style>
-    :root {
-      color-scheme: light dark;
-    }
-    * {
-      box-sizing: border-box;
-    }
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
-      padding: 24px;
+      padding: ${isPanelMode ? '0' : '0'};
       font-family: var(--vscode-font-family);
+      font-size: 13px;
       color: var(--vscode-foreground);
       background: var(--vscode-editor-background);
+      min-height: 100vh;
     }
-    .wrap {
-      max-width: 1240px;
-      margin: 0 auto;
-    }
-    .hero {
-      padding: 24px;
-      border-radius: 20px;
-      border: 1px solid var(--vscode-panel-border);
-      background:
-        radial-gradient(circle at top right, color-mix(in srgb, var(--vscode-textLink-foreground) 12%, transparent), transparent 36%),
-        linear-gradient(135deg, color-mix(in srgb, var(--vscode-editorWidget-background) 94%, transparent), var(--vscode-editor-background));
-    }
-    .hero-header {
+    /* ── Layout ── */
+    .page { display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar {
       display: flex;
-      align-items: baseline;
-      gap: 8px;
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 0 ${isPanelMode ? '32px' : '16px'};
+      height: 48px;
+      background: var(--vscode-titleBar-activeBackground, var(--vscode-sideBar-background));
+      border-bottom: 1px solid var(--vscode-panel-border);
+      flex-shrink: 0;
     }
-    .eyebrow {
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      opacity: 0.72;
+    .brand {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; opacity: 0.9; white-space: nowrap;
     }
-    h1 {
-      margin: 0;
-      font-size: 28px;
-      line-height: 1.15;
+    .brand-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #49b470; box-shadow: 0 0 6px rgba(73,180,112,0.7);
+      flex-shrink: 0;
     }
-    .grid,
-    .workflow-grid,
-    .snapshot-grid {
-      display: grid;
+    .topbar-spacer { flex: 1; }
+    .topbar-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .debug-btn {
+      padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 600;
+      background: transparent; color: var(--vscode-descriptionForeground);
+      border: 1px solid var(--vscode-panel-border); cursor: pointer; opacity: 0.7;
+      font-family: var(--vscode-font-family);
+    }
+    .debug-btn:hover { opacity: 1; }
+    .debug-panel {
+      display: none; font-size: 11px; font-family: var(--vscode-editor-font-family);
+      background: rgba(255,200,0,0.08); border: 1px solid rgba(255,200,0,0.35);
+      border-radius: 6px; padding: 10px 14px; line-height: 1.8;
+      white-space: pre-wrap; word-break: break-all;
+    }
+    .debug-panel.open { display: block; }
+    .content {
+      flex: 1;
+      padding: ${isPanelMode ? '24px 32px' : '16px'};
+      max-width: ${isPanelMode ? '1600px' : '100%'};
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
       gap: 16px;
     }
-    .grid {
-      grid-template-columns: 1.2fr 1fr;
-      margin-top: 20px;
+    /* ── Gate banners ── */
+    .gate-banner {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 18px; border-radius: 8px; border: 1px solid transparent;
+      font-size: 13px; line-height: 1.5;
     }
-    .workflow-grid {
-      grid-template-columns: ${isPanelMode ? 'minmax(320px, 0.95fr) minmax(540px, 1.25fr)' : '1fr'};
-      margin-top: 20px;
-      align-items: start;
-    }
-    .snapshot-grid {
-      grid-template-columns: 1.1fr 1fr;
-      margin-top: 20px;
-      align-items: start;
-    }
-    .session-panel {
-      margin-top: 20px;
-    }
-    .panel,
-    .issue {
-      border-radius: 18px;
-      border: 1px solid var(--vscode-panel-border);
-      background: var(--vscode-sideBar-background);
-      padding: 18px;
-    }
-    .active-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 13px;
-      border: 1px solid transparent;
-    }
-    .active-pill {
-      color: #136c37;
-      background: rgba(73, 180, 112, 0.24);
-      border-color: rgba(73, 180, 112, 0.42);
-    }
-    .next-pill {
+    .gate-banner-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .gate-banner-body { display: flex; flex-direction: column; gap: 2px; }
+    .gate-banner-title { font-weight: 700; font-size: 13px; }
+    .gate-banner-desc { opacity: 0.82; font-size: 12px; }
+    .gate-pending-review {
+      background: rgba(232,173,53,0.12); border-color: rgba(232,173,53,0.45);
       color: #7a4d00;
-      background: rgba(232, 173, 53, 0.18);
-      border-color: rgba(232, 173, 53, 0.28);
     }
+    .gate-blocked {
+      background: rgba(218,30,40,0.10); border-color: rgba(218,30,40,0.40);
+      color: #a2191f;
+    }
+    .gate-banner-actions { display: flex; gap: 8px; margin-top: 10px; }
+    button.approve { background: #24a148; color: #fff; border-color: #198038; }
+    button.approve:hover { background: #198038; }
+    /* ── Issue banner ── */
+    .issue-banner {
+      padding: 12px 16px; border-radius: 8px;
+      border: 1px solid ${issue?.level === 'error' ? 'rgba(218,30,40,0.4)' : 'rgba(220,145,44,0.4)'};
+      background: ${issue?.level === 'error' ? 'rgba(218,30,40,0.08)' : 'rgba(220,145,44,0.08)'};
+      display: ${issue ? 'block' : 'none'};
+      font-size: 13px;
+    }
+    .issue-banner strong { display: block; margin-bottom: 4px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .stat-card {
+      background: var(--vscode-sideBar-background);
+      border: 1px solid var(--vscode-panel-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
+    .stat-value { font-size: 22px; font-weight: 700; line-height: 1; }
+    .stat-sub { font-size: 11px; opacity: 0.6; }
+    /* ── Progress bar ── */
+    .progress-track {
+      height: 4px; border-radius: 2px;
+      background: var(--vscode-panel-border);
+      overflow: hidden; margin-top: 4px;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 2px;
+      background: linear-gradient(90deg, #24a148, #49b470);
+      transition: width 0.4s ease;
+    }
+    /* ── Runner card ── */
+    .runner-card {
+      background: var(--vscode-sideBar-background);
+      border: 1px solid var(--vscode-panel-border);
+      border-radius: 8px;
+      padding: 16px 18px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .runner-card-header {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .runner-card-title { font-size: 13px; font-weight: 700; }
+    .runner-card-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px 24px;
+      font-size: 12px;
+    }
+    .runner-meta-item { display: flex; gap: 6px; align-items: baseline; }
+    .runner-meta-label { opacity: 0.6; white-space: nowrap; flex-shrink: 0; }
+    .runner-meta-value { font-family: var(--vscode-editor-font-family); word-break: break-all; }
+    .runner-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    /* ── Panels ── */
+    .panels-grid {
+      display: grid;
+      grid-template-columns: ${isPanelMode ? 'minmax(380px,1fr) minmax(520px,1.6fr)' : '1fr'};
+      gap: 16px;
+      align-items: start;
+    }
+    .panel {
+      background: var(--vscode-sideBar-background);
+      border: 1px solid var(--vscode-panel-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--vscode-panel-border);
+      background: color-mix(in srgb, var(--vscode-editor-background) 60%, var(--vscode-sideBar-background));
+    }
+    .panel-title { font-size: 13px; font-weight: 700; }
+    .panel-subtitle { font-size: 11px; opacity: 0.6; font-family: var(--vscode-editor-font-family); word-break: break-all; }
+    .panel-body { overflow-x: auto; }
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th {
+      padding: 8px 12px; text-align: left;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      background: color-mix(in srgb, var(--vscode-editor-background) 80%, black 20%);
+      border-bottom: 1px solid var(--vscode-panel-border);
+      white-space: nowrap; opacity: 0.85;
+    }
+    td {
+      padding: 10px 12px; vertical-align: top;
+      border-bottom: 1px solid color-mix(in srgb, var(--vscode-panel-border) 60%, transparent);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: color-mix(in srgb, var(--vscode-textLink-foreground) 6%, transparent); }
+    .row-selected td { background: color-mix(in srgb, rgba(73,180,112,0.15) 80%, transparent) !important; }
+    .row-running td { animation: row-breathe 2.2s ease-in-out infinite; }
+    .row-current td:first-child { box-shadow: inset 3px 0 0 #49b470; }
+    @keyframes row-breathe {
+      0%,100% { background: color-mix(in srgb, rgba(73,180,112,0.08) 100%, transparent); }
+      50% { background: color-mix(in srgb, rgba(73,180,112,0.22) 100%, transparent); }
+    }
+    /* ── Pills ── */
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 999px; border: 1px solid transparent;
+      font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.4;
+    }
+    .pill-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    /* runner state */
+    .pill-idle { color: #c6c6c6; background: #393939; border-color: #525252; }
+    .pill-starting { color: #261700; background: #ffd7a0; border-color: #ffb84d; }
+    .pill-running { color: #04351e; background: #a7f0ba; border-color: #24a148; animation: pill-pulse 1.8s ease-in-out infinite; }
+    .pill-paused { color: #4c2d00; background: #f1c21b; border-color: #8a3c00; }
+    .pill-done { color: #04351e; background: #a7f0ba; border-color: #24a148; }
+    /* session status */
+    .pill-completed { color: #0b63ce; background: rgba(32,125,255,0.14); border-color: rgba(32,125,255,0.3); }
+    .pill-pending { color: var(--vscode-foreground); background: var(--vscode-badge-background); border-color: var(--vscode-panel-border); opacity: 0.7; }
+    .pill-blocked { color: #a2191f; background: rgba(218,30,40,0.12); border-color: rgba(218,30,40,0.35); }
+    .pill-pending-review { color: #7a4d00; background: rgba(232,173,53,0.18); border-color: rgba(232,173,53,0.4); }
+    /* phase */
+    .pill-phase-design { color: #6929c4; background: rgba(105,41,196,0.12); border-color: rgba(105,41,196,0.3); }
+    .pill-phase-development { color: #0b63ce; background: rgba(11,99,206,0.12); border-color: rgba(11,99,206,0.3); }
+    .pill-phase-done { color: #04351e; background: rgba(36,161,72,0.14); border-color: rgba(36,161,72,0.3); }
+    /* next session */
+    .pill-next { color: #7a4d00; background: rgba(232,173,53,0.18); border-color: rgba(232,173,53,0.35); }
+    @keyframes pill-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(73,180,112,0); }
+      50% { box-shadow: 0 0 0 4px rgba(73,180,112,0.2); }
+    }
+    @keyframes dot-ping {
+      0% { box-shadow: 0 0 0 0 rgba(73,180,112,0.6); }
+      70% { box-shadow: 0 0 0 8px rgba(73,180,112,0); }
+      100% { box-shadow: 0 0 0 0 rgba(73,180,112,0); }
+    }
+    .dot-running { background: #49b470; animation: dot-ping 1.6s ease-out infinite; }
+    .dot-completed { background: #207dff; }
+    .dot-pending { background: color-mix(in srgb, var(--vscode-foreground) 40%, transparent); }
+    /* ── Buttons ── */
     button {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 14px;
+      padding: 6px 12px; border-radius: 5px;
       border: 1px solid var(--vscode-button-border, transparent);
       background: var(--vscode-button-background);
       color: var(--vscode-button-foreground);
-      cursor: pointer;
-      font: inherit;
-      text-align: left;
+      font: inherit; font-size: 12px; cursor: pointer;
+      white-space: nowrap;
     }
-    button.secondary,
-    button.tree-button {
+    button:hover { opacity: 0.88; }
+    button.secondary {
       background: transparent;
       color: var(--vscode-textLink-foreground);
       border-color: var(--vscode-panel-border);
     }
-    button:hover {
-      background: var(--vscode-button-hoverBackground);
-    }
-    .secondary:hover,
-    .tree-button:hover {
-      background: color-mix(in srgb, var(--vscode-textLink-foreground) 10%, transparent);
-    }
-    h2 {
-      margin: 0 0 12px;
-      font-size: 18px;
-    }
-    .panel-heading {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .panel-heading h2 {
-      margin: 0;
-    }
-    .panel-heading-path {
-      font-size: 12px;
-      opacity: 0.72;
-      word-break: break-word;
-      font-family: var(--vscode-editor-font-family);
-    }
-    h3 {
-      margin: 0;
-      font-size: 16px;
-    }
-    .table-wrap {
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    .carbon-table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-      border: 1px solid color-mix(in srgb, var(--vscode-panel-border) 82%, var(--vscode-foreground) 18%);
-      background: color-mix(in srgb, var(--vscode-editorWidget-background) 92%, transparent);
-      font-size: 13px;
-    }
-    .carbon-table th,
-    .carbon-table td {
-      padding: 12px 14px;
-      border: 1px solid color-mix(in srgb, var(--vscode-panel-border) 76%, var(--vscode-foreground) 24%);
-      vertical-align: top;
-      text-align: left;
-    }
-    .carbon-table th {
-      background: color-mix(in srgb, var(--vscode-editor-background) 78%, black 22%);
-      color: var(--vscode-foreground);
-      opacity: 0.9;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    .carbon-table td {
-      background: color-mix(in srgb, var(--vscode-sideBar-background) 94%, transparent);
-    }
-    .carbon-table tbody tr:hover td {
-      background: color-mix(in srgb, var(--vscode-editorWidget-background) 86%, var(--vscode-textLink-foreground) 14%);
-    }
-    .carbon-table-row-selected td {
-      background: color-mix(in srgb, rgba(73, 180, 112, 0.18) 78%, var(--vscode-sideBar-background));
-    }
-    .carbon-table-row-selected:hover td {
-      background: color-mix(in srgb, rgba(73, 180, 112, 0.24) 80%, var(--vscode-sideBar-background));
-    }
-    .carbon-table-cell-index {
-      width: 64px;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .carbon-table-cell-status,
-    .carbon-table-cell-progress,
-    .carbon-table-cell-runtime {
-      white-space: nowrap;
-    }
-    .carbon-table-cell-actions {
-      width: 150px;
-    }
-    .carbon-table-cell-actions button {
-      width: auto;
-      min-width: 88px;
-      border-radius: 0;
-    }
-    .process-cell-mono {
-      font-family: var(--vscode-editor-font-family);
-      word-break: break-word;
-    }
-    .process-name-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: flex-start;
-    }
-    .process-name-primary {
-      font-family: var(--vscode-editor-font-family);
-      word-break: break-word;
-    }
-    .process-name-secondary {
-      font-size: 12px;
-      opacity: 0.72;
-      font-family: var(--vscode-editor-font-family);
-      word-break: break-word;
-    }
-    .process-cell-status {
-      width: 240px;
-      min-width: 240px;
-      max-width: 240px;
-    }
-    .process-status-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: flex-start;
-    }
-    .process-status-meta {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 4px 10px;
-      font-size: 12px;
-      line-height: 1.4;
-      width: 100%;
-    }
-    .process-status-label {
-      opacity: 0.72;
-      white-space: nowrap;
-    }
-    .process-status-value {
-      font-family: var(--vscode-editor-font-family);
-      word-break: break-word;
-    }
-    .process-cell-actions {
-      width: 168px;
-      min-width: 168px;
-      max-width: 168px;
-    }
-    .process-pid-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: flex-start;
-    }
-    .process-pid-primary {
-      font-family: var(--vscode-editor-font-family);
-      word-break: break-word;
-    }
-    .process-pid-secondary {
-      font-size: 12px;
-      opacity: 0.72;
-      font-family: var(--vscode-editor-font-family);
-      word-break: break-word;
-    }
-    .process-table.carbon-table {
-      border: 2px solid color-mix(in srgb, var(--vscode-foreground) 52%, var(--vscode-editor-background) 48%);
-      background: color-mix(in srgb, var(--vscode-sideBar-background) 96%, var(--vscode-editor-background));
-    }
-    .process-table.carbon-table th,
-    .process-table.carbon-table td {
-      border: 1px solid color-mix(in srgb, var(--vscode-foreground) 38%, var(--vscode-editor-background) 62%);
-    }
-    .process-table.carbon-table th {
-      color: #ffffff;
-      background: #1f3a5f;
-      border-bottom: 2px solid #162a45;
-    }
-    .process-table.carbon-table td {
-      background: color-mix(in srgb, var(--vscode-sideBar-background) 92%, var(--vscode-editor-background) 8%);
-    }
-    .process-table.carbon-table tbody tr:hover td {
-      background: color-mix(in srgb, var(--vscode-editorWidget-background) 82%, var(--vscode-textLink-foreground) 18%);
-    }
-    .process-table.carbon-table .runner-controls button {
-      min-width: 64px;
-      padding: 10px 10px;
-    }
-    .issue {
-      margin-top: 20px;
-      border-color: ${issue?.level === 'error' ? 'rgba(255, 99, 71, 0.35)' : 'rgba(220, 145, 44, 0.35)'};
-      display: ${issue ? 'block' : 'none'};
-    }
-    .issue strong {
-      display: inline-block;
-      margin-bottom: 8px;
-    }
-    .tips {
-      margin: 0;
-      padding-left: 18px;
-      line-height: 1.7;
-    }
-    .runner-state-pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 5px 10px;
-      border-radius: 999px;
-      border: 1px solid transparent;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-    }
-    .runner-state-idle {
-      color: #f4f4f4;
-      background: #525252;
-      border-color: #8d8d8d;
-    }
-    .runner-state-starting {
-      color: #261700;
-      background: #ffd7a0;
-      border-color: #ffb84d;
-    }
-    .runner-state-running {
-      color: #04351e;
-      background: #a7f0ba;
-      border-color: #24a148;
-    }
-    .runner-state-paused {
-      color: #4c2d00;
-      background: #f1c21b;
-      border-color: #8a3c00;
-    }
-    .runner-state-completed {
-      color: #04351e;
-      background: #a7f0ba;
-      border-color: #24a148;
-    }
-    .startup-row-title {
-      font-size: 13px;
-      font-weight: 700;
-      line-height: 1.35;
-    }
-    .startup-row-summary {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 4px;
-    }
-    .startup-status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid transparent;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .startup-status-not_started {
-      color: var(--vscode-foreground);
-      background: var(--vscode-badge-background);
-      border-color: var(--vscode-panel-border);
-    }
-    .startup-status-in_progress {
-      color: #0b63ce;
-      background: rgba(32, 125, 255, 0.15);
-      border-color: rgba(32, 125, 255, 0.24);
-    }
-    .startup-status-done {
-      color: #1f6f43;
-      background: rgba(73, 180, 112, 0.18);
-      border-color: rgba(73, 180, 112, 0.28);
-    }
-    .startup-progress {
-      font-size: 12px;
-      opacity: 0.76;
-      white-space: nowrap;
-    }
-    .workflow-path {
-      font-size: 12px;
-      opacity: 0.7;
-      word-break: break-word;
-    }
-    .session-file-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .runner-controls {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .runner-controls button {
-      width: auto;
-      min-width: 88px;
-    }
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.6;
-      color: var(--vscode-disabledForeground);
-      background: color-mix(in srgb, var(--vscode-editorWidget-background) 88%, transparent);
-      border-color: var(--vscode-panel-border);
-    }
-    .danger {
-      color: #ffffff;
-      background: #a2191f;
-      border-color: #da1e28;
-    }
-    .danger:hover {
-      background: #c21f2b;
-    }
-    .session-file-actions button {
-      width: auto;
-      min-width: 92px;
-    }
-    .session-time-cell {
-      white-space: nowrap;
-      font-family: var(--vscode-editor-font-family);
-      font-size: 12px;
-    }
-    .session-row-running {
-      background: color-mix(in srgb, var(--vscode-editorWidget-background) 74%, rgba(73, 180, 112, 0.20));
-    }
-    @keyframes session-row-breathe {
-      0% {
-        box-shadow: inset 4px 0 0 rgba(73, 180, 112, 0.28);
-        background: color-mix(in srgb, var(--vscode-editorWidget-background) 74%, rgba(73, 180, 112, 0.16));
-      }
-      50% {
-        box-shadow: inset 6px 0 0 rgba(73, 180, 112, 0.92);
-        background: color-mix(in srgb, var(--vscode-editorWidget-background) 60%, rgba(73, 180, 112, 0.34));
-      }
-      100% {
-        box-shadow: inset 4px 0 0 rgba(73, 180, 112, 0.28);
-        background: color-mix(in srgb, var(--vscode-editorWidget-background) 74%, rgba(73, 180, 112, 0.16));
-      }
-    }
-    @keyframes session-pill-pulse {
-      0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(73, 180, 112, 0.00);
-        filter: brightness(1);
-      }
-      50% {
-        transform: scale(1.04);
-        box-shadow: 0 0 0 6px rgba(73, 180, 112, 0.18);
-        filter: brightness(1.08);
-      }
-      100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(73, 180, 112, 0.00);
-        filter: brightness(1);
-      }
-    }
-    @keyframes session-dot-ping {
-      0% {
-        transform: scale(0.9);
-        box-shadow: 0 0 0 0 rgba(73, 180, 112, 0.55);
-        opacity: 0.95;
-      }
-      70% {
-        transform: scale(1.08);
-        box-shadow: 0 0 0 10px rgba(73, 180, 112, 0.00);
-        opacity: 1;
-      }
-      100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(73, 180, 112, 0.00);
-        opacity: 0.92;
-      }
-    }
-    .session-row-completed {
-      background: color-mix(in srgb, var(--vscode-editorWidget-background) 80%, rgba(32, 125, 255, 0.14));
-    }
-    .session-row-pending {
-      background: transparent;
-    }
-    .session-status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      border: 1px solid transparent;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .session-status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      display: inline-block;
-      flex: 0 0 auto;
-    }
-    .session-status-dot-running {
-      background: #49b470;
-      box-shadow: 0 0 0 0 rgba(73, 180, 112, 0.55);
-      animation: session-dot-ping 1.6s ease-out infinite;
-    }
-    .session-status-dot-completed {
-      background: #207dff;
-    }
-    .session-status-dot-pending {
-      background: color-mix(in srgb, var(--vscode-foreground) 55%, transparent);
-    }
-    .session-status-running {
-      color: #136c37;
-      background: rgba(73, 180, 112, 0.24);
-      border-color: rgba(73, 180, 112, 0.42);
-      animation: session-pill-pulse 1.8s ease-in-out infinite;
-    }
-    .session-status-completed {
-      color: #0b63ce;
-      background: rgba(32, 125, 255, 0.15);
-      border-color: rgba(32, 125, 255, 0.24);
-    }
-    .session-status-pending {
-      color: var(--vscode-foreground);
-      background: var(--vscode-badge-background);
-      border-color: var(--vscode-panel-border);
-    }
-    .session-status-cell {
-      min-width: 220px;
-    }
-    .session-status-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: flex-start;
-    }
-    .session-status-meta {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 4px 10px;
-      font-size: 12px;
-      line-height: 1.4;
-      width: 100%;
-    }
-    .session-status-label {
-      opacity: 0.72;
-      white-space: nowrap;
-    }
-    .session-status-value {
-      font-family: var(--vscode-editor-font-family);
-      word-break: break-word;
-    }
-    .session-prompt-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .session-prompt-check {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 22px;
-      height: 22px;
-      padding: 0 7px;
-      border-radius: 999px;
-      color: #ffffff;
-      background: linear-gradient(135deg, #24a148, #49b470);
-      box-shadow: 0 0 0 2px rgba(73, 180, 112, 0.18);
-      font-size: 13px;
-      font-weight: 900;
-      line-height: 1;
-    }
-    .session-row-current td:first-child {
-      box-shadow: inset 4px 0 0 rgba(73, 180, 112, 0.72);
-    }
-    .session-row-current td {
-      font-weight: 600;
-    }
-    .session-row-running.session-row-current td {
-      animation: session-row-breathe 2.1s ease-in-out infinite;
-    }
-    .muted {
-      opacity: 0.72;
-    }
-    .cell-warning {
-      color: #b42318;
-      font-weight: 600;
-    }
-    code {
-      font-family: var(--vscode-editor-font-family);
-    }
-	    @media (max-width: ${isPanelMode ? '640px' : '99999px'}) {
-	      .grid,
-	      .workflow-grid,
-	      .snapshot-grid {
-	        grid-template-columns: 1fr;
-	      }
-	    }
-	  </style>
-	</head>
-	<body>
-	  <div class="wrap">
-	    <section class="hero">
-	      <div class="hero-header">
-	        <h1>Dashboard</h1>
-	        <div class="eyebrow">- VibeCoding Workflow</div>
-	      </div>
-	    </section>
+    button.secondary:hover { background: color-mix(in srgb, var(--vscode-textLink-foreground) 10%, transparent); }
+    button.danger { background: #a2191f; color: #fff; border-color: #da1e28; }
+    button.danger:hover { background: #c21f2b; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    /* ── Misc ── */
+    .mono { font-family: var(--vscode-editor-font-family); }
+    .muted { opacity: 0.6; }
+    .check-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: linear-gradient(135deg,#24a148,#49b470);
+      color: #fff; font-size: 11px; font-weight: 900; flex-shrink: 0;
+    }
+    .cell-warn { color: #da1e28; font-size: 11px; margin-top: 3px; }
+    .path-text { font-size: 11px; opacity: 0.6; word-break: break-all; font-family: var(--vscode-editor-font-family); }
+    .timing-grid { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; font-size: 11px; margin-top: 4px; }
+    .timing-label { opacity: 0.6; white-space: nowrap; }
+    .timing-value { font-family: var(--vscode-editor-font-family); }
+    .session-actions { display: flex; gap: 6px; }
+    @media (max-width: ${isPanelMode ? '860px' : '9999px'}) {
+      .panels-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
 
-    <section class="panel session-panel">
-      <div class="panel-heading">
-        <h2>脚本进程</h2>
-      </div>
-      <div class="process-table-wrap">
-        <table class="process-table carbon-table">
-          <thead>
-            <tr>
-              <th>进程名称</th>
-              <th>进程状态</th>
-              <th>进程 PID</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="process-cell-mono">${renderProcessNameCell(processTableRunnerProcess?.processName, processTableRunnerDbPath)}</td>
-              <td class="process-cell-status">${renderRunnerProcessStatus(processTableRunnerState, processTableRunnerProcess, processTableWorkflow, result)}</td>
-              <td class="process-cell-mono">${renderProcessPidCell(processTableRunnerProcess?.pid, processTableRunnerLogPath)}</td>
-              <td class="process-cell-actions">${renderRunnerControls(processTableWorkflowRoot, processTableRunnerState, processTableWorkflow, result)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+  <!-- ── Top bar ── -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <span>VibeCoding</span>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-meta">
+      ${currentPhase ? `<span class="pill pill-phase-${escapeHtml(currentPhase)}">Phase: ${escapeHtml(currentPhase)}</span>` : ''}
+      ${renderGatePill(sessionGate)}
+      ${renderRunnerStatePill(processTableRunnerState)}
+      <button class="debug-btn" id="debugToggleBtn">Debug</button>
+    </div>
+  </header>
 
-    <section class="issue">
+  <div class="content">
+
+    <!-- ── Debug panel ── -->
+    <div class="debug-panel" id="debugPanel">sessionGate = ${escapeHtml(sessionGate || '(empty)')}
+projectRoot  = ${escapeHtml(projectRoot || '(empty)')}
+result       = ${result ? 'loaded' : 'undefined (driver not called yet)'}
+selectedWorkflow.sessionGate = ${escapeHtml(selectedWorkflow?.sessionGate ?? '(none)')}
+lastCompletedSession = ${String(lastCompletedSession ?? '-')}
+nextSession          = ${String(nextSession ?? '-')}
+totalSessions        = ${String(totalSessions)}
+progressPct          = ${progressPct}%</div>
+
+    <!-- ── HITL banners ── -->
+    ${sessionGate === 'pending_review' ? `
+    <div class="gate-banner gate-pending-review">
+      <div class="gate-banner-icon">⏸</div>
+      <div class="gate-banner-body">
+        <div class="gate-banner-title">等待人工验收 — Session 已完成</div>
+        <div class="gate-banner-desc">请检查产出物和代码变更，确认无误后批准推进，或驳回并填写原因。</div>
+        <div class="gate-banner-actions">
+          ${commandButton('vibeCoding.approveSession', '✅ 批准，推进下一 Session', false, [projectRoot], { className: 'approve' })}
+          ${commandButton('vibeCoding.rejectSession', '❌ 驳回', true, [projectRoot])}
+        </div>
+      </div>
+    </div>` : ''}
+    ${sessionGate === 'blocked' ? `
+    <div class="gate-banner gate-blocked">
+      <div class="gate-banner-icon">⛔</div>
+      <div class="gate-banner-body">
+        <div class="gate-banner-title">Session 已驳回</div>
+        <div class="gate-banner-desc">请查看 memory.md 中的 review_notes，修复问题后点击重新开放。</div>
+        <div class="gate-banner-actions">
+          ${commandButton('vibeCoding.approveSession', '🔄 重新开放本 Session', false, [projectRoot], { className: 'approve' })}
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- ── Issue banner ── -->
+    <div class="issue-banner">
       <strong>${escapeHtml(issue?.level?.toUpperCase() ?? '')}</strong>
       <div>${escapeHtml(issue?.message ?? '')}</div>
-      <div style="margin-top:8px; opacity:0.78;">${escapeHtml(issue?.details ?? '')}</div>
-    </section>
+      <div style="margin-top:4px;opacity:0.75;">${escapeHtml(issue?.details ?? '')}</div>
+    </div>
 
-    <section class="workflow-grid">
+    <!-- ── Stats row ── -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">已完成 Session</div>
+        <div class="stat-value">${escapeHtml(String(lastCompletedSession ?? '-'))}</div>
+        <div class="stat-sub">共 ${escapeHtml(String(totalSessions || '-'))} 个</div>
+        <div class="progress-track"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">下一个 Session</div>
+        <div class="stat-value">${nextSession !== null ? escapeHtml(String(nextSession)) : '-'}</div>
+        <div class="stat-sub">${escapeHtml(nextSessionPromptLabel || '-')}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">工作流数量</div>
+        <div class="stat-value">${workflows.length}</div>
+        <div class="stat-sub">当前工作区</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">进度</div>
+        <div class="stat-value">${progressPct}%</div>
+        <div class="stat-sub">${escapeHtml(selectedWorkflow?.statusLabel ?? '-')}</div>
+      </div>
+    </div>
+
+    <!-- ── Runner card ── -->
+    <div class="runner-card">
+      <div class="runner-card-header">
+        <span class="runner-card-title">调度驱动器</span>
+        ${renderRunnerStatePill(processTableRunnerState)}
+        ${processTableRunnerProcess?.pid ? `<span class="pill pill-idle mono">PID ${escapeHtml(String(processTableRunnerProcess.pid))}</span>` : ''}
+      </div>
+      <div class="runner-card-meta">
+        <div class="runner-meta-item">
+          <span class="runner-meta-label">进程</span>
+          <span class="runner-meta-value mono">${escapeHtml(processTableRunnerProcess?.processName ?? 'n/a')}</span>
+        </div>
+        <div class="runner-meta-item">
+          <span class="runner-meta-label">启动时间</span>
+          <span class="runner-meta-value" data-timestamp-epoch="${escapeHtml(String(processTableRunnerProcess?.startedAtEpochMs ?? ''))}">${escapeHtml(formatTimestampValue(processTableRunnerProcess?.startedAtEpochMs ?? null))}</span>
+        </div>
+        <div class="runner-meta-item">
+          <span class="runner-meta-label">运行时长</span>
+          <span class="runner-meta-value" data-duration-from-epoch="${escapeHtml(String(processTableRunnerProcess?.startedAtEpochMs ?? ''))}">${escapeHtml(processTableRunnerProcess?.startedAtEpochMs ? formatDuration(Date.now() - processTableRunnerProcess.startedAtEpochMs) : '-')}</span>
+        </div>
+        <div class="runner-meta-item">
+          <span class="runner-meta-label">心跳</span>
+          <span class="runner-meta-value" data-timestamp-epoch="${escapeHtml(String(processTableRunnerProcess?.heartbeatAtEpochMs ?? ''))}">${escapeHtml(formatTimestampValue(processTableRunnerProcess?.heartbeatAtEpochMs ?? null))}</span>
+        </div>
+        <div class="runner-meta-item">
+          <span class="runner-meta-label">状态库</span>
+          <span class="runner-meta-value mono">${escapeHtml(processTableRunnerDbPath)}</span>
+        </div>
+        <div class="runner-meta-item">
+          <span class="runner-meta-label">日志</span>
+          <span class="runner-meta-value mono">${escapeHtml(processTableRunnerLogPath)}</span>
+        </div>
+      </div>
+      <div class="runner-actions">
+        ${renderRunnerControls(processTableWorkflowRoot, processTableRunnerState, processTableWorkflow, result)}
+      </div>
+    </div>
+
+    <!-- ── Workflow + Session panels ── -->
+    <div class="panels-grid">
+
+      <!-- Left: Workflow list -->
       <div class="panel">
-        <h2>StartupPrompt Tree</h2>
-        <div class="table-wrap">
-          <table class="carbon-table">
+        <div class="panel-header">
+          <span class="panel-title">工作流列表</span>
+          <span class="muted" style="font-size:11px;">${workflows.length} 个任务</span>
+        </div>
+        <div class="panel-body">
+          <table>
             <thead>
               <tr>
                 <th>#</th>
-                <th>Startup Prompt</th>
-                <th>Status</th>
-                <th>Progress</th>
-                <th>Runtime</th>
-                <th>Path</th>
-                <th>Action</th>
+                <th>任务名称</th>
+                <th>状态</th>
+                <th>进度</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody>
-              ${workflows.length > 0 ? workflows.map((workflow, index) => renderWorkflowTreeItem(workflow, selectedWorkflowRoot, state.runnerStateByWorkflow ?? {}, selectedRunnerState, index)).join('') : '<tr><td colspan="7">No startup-prompt.md was found under the current project root.</td></tr>'}
+              ${workflows.length > 0
+                ? workflows.map((workflow, index) => renderWorkflowTreeItem(workflow, selectedWorkflowRoot, state.runnerStateByWorkflow ?? {}, selectedRunnerState, index)).join('')
+                : '<tr><td colspan="5" style="padding:20px;text-align:center;opacity:0.5;">未找到 startup-prompt.md</td></tr>'}
             </tbody>
           </table>
         </div>
       </div>
+
+      <!-- Right: Session timeline -->
       <div class="panel">
-        <div class="panel-heading">
-          <h2>Session Prompt Table</h2>
-          <div class="panel-heading-path">: ${escapeHtml(selectedStartupFile?.path ?? 'n/a')}</div>
+        <div class="panel-header">
+          <span class="panel-title">Session 时间线</span>
+          <span class="panel-subtitle">${escapeHtml(selectedStartupFile?.path ?? 'n/a')}</span>
         </div>
-        <div class="table-wrap">
-          <table class="carbon-table">
+        <div class="panel-body">
+          <table>
             <thead>
               <tr>
-                <th>Session Prompt</th>
-                <th>State</th>
-                <th>Status</th>
-                <th>Path</th>
-                <th>Action</th>
+                <th>Session</th>
+                <th>状态</th>
+                <th>时间</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody>
-              ${selectedSessionPromptFiles.length > 0 ? selectedSessionPromptFiles.map((file) => renderSessionPromptFileRow(file, selectedWorkflow, selectedWorkflowRoot, nextSessionPromptPath, nextSessionPromptLabel, result, selectedRunnerState, processTableRunnerProcess)).join('') : '<tr><td colspan="5">No session prompt files were found for the selected startup node.</td></tr>'}
+              ${selectedSessionPromptFiles.length > 0
+                ? selectedSessionPromptFiles.map((file) => renderSessionPromptFileRow(file, selectedWorkflow, selectedWorkflowRoot, nextSessionPromptPath, nextSessionPromptLabel, result, selectedRunnerState, processTableRunnerProcess)).join('')
+                : '<tr><td colspan="4" style="padding:20px;text-align:center;opacity:0.5;">未找到 session 文件</td></tr>'}
             </tbody>
           </table>
         </div>
       </div>
-    </section>
 
+    </div>
   </div>
-  <script>
-    const vscode = acquireVsCodeApi();
-    const formatTimestamp = (epochMs) => {
-      const parsed = Number(epochMs);
-      if (!Number.isFinite(parsed) || parsed <= 0) {
-        return '-';
-      }
-      return new Date(parsed).toLocaleString();
-    };
-    const formatDuration = (durationMs) => {
-      const parsed = Number(durationMs);
-      if (!Number.isFinite(parsed) || parsed < 0) {
-        return '-';
-      }
-      const totalSeconds = Math.floor(parsed / 1000);
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-      if (hours > 0) {
-        return String(hours) + 'h ' + String(minutes) + 'm ' + String(seconds) + 's';
-      }
-      if (minutes > 0) {
-        return String(minutes) + 'm ' + String(seconds) + 's';
-      }
-      return String(seconds) + 's';
-    };
-    const refreshProcessMetrics = () => {
-      document.querySelectorAll('[data-timestamp-epoch]').forEach((node) => {
-        const epoch = node.getAttribute('data-timestamp-epoch');
-        if (!epoch) {
-          node.textContent = '-';
-          return;
-        }
-        node.textContent = formatTimestamp(epoch);
-      });
-      document.querySelectorAll('[data-duration-from-epoch]').forEach((node) => {
-        const epoch = Number(node.getAttribute('data-duration-from-epoch'));
-        if (!Number.isFinite(epoch) || epoch <= 0) {
-          node.textContent = '-';
-          return;
-        }
-        node.textContent = formatDuration(Date.now() - epoch);
-      });
-    };
-    document.querySelectorAll('[data-command]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const rawArgs = button.getAttribute('data-args');
-        vscode.postMessage({
-          type: 'runCommand',
-          command: button.getAttribute('data-command'),
-          args: rawArgs ? JSON.parse(rawArgs) : undefined,
-        });
+</div>
+<script>
+  const vscode = acquireVsCodeApi();
+  const formatTimestamp = (epochMs) => {
+    const parsed = Number(epochMs);
+    if (!Number.isFinite(parsed) || parsed <= 0) return '-';
+    return new Date(parsed).toLocaleString('zh-CN', { hour12: false });
+  };
+  const formatDuration = (durationMs) => {
+    const parsed = Number(durationMs);
+    if (!Number.isFinite(parsed) || parsed < 0) return '-';
+    const totalSeconds = Math.floor(parsed / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    if (hours > 0) return hours + 'h ' + minutes + 'm ' + seconds + 's';
+    if (minutes > 0) return minutes + 'm ' + seconds + 's';
+    return seconds + 's';
+  };
+  const refreshProcessMetrics = () => {
+    document.querySelectorAll('[data-timestamp-epoch]').forEach((node) => {
+      const epoch = node.getAttribute('data-timestamp-epoch');
+      node.textContent = epoch ? formatTimestamp(epoch) : '-';
+    });
+    document.querySelectorAll('[data-duration-from-epoch]').forEach((node) => {
+      const epoch = Number(node.getAttribute('data-duration-from-epoch'));
+      node.textContent = (Number.isFinite(epoch) && epoch > 0) ? formatDuration(Date.now() - epoch) : '-';
+    });
+  };
+  document.querySelectorAll('[data-command]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const rawArgs = button.getAttribute('data-args');
+      vscode.postMessage({
+        type: 'runCommand',
+        command: button.getAttribute('data-command'),
+        args: rawArgs ? JSON.parse(rawArgs) : undefined,
       });
     });
-    refreshProcessMetrics();
-    window.setInterval(refreshProcessMetrics, 1000);
-  </script>
+  });
+  refreshProcessMetrics();
+  window.setInterval(refreshProcessMetrics, 1000);
+  // Debug toggle
+  const debugBtn = document.getElementById('debugToggleBtn');
+  const debugPanel = document.getElementById('debugPanel');
+  if (debugBtn && debugPanel) {
+    debugBtn.addEventListener('click', () => {
+      const open = debugPanel.classList.toggle('open');
+      debugBtn.textContent = open ? 'Debug ▲' : 'Debug';
+    });
+  }
+</script>
 </body>
 </html>`;
 }
@@ -1062,28 +924,35 @@ function renderWorkflowTreeItem(
     const isSelected = workflow.projectRoot === selectedWorkflowRoot;
     const startupLabel = startupFile?.label ?? 'startup-prompt.md';
     const runnerState = runnerStateByWorkflow[workflow.projectRoot] ?? 'idle';
-    const rowClasses = isSelected ? 'carbon-table-row-selected' : '';
-    const missingFiles = workflow.missingFiles.length > 0
-        ? `<div class="cell-warning">缺少: ${escapeHtml(workflow.missingFiles.map((filePath) => basename(filePath)).join(', '))}</div>`
-        : '';
-    const actionCell = commandButton('vibeCoding.selectWorkflow', isSelected ? 'Selected' : 'Select', isSelected, [workflow.projectRoot], {
-        disabled: workflow.statusLabel === '完成',
-    });
-    const completedCheck = workflow.statusLabel === '完成'
-        ? '<span class="session-prompt-check" aria-label="Completed">&#10003;</span>'
+    const isDone = workflow.statusLabel === '完成';
+    const rowClass = isSelected ? 'row-selected' : '';
+    const missingHtml = workflow.missingFiles.length > 0
+        ? `<div class="cell-warn">缺少: ${escapeHtml(workflow.missingFiles.map((f) => basename(f)).join(', '))}</div>`
         : '';
 
-    return `<tr class="${rowClasses}">
-      <td class="carbon-table-cell-index"><strong>${index + 1}</strong></td>
+    let statusPill = '';
+    if (isDone) {
+        statusPill = '<span class="pill pill-done">✓ 完成</span>';
+    } else if (runnerState === 'running') {
+        statusPill = '<span class="pill pill-running"><span class="pill-dot dot-running"></span>执行中</span>';
+    } else if (runnerState === 'paused') {
+        statusPill = '<span class="pill pill-paused">已暂停</span>';
+    } else if (runnerState === 'starting') {
+        statusPill = '<span class="pill pill-starting">启动中</span>';
+    } else {
+        statusPill = `<span class="pill pill-pending">${escapeHtml(workflow.statusLabel || '未开始')}</span>`;
+    }
+
+    return `<tr class="${rowClass}">
+      <td style="text-align:center;font-weight:700;opacity:0.5;width:36px;">${index + 1}</td>
       <td>
-        <div class="startup-row-title"><span class="session-prompt-label">${escapeHtml(startupLabel)}${completedCheck}</span></div>
-        ${missingFiles}
+        <div style="font-weight:600;font-size:12px;">${escapeHtml(startupLabel)}${isDone ? ' <span class="check-badge">✓</span>' : ''}</div>
+        <div class="path-text" style="margin-top:2px;">${escapeHtml(startupPath)}</div>
+        ${missingHtml}
       </td>
-      <td class="carbon-table-cell-status"><span class="startup-status-pill startup-status-${escapeHtml(workflowStatusClassName(workflow.statusLabel))}">${escapeHtml(workflow.statusLabel === '完成' ? '✓ 完成' : workflow.statusLabel)}</span></td>
-      <td class="carbon-table-cell-progress"><span class="startup-progress">${escapeHtml(workflow.progressLabel)}</span></td>
-      <td class="carbon-table-cell-runtime">${renderWorkflowRuntimePill(workflow.statusLabel, runnerState)}</td>
-      <td><span class="workflow-path process-cell-mono">${escapeHtml(startupPath)}</span></td>
-      <td class="carbon-table-cell-actions">${actionCell}</td>
+      <td>${statusPill}</td>
+      <td style="font-size:11px;opacity:0.7;white-space:nowrap;">${escapeHtml(workflow.progressLabel)}</td>
+      <td>${commandButton('vibeCoding.selectWorkflow', isSelected ? '已选中' : '选择', isSelected, [workflow.projectRoot], { disabled: isDone })}</td>
     </tr>`;
 }
 
@@ -1099,27 +968,52 @@ function renderSessionPromptFileRow(
 ): string {
     const isNextSession = file.path === nextSessionPromptPath || file.label === nextSessionPromptLabel;
     const executionStatus = resolveSessionPromptExecutionStatus(file, selectedWorkflow, result, runnerState, isNextSession);
-    const rowClasses = [`session-row-${executionStatus}`];
-    if (isCurrentSessionPrompt(file, selectedWorkflow, result, isNextSession)) {
-        rowClasses.push('session-row-current');
-    }
+    const isCurrent = isCurrentSessionPrompt(file, selectedWorkflow, result, isNextSession);
     const timing = resolveSessionPromptTiming(file, executionStatus, runnerProcess);
-    const completedCheck = executionStatus === 'completed'
-        ? '<span class="session-prompt-check" aria-label="Completed">&#10003;</span>'
+
+    const rowClasses = ['row-' + executionStatus, isCurrent ? 'row-current' : ''].filter(Boolean).join(' ');
+
+    let statusPill = '';
+    if (executionStatus === 'running') {
+        statusPill = '<span class="pill pill-running"><span class="pill-dot dot-running"></span>执行中</span>';
+    } else if (executionStatus === 'completed') {
+        statusPill = '<span class="pill pill-completed"><span class="pill-dot dot-completed"></span>✓ 完成</span>';
+    } else {
+        statusPill = '<span class="pill pill-pending"><span class="pill-dot dot-pending"></span>未执行</span>';
+    }
+
+    const nextBadge = isNextSession
+        ? '<span class="pill pill-next" style="margin-left:6px;">↑ 下一个</span>'
         : '';
 
-    return `<tr class="${rowClasses.join(' ')}">
-      <td><span class="session-prompt-label"><strong>${escapeHtml(file.label)}</strong>${completedCheck}</span></td>
-      <td>${isNextSession ? '<span class="active-pill next-pill">Next Session</span>' : '<span class="muted">Manual</span>'}</td>
-      <td class="session-status-cell">${renderSessionPromptStatusCell(executionStatus, timing, runnerProcess)}</td>
-      <td><span class="muted process-cell-mono">${escapeHtml(file.path)}</span></td>
-      <td class="carbon-table-cell-actions">
-        <div class="session-file-actions">
-          ${commandButton('vibeCoding.openWorkflowFileAtPath', 'Open', true, [selectedWorkflowRoot, file.path, file.label])}
+    const startedEl = executionStatus === 'running' && runnerProcess?.startedAtEpochMs
+        ? `<span data-timestamp-epoch="${escapeHtml(String(runnerProcess.startedAtEpochMs))}">${escapeHtml(timing.startedAtLabel)}</span>`
+        : `<span>${escapeHtml(timing.startedAtLabel)}</span>`;
+    const durationEl = executionStatus === 'running' && runnerProcess?.startedAtEpochMs
+        ? `<span data-duration-from-epoch="${escapeHtml(String(runnerProcess.startedAtEpochMs))}">${escapeHtml(timing.durationLabel)}</span>`
+        : `<span>${escapeHtml(timing.durationLabel)}</span>`;
+
+    return `<tr class="${rowClasses}">
+      <td>
+        <div style="font-weight:600;font-size:12px;">${escapeHtml(file.label)}${nextBadge}</div>
+        <div class="path-text" style="margin-top:2px;">${escapeHtml(file.path)}</div>
+      </td>
+      <td>${statusPill}</td>
+      <td>
+        <div class="timing-grid">
+          <span class="timing-label">开始</span>${startedEl}
+          <span class="timing-label">结束</span><span>${escapeHtml(timing.endedAtLabel)}</span>
+          <span class="timing-label">耗时</span>${durationEl}
+        </div>
+      </td>
+      <td>
+        <div class="session-actions">
+          ${commandButton('vibeCoding.openWorkflowFileAtPath', '打开', true, [selectedWorkflowRoot, file.path, file.label])}
         </div>
       </td>
     </tr>`;
 }
+
 
 function renderRunnerControls(
     selectedWorkflowRoot: string,
@@ -1145,71 +1039,27 @@ function renderRunnerControls(
     </div>`;
 }
 
-function renderProcessNameCell(processName: string | undefined, runnerDbPath: string): string {
-    return `<div class="process-name-stack">
-      <span class="process-name-primary">${escapeHtml(processName ?? 'n/a')}</span>
-      <span class="process-name-secondary">${escapeHtml(runnerDbPath)}</span>
-    </div>`;
-}
-
-function renderProcessPidCell(pid: number | null | undefined, runnerLogPath: string): string {
-    return `<div class="process-pid-stack">
-      <span class="process-pid-primary">${escapeHtml(pid?.toString() ?? 'n/a')}</span>
-      <span class="process-pid-secondary">${escapeHtml(runnerLogPath)}</span>
-    </div>`;
-}
-
 function renderRunnerStatePill(runnerState: DashboardRunnerState): string {
     if (runnerState === 'starting') {
-        return '<span class="runner-state-pill runner-state-starting">启动中</span>';
+        return '<span class="pill pill-starting">启动中</span>';
     }
-
     if (runnerState === 'running') {
-        return '<span class="runner-state-pill runner-state-running">执行中</span>';
+        return '<span class="pill pill-running"><span class="pill-dot dot-running"></span>执行中</span>';
     }
-
     if (runnerState === 'paused') {
-        return '<span class="runner-state-pill runner-state-paused">已暂停</span>';
+        return '<span class="pill pill-paused">已暂停</span>';
     }
-
-    return '<span class="runner-state-pill runner-state-idle">未启动</span>';
+    return '<span class="pill pill-idle">未启动</span>';
 }
 
-function renderWorkflowRuntimePill(statusLabel: string, runnerState: DashboardRunnerState): string {
-    if (statusLabel === '完成') {
-        return '<span class="runner-state-pill runner-state-completed">已完成</span>';
-    }
-
-    return renderRunnerStatePill(runnerState);
-}
-
-function renderRunnerProcessStatus(
-    runnerState: DashboardRunnerState,
-    runnerProcess: DashboardRunnerProcessInfo | undefined,
-    _selectedWorkflow: DashboardWorkflowSummary | undefined,
-    _result: DriverResult | undefined,
-): string {
-    let statePill = '<span class="runner-state-pill runner-state-idle">停止</span>';
-    if (runnerState === 'starting') {
-        statePill = '<span class="runner-state-pill runner-state-starting">未知</span>';
-    } else if (runnerState === 'running') {
-        statePill = '<span class="runner-state-pill runner-state-running">运行</span>';
-    } else if (runnerState === 'paused') {
-        statePill = '<span class="runner-state-pill runner-state-paused">停止</span>';
-    }
-
-    const runtimeMs = runnerProcess?.startedAtEpochMs ? Math.max(Date.now() - runnerProcess.startedAtEpochMs, 0) : null;
-    return `<div class="process-status-stack">
-      ${statePill}
-      <div class="process-status-meta">
-        <span class="process-status-label">启动时间</span>
-        <span class="process-status-value" data-timestamp-epoch="${escapeHtml(String(runnerProcess?.startedAtEpochMs ?? ''))}">${escapeHtml(formatTimestampValue(runnerProcess?.startedAtEpochMs ?? null))}</span>
-        <span class="process-status-label">运行时长</span>
-        <span class="process-status-value" data-duration-from-epoch="${escapeHtml(String(runnerProcess?.startedAtEpochMs ?? ''))}">${escapeHtml(runtimeMs === null ? '-' : formatDuration(runtimeMs))}</span>
-        <span class="process-status-label">心跳时间</span>
-        <span class="process-status-value" data-timestamp-epoch="${escapeHtml(String(runnerProcess?.heartbeatAtEpochMs ?? ''))}">${escapeHtml(formatTimestampValue(runnerProcess?.heartbeatAtEpochMs ?? null))}</span>
-      </div>
-    </div>`;
+function renderGatePill(sessionGate: string): string {
+    if (!sessionGate) return '';
+    if (sessionGate === 'ready') return '<span class="pill pill-completed">Gate: 就绪</span>';
+    if (sessionGate === 'in_progress') return '<span class="pill pill-running"><span class="pill-dot dot-running"></span>Gate: 执行中</span>';
+    if (sessionGate === 'pending_review') return '<span class="pill pill-pending-review">Gate: 待验收</span>';
+    if (sessionGate === 'blocked') return '<span class="pill pill-blocked">Gate: 已驳回</span>';
+    if (sessionGate === 'done') return '<span class="pill pill-done">Gate: 已完成</span>';
+    return `<span class="pill pill-pending">Gate: ${escapeHtml(sessionGate)}</span>`;
 }
 
 function resolveSessionPromptTiming(
@@ -1270,43 +1120,6 @@ function isCurrentSessionPrompt(
     return sessionNumber !== null && workflowNextSession !== null && sessionNumber === workflowNextSession;
 }
 
-function renderSessionPromptExecutionStatus(status: SessionPromptExecutionStatus): string {
-    if (status === 'running') {
-        return '<span class="session-status-pill session-status-running"><span class="session-status-dot session-status-dot-running"></span><span>执行中</span></span>';
-    }
-
-    if (status === 'completed') {
-        return '<span class="session-status-pill session-status-completed"><span class="session-status-dot session-status-dot-completed"></span><span>&#10003; 完成</span></span>';
-    }
-
-    return '<span class="session-status-pill session-status-pending"><span class="session-status-dot session-status-dot-pending"></span><span>未执行</span></span>';
-}
-
-function renderSessionPromptStatusCell(
-    status: SessionPromptExecutionStatus,
-    timing: { startedAtLabel: string; endedAtLabel: string; durationLabel: string },
-    runnerProcess: DashboardRunnerProcessInfo | undefined,
-): string {
-    const startedAtValue = status === 'running' && runnerProcess?.startedAtEpochMs
-        ? `<span class="session-status-value" data-timestamp-epoch="${escapeHtml(String(runnerProcess.startedAtEpochMs))}">${escapeHtml(timing.startedAtLabel)}</span>`
-        : `<span class="session-status-value">${escapeHtml(timing.startedAtLabel)}</span>`;
-    const durationValue = status === 'running' && runnerProcess?.startedAtEpochMs
-        ? `<span class="session-status-value" data-duration-from-epoch="${escapeHtml(String(runnerProcess.startedAtEpochMs))}">${escapeHtml(timing.durationLabel)}</span>`
-        : `<span class="session-status-value">${escapeHtml(timing.durationLabel)}</span>`;
-
-    return `<div class="session-status-stack">
-      ${renderSessionPromptExecutionStatus(status)}
-      <div class="session-status-meta">
-        <span class="session-status-label">开始时间</span>
-        ${startedAtValue}
-        <span class="session-status-label">结束时间</span>
-        <span class="session-status-value">${escapeHtml(timing.endedAtLabel)}</span>
-        <span class="session-status-label">耗时</span>
-        ${durationValue}
-      </div>
-    </div>`;
-}
-
 function parseSessionPromptNumber(value: string): number | null {
     const match = value.match(/session-(\d+)-prompt\.md$/);
     if (!match) {
@@ -1359,16 +1172,6 @@ function formatTimestampValue(epochMs: number | null | undefined): string {
 function basename(filePath: string): string {
     const segments = filePath.split('/').filter(Boolean);
     return segments.length > 0 ? segments[segments.length - 1] : filePath;
-}
-
-function workflowStatusClassName(statusLabel: string): string {
-    if (statusLabel === '完成') {
-        return 'done';
-    }
-    if (statusLabel === '执行中') {
-        return 'in_progress';
-    }
-    return 'not_started';
 }
 
 function compareSessionLabels(left: string, right: string): number {

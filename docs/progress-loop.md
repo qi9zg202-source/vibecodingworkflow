@@ -49,13 +49,18 @@ This loop now has two handoff layers:
 graph TD
     A[Session N 执行工作] --> B[运行测试]
     B --> C{测试结果}
-    C -->|passed| D[写 session-N-summary.md]
     C -->|failed / blocked| E[保持 session_gate: blocked\n不推进 next_session]
     E --> A
+    C -->|passed| D[写 session-N-summary.md]
     D --> F[写 session-N-manifest.json]
-    F --> G[更新 memory.md\nnext_session = N+1\nsession_gate = ready]
+    F --> G[更新 memory.md\nsession_gate = pending_review]
     G --> H[结束当前 Session]
-    H --> I[开启 Fresh Session\n零历史上下文]
+    H --> WAIT[调度程序暂停\n通知用户验收]
+    WAIT --> REVIEW{人工验收}
+    REVIEW -->|✅ 验收通过| APPROVE[外部更新 memory.md\nnext_session = N+1\nsession_gate = ready]
+    REVIEW -->|❌ 验收拒绝| REJECT[外部更新 memory.md\nsession_gate = blocked\n填写 review_notes]
+    APPROVE --> I[调度程序推进\n开启 Fresh Session]
+    REJECT --> A
     I --> J[执行 startup-prompt.md]
     J --> K[读取 memory.md\n路由到 Session N+1]
     K --> A
@@ -136,7 +141,15 @@ Why:
 
 ## Automation Shape
 
-The preferred automation shape is an external session driver, not in-chat self continuation.
+The preferred automation shape is an external session driver with a **Human-in-the-Loop (HITL) review gate** after every session.
+
+```
+Claude 执行 Session N
+  → 测试通过 → 写 summary + manifest → session_gate = pending_review
+  → 调度程序暂停，通知用户验收
+  → 用户验收通过 → session_gate = ready → 驱动器推进下一个 Session
+  → 用户验收拒绝 → session_gate = blocked + review_notes → 驱动器重做本 Session
+```
 
 Example responsibilities:
 
@@ -155,6 +168,7 @@ sequenceDiagram
     participant M as memory.md
     participant S as startup-prompt.md
     participant A as Agent (Fresh Session)
+    participant U as Engineer (Human Review)
     participant O as outputs/
 
     D->>M: inspect session_gate
@@ -167,9 +181,17 @@ sequenceDiagram
     A->>A: execute Session N work + tests
     A->>O: write session-N-summary.md
     A->>O: write session-N-manifest.json
-    A->>M: update memory.md (next_session = N+1)
-    A-->>D: session complete
-    D->>M: re-check memory.md
+    A->>M: update memory.md (session_gate = pending_review)
+    A-->>D: session complete, awaiting review
+    D->>U: notify: Session N ready for review
+    U->>O: review session-N-summary.md + artifacts
+    alt 验收通过
+        U->>M: session_gate = ready, next_session = N+1
+        D->>M: re-check memory.md → advance
+    else 验收拒绝
+        U->>M: session_gate = blocked, review_notes = "..."
+        D->>M: re-check memory.md → re-run Session N
+    end
 ```
 
 ## Correct Sequence
@@ -179,13 +201,15 @@ Session N work
 -> tests
 -> write session-N-summary.md
 -> write session-N-manifest.json
--> update memory.md
+-> update memory.md (session_gate = pending_review)
 -> end current session
--> start fresh session
--> run startup-prompt.md
--> startup reads memory.md
--> startup reads previous summary
--> Session N+1 or stay on Session N
+-> driver pauses, notifies engineer
+-> engineer reviews artifacts
+-> [approved] update memory.md (session_gate = ready, next_session = N+1)
+-> [rejected] update memory.md (session_gate = blocked, review_notes = "...")
+-> driver re-checks memory.md
+-> [approved] start fresh session -> run startup-prompt.md -> Session N+1
+-> [rejected] start fresh session -> run startup-prompt.md -> re-run Session N
 ```
 
 ## Blocked and Failed Sessions
@@ -201,13 +225,12 @@ If the session is blocked or failed:
 stateDiagram-v2
     [*] --> ready : Session 0 完成后初始化
     ready --> in_progress : 进入 Session N
-    in_progress --> passed : 测试通过
-    in_progress --> failed : 测试失败
-    in_progress --> blocked : 遇到阻塞
-    passed --> ready : next_session +1\n写 summary + manifest
-    failed --> in_progress : 修复后重试
-    blocked --> in_progress : 解除阻塞后重试
-    passed --> done : Session 10 完成
+    in_progress --> pending_review : 测试通过\n写 summary + manifest
+    pending_review --> ready : 人工验收通过\nnext_session +1
+    pending_review --> blocked : 人工验收拒绝\n留 review_notes
+    in_progress --> blocked : 遇到阻塞或失败
+    blocked --> in_progress : 修复后重试
+    ready --> done : Session 10 验收通过
     done --> [*]
 ```
 

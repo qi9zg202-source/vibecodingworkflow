@@ -160,7 +160,7 @@ flowchart TB
 - `Workflow Truth`: keep routing and handoff state in files, not in chat memory or UI cache.
 - `Orchestration`: let the Python driver read `memory.md`, decide whether the next session may advance, and emit machine-readable handoff output.
 - `Execution`: complete one scoped deliverable per fresh session, then update `memory.md` and write the session summary artifact.
-- `Integration`: expose the same flow in VS Code without taking ownership of workflow truth.
+- `Integration`: expose the same flow in VS Code without taking ownership of workflow truth. See [`docs/claude-code-plugin.md`](claude-code-plugin.md) for the full VSCode extension usage guide.
 - `Verification`: prove the contract with repository checks, fixtures, and integration scripts.
 
 ## Runtime Sequence
@@ -197,8 +197,19 @@ Always re-enter through `startup-prompt.md`. Never jump directly into `session-N
 
 - `memory.md` is the only source of truth
 - `session_gate = ready` means the next session may start
-- `failed` or `blocked` means stay on the current session
-- `done` means the flow is complete
+- `session_gate = in_progress` means a session is currently running
+- `session_gate = pending_review` means Claude has finished; **waiting for human approval before advancing**
+- `session_gate = blocked` means the session failed review or hit a blocker; must re-run
+- `session_gate = done` means the entire workflow is complete
+
+**Human-in-the-Loop (HITL) gate** is mandatory between every session:
+
+```
+in_progress → pending_review → (human approves) → ready → next session
+                             → (human rejects)  → blocked → re-run same session
+```
+
+`review_notes` field in `memory.md` carries the engineer's rejection reason to the next Claude execution.
 
 ## Task Rule
 
@@ -243,7 +254,12 @@ Typical implementation:
 - the driver writes a machine-readable next-session spec
 - the driver starts a fresh session
 - that fresh session runs `startup-prompt.md`
-- the driver waits for the session to end and checks `memory.md` again
+- the session sets `session_gate = pending_review` when done
+- **the driver pauses and notifies the engineer** (terminal prompt / signal file / notification)
+- **the engineer reviews `artifacts/session-N-summary.md` and the produced code**
+- **approved**: engineer updates `session_gate = ready`, `next_session = N+1`; driver advances
+- **rejected**: engineer updates `session_gate = blocked`, fills `review_notes`; driver re-runs same session
+- the driver checks `memory.md` again and repeats
 
 ## Legacy Compatibility
 

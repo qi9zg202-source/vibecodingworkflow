@@ -41,7 +41,9 @@ type InternalVibeCodingCommand =
     | 'vibeCoding.pauseWorkflowRunner'
     | 'vibeCoding.resumeWorkflowRunner'
     | 'vibeCoding.cancelWorkflowRunner'
-    | 'vibeCoding.killWorkflowRunner';
+    | 'vibeCoding.killWorkflowRunner'
+    | 'vibeCoding.approveSession'
+    | 'vibeCoding.rejectSession';
 
 const COMMANDS: ReadonlyArray<{ id: VibeCodingCommand; label: string }> = [
     { id: 'vibeCoding.openDashboard', label: 'Open Dashboard' },
@@ -77,6 +79,8 @@ export function activate(context: vscode.ExtensionContext) {
     hydrateRunnerStateFromStore(persistenceWorkspaceRoot);
     dashboardViewProvider = new WorkflowDashboardViewProvider(latestDashboardState, async (command, args) => {
         await vscode.commands.executeCommand(command, ...(args ?? []));
+    }, () => {
+        openDashboard();
     });
     outputChannel.appendLine('Session 7 activation complete.');
     outputChannel.appendLine('Refresh, prepare, runner, and error handling now use the Python driver JSON contract.');
@@ -132,6 +136,16 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('vibeCoding.killWorkflowRunner', async (workflowRoot?: unknown) => {
         if (typeof workflowRoot === 'string') {
             await killWorkflowRunner(workflowRoot);
+        }
+    }));
+    context.subscriptions.push(vscode.commands.registerCommand('vibeCoding.approveSession', async (workflowRoot?: unknown) => {
+        if (typeof workflowRoot === 'string') {
+            await approveSession(workflowRoot);
+        }
+    }));
+    context.subscriptions.push(vscode.commands.registerCommand('vibeCoding.rejectSession', async (workflowRoot?: unknown) => {
+        if (typeof workflowRoot === 'string') {
+            await rejectSession(workflowRoot);
         }
     }));
 
@@ -348,6 +362,65 @@ async function killWorkflowRunner(workflowRoot: string) {
     void vscode.window.showInformationMessage(processInfo?.pid ? 'Workflow runner killed.' : 'Workflow runner terminal closed because PID was unavailable.');
 }
 
+// ─── HITL Review Gate ────────────────────────────────────────────────────────
+
+/**
+ * 批准当前 Session：将 memory.md 中的 session_gate 设为 ready，并触发刷新。
+ * 对 blocked 状态同样适用（重新开放本 Session，不递增 next_session）。
+ */
+async function approveSession(workflowRoot: string) {
+    const memoryPath = path.join(workflowRoot, 'memory.md');
+    try {
+        let content = fs.readFileSync(memoryPath, 'utf-8');
+        content = content.replace(/^(- session_gate:\s*).*$/m, '$1ready');
+        fs.writeFileSync(memoryPath, content, 'utf-8');
+        outputChannel?.appendLine(`[approveSession] session_gate → ready  (${memoryPath})`);
+        void vscode.window.showInformationMessage('Session 已批准，session_gate 已设为 ready。');
+        await refreshWorkflowStatus();
+    } catch (error) {
+        void vscode.window.showErrorMessage(`批准失败：${formatErrorMessage(error)}`);
+    }
+}
+
+/**
+ * 驳回当前 Session：弹出输入框收集原因，写入 review_notes 并将 session_gate 设为 blocked。
+ */
+async function rejectSession(workflowRoot: string) {
+    const reason = await vscode.window.showInputBox({
+        title: '驳回 Session',
+        prompt: '请输入驳回原因（将写入 memory.md review_notes）',
+        placeHolder: '例如：测试未通过，缺少边界检查…',
+    });
+    if (reason === undefined) {
+        return; // 用户取消
+    }
+
+    const memoryPath = path.join(workflowRoot, 'memory.md');
+    try {
+        let content = fs.readFileSync(memoryPath, 'utf-8');
+        // 更新 session_gate
+        content = content.replace(/^(- session_gate:\s*).*$/m, '$1blocked');
+        // 更新或追加 review_notes
+        if (/^- review_notes:/m.test(content)) {
+            content = content.replace(/^(- review_notes:\s*).*$/m, `$1${reason}`);
+        } else {
+            // 插入到 session_gate 行后
+            content = content.replace(
+                /^(- session_gate:.*)$/m,
+                `$1\n- review_notes: ${reason}`,
+            );
+        }
+        fs.writeFileSync(memoryPath, content, 'utf-8');
+        outputChannel?.appendLine(`[rejectSession] session_gate → blocked, review_notes="${reason}"  (${memoryPath})`);
+        void vscode.window.showWarningMessage('Session 已驳回，请修复问题后重新开放。');
+        await refreshWorkflowStatus();
+    } catch (error) {
+        void vscode.window.showErrorMessage(`驳回失败：${formatErrorMessage(error)}`);
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 async function openWorkflowFileAtPathCommand(args: unknown[]) {
     const [workflowRoot, filePath, label] = args;
     if (typeof workflowRoot !== 'string' || typeof filePath !== 'string' || typeof label !== 'string') {
@@ -508,6 +581,7 @@ function mapDashboardWorkflows(discovery: WorkflowDiscovery | null): DashboardWo
         lastCompletedSession: workflow.progress.lastCompletedSession,
         nextSession: workflow.progress.nextSession,
         totalSessionCount: workflow.progress.totalSessionCount,
+        sessionGate: workflow.progress.sessionGate ?? null,
         files: [
             { label: 'startup-prompt.md', path: workflow.startupPromptPath, kind: 'startup' as const },
             { label: 'memory.md', path: workflow.memoryPath, kind: 'memory' as const },

@@ -11,17 +11,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished",
-    "onView:vibeCodingDashboardView",
-    "onCommand:vibeCoding.openDashboard",
-    "onCommand:vibeCoding.refreshWorkflowStatus",
-    "onCommand:vibeCoding.openMemory",
-    "onCommand:vibeCoding.openStartupPrompt",
-    "onCommand:vibeCoding.openNextSessionPrompt",
-    "onCommand:vibeCoding.prepareFreshSession",
-    "onCommand:vibeCoding.startRunnerInTerminal",
-    "onCommand:vibeCoding.openLoopLog",
-    "onCommand:vibeCoding.configurePythonDriverPath"
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -112,11 +102,6 @@
           "command": "vibeCoding.refreshWorkflowStatus",
           "when": "view == vibeCodingDashboardView",
           "group": "navigation@1"
-        },
-        {
-          "command": "vibeCoding.openDashboard",
-          "when": "view == vibeCodingDashboardView",
-          "group": "navigation@2"
         }
       ],
       "editor/title": [
@@ -143,6 +128,7 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.7.1",
     "typescript": "^5.3.0"
   }
 }

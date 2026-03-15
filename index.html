@@ -747,11 +747,12 @@
         <text x="480" y="545" text-anchor="middle" font-size="11" fill="#b45309">完成后更新 memory.md → 触发下一轮</text>
 
         <!-- VS Code ext (side) -->
-        <rect x="820" y="155" width="125" height="72" rx="10" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
+        <rect x="820" y="155" width="125" height="84" rx="10" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
         <text x="882" y="179" text-anchor="middle" font-size="11" fill="#4338ca" font-weight="600">VS Code Ext</text>
-        <text x="882" y="196" text-anchor="middle" font-size="10" fill="#6366f1">UI shell only</text>
-        <text x="882" y="212" text-anchor="middle" font-size="10" fill="#6366f1">读 memory</text>
-        <text x="882" y="224" text-anchor="middle" font-size="10" fill="#6366f1">调用 driver</text>
+        <text x="882" y="194" text-anchor="middle" font-size="10" fill="#6366f1">Dashboard UI</text>
+        <text x="882" y="208" text-anchor="middle" font-size="10" fill="#6366f1">phase/gate pills</text>
+        <text x="882" y="222" text-anchor="middle" font-size="10" fill="#6366f1">HITL 验收面板</text>
+        <text x="882" y="236" text-anchor="middle" font-size="10" fill="#6366f1">runner control</text>
 
         <!-- vscode ↔ memory -->
         <line x1="820" y1="185" x2="590" y2="185" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr2b)"/>
@@ -876,8 +877,8 @@
           <p><code>scripts/run-vibecoding-loop.py</code> 读取 <code>memory.md</code> 并输出 machine-readable handoff。</p>
         </article>
         <article class="card">
-          <h3>VS Code integration</h3>
-          <p><code>integrations/vibecoding-vscode-extension/</code> 已迁移完成，覆盖 smoke、regression 与真实场景验证。</p>
+          <h3>VS Code Dashboard</h3>
+          <p><code>integrations/vibecoding-vscode-extension/</code> 全屏控制台：顶栏 phase/gate/runner 状态 pill、<strong>HITL 验收 Banner（✅批准 / ❌驳回 按钮）</strong>、进度统计行、调度驱动器控制卡、工作流列表与 Session 时间线双面板。点击批准/驳回即可写回 <code>memory.md</code>，无需手动编辑文件。</p>
         </article>
       </div>
     </section>
@@ -1016,10 +1017,106 @@
       <code>scripts/run-vibecoding-loop.py</code>
     </div>
     <div class="callout">
-      如果希望在 IDE 内完成 refresh、prepare、open files 和 runner control，
+      如果希望在 IDE 内完成 refresh、prepare、open files、runner control 和 HITL 验收，
       当前配套实现位于
       <code>integrations/vibecoding-vscode-extension/</code>，
-      架构固定为 <strong>Python core + VS Code UI shell</strong>。
+      架构为 <strong>Python core + VS Code Dashboard UI</strong>。Dashboard 提供 phase/gate 状态感知、<strong>HITL 验收 Banner（✅ 批准 / ❌ 驳回按钮，自动写回 memory.md）</strong>与 Session 时间线，无需切出 IDE 即可完成工作流审核与推进。
+    </div>
+  </section>
+
+  <!-- ═══ HITL REVIEW GATE ═══ -->
+  <section class="section mb22">
+    <h2>人工验收门控（HITL Review Gate）</h2>
+    <p>
+      每个 Session 完成后，<strong>不得自动推进</strong>到下一 Session。
+      驱动器将 <code>session_gate</code> 设为 <code>pending_review</code>，
+      等待人工验收通过后才推进。这是防止错误链式传播的关键设计。
+    </p>
+    <div style="overflow-x:auto;">
+      <svg viewBox="0 0 860 120" xmlns="http://www.w3.org/2000/svg" font-family="'Avenir Next','PingFang SC',sans-serif" style="width:100%;max-width:860px;">
+        <defs>
+          <marker id="harr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#0f766e"/>
+          </marker>
+          <marker id="harr-o" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#c2410c"/>
+          </marker>
+          <marker id="harr-g" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#64748b"/>
+          </marker>
+        </defs>
+
+        <!-- ready -->
+        <rect x="10" y="38" width="80" height="44" rx="10" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="50" y="63" text-anchor="middle" font-size="12" fill="#155e57" font-weight="700">ready</text>
+        <text x="50" y="77" text-anchor="middle" font-size="10" fill="#58655f">就绪</text>
+
+        <!-- in_progress -->
+        <rect x="140" y="38" width="105" height="44" rx="10" fill="#1d2725" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="192" y="63" text-anchor="middle" font-size="12" fill="#6ee7b7" font-weight="700">in_progress</text>
+        <text x="192" y="77" text-anchor="middle" font-size="10" fill="#94a3a0">执行中</text>
+
+        <!-- pending_review -->
+        <rect x="300" y="30" width="130" height="60" rx="10" fill="#fef9c3" stroke="#d97706" stroke-width="2"/>
+        <text x="365" y="57" text-anchor="middle" font-size="12" fill="#92400e" font-weight="700">pending_review</text>
+        <text x="365" y="72" text-anchor="middle" font-size="10" fill="#b45309">⏸ 待人工验收</text>
+        <text x="365" y="84" text-anchor="middle" font-size="9" fill="#b45309">Dashboard 展示 amber 横幅</text>
+
+        <!-- human icon -->
+        <text x="490" y="68" text-anchor="middle" font-size="28" fill="#0f766e">👤</text>
+        <text x="490" y="84" text-anchor="middle" font-size="9" fill="#58655f">工程师验收</text>
+
+        <!-- approved → ready (next) -->
+        <rect x="560" y="38" width="80" height="44" rx="10" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="600" y="63" text-anchor="middle" font-size="12" fill="#155e57" font-weight="700">ready</text>
+        <text x="600" y="77" text-anchor="middle" font-size="10" fill="#58655f">N+1 推进</text>
+
+        <!-- blocked -->
+        <rect x="560" y="2" width="80" height="36" rx="10" fill="#fee2e2" stroke="#c2410c" stroke-width="1.5"/>
+        <text x="600" y="21" text-anchor="middle" font-size="11" fill="#991b1b" font-weight="700">blocked</text>
+        <text x="600" y="33" text-anchor="middle" font-size="9" fill="#b91c1c">重做本 Session</text>
+
+        <!-- done -->
+        <rect x="700" y="38" width="60" height="44" rx="10" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="730" y="63" text-anchor="middle" font-size="12" fill="#4338ca" font-weight="700">done</text>
+        <text x="730" y="77" text-anchor="middle" font-size="10" fill="#6366f1">完成</text>
+
+        <!-- arrows -->
+        <line x1="90" y1="60" x2="140" y2="60" stroke="#0f766e" stroke-width="1.8" marker-end="url(#harr)"/>
+        <line x1="245" y1="60" x2="300" y2="60" stroke="#0f766e" stroke-width="1.8" marker-end="url(#harr)"/>
+        <line x1="430" y1="60" x2="490" y2="60" stroke="#d97706" stroke-width="1.6" marker-end="url(#harr)"/>
+        <line x1="510" y1="68" x2="560" y2="68" stroke="#0f766e" stroke-width="1.8" marker-end="url(#harr)"/>
+        <line x1="510" y1="52" x2="560" y2="25" stroke="#c2410c" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#harr-o)"/>
+        <line x1="640" y1="60" x2="700" y2="60" stroke="#0f766e" stroke-width="1.8" marker-end="url(#harr)"/>
+        <!-- blocked → in_progress loop -->
+        <path d="M 600 2 Q 600 -10 192 -10 Q 192 38 192 38" stroke="#c2410c" stroke-width="1.2" fill="none" stroke-dasharray="4,3" marker-end="url(#harr-o)"/>
+
+        <!-- labels on arrows -->
+        <text x="115" y="55" text-anchor="middle" font-size="9" fill="#0f766e">驱动器启动</text>
+        <text x="272" y="55" text-anchor="middle" font-size="9" fill="#0f766e">Claude 完成</text>
+        <text x="515" y="78" text-anchor="middle" font-size="9" fill="#0f766e">✓ 通过</text>
+        <text x="540" y="37" text-anchor="middle" font-size="9" fill="#c2410c">✗ 驳回</text>
+      </svg>
+    </div>
+    <div class="callout" style="margin-top:16px;">
+      <strong>核心原则：越早的 Session，验收越严格。</strong>
+      Session 0（设计）和 Session 1-3（核心架构）必须严格验收，
+      因为后续所有 Session 都建立在其基础上。
+      错误发现越晚，修复成本指数级增长。
+    </div>
+    <div class="cards" style="margin-top:14px;">
+      <article class="card">
+        <h3>⏸ pending_review（待验收）</h3>
+        <p>Claude 完成 Session，写入 summary + manifest，设 <code>session_gate = pending_review</code>。驱动器暂停，VS Code Dashboard 展示<strong>琥珀色横幅</strong>，并提供 <strong>✅ 批准</strong> 和 <strong>❌ 驳回</strong> 操作按钮。</p>
+      </article>
+      <article class="card">
+        <h3>✓ 验收通过</h3>
+        <p>点击 Dashboard 中的 <strong>✅ 批准，推进下一 Session</strong>，扩展自动将 <code>session_gate</code> 改为 <code>ready</code>，<code>next_session</code> 递增。驱动器检测到 ready 后自动推进 Session N+1。</p>
+      </article>
+      <article class="card">
+        <h3>⛔ blocked（驳回重做）</h3>
+        <p>点击 <strong>❌ 驳回</strong>，在弹出框填写原因，扩展自动写入 <code>review_notes</code> 并将 <code>session_gate</code> 改为 <code>blocked</code>（展示<strong>红色横幅</strong>）。下一轮 Claude 读取 review_notes，针对性修复，重做同一 Session。点击 <strong>🔄 重新开放</strong> 可重置为 ready。</p>
+      </article>
     </div>
   </section>
 
