@@ -234,6 +234,48 @@ Runner 状态保存在：
 
 ---
 
+## 扩展开发 & 更新（修改源码后如何生效）
+
+VSCode 加载的是已安装目录（`~/.vscode/extensions/`）中的编译产物，**直接修改源码不会自动生效**。每次修改 TypeScript 源码后，必须执行以下两步：
+
+### 第一步：编译并同步
+
+在仓库根目录执行一键脚本：
+
+```bash
+./integrations/vibecoding-vscode-extension/build-and-sync.sh
+```
+
+脚本做了两件事：
+1. 在 `vscode-ext/` 目录执行 `tsc -p ./`，将 TypeScript 编译为 `out/` 目录下的 JS
+2. 将 `out/` 同步到 `~/.vscode/extensions/beckliu.vibecoding-vscode-extension-0.1.10/out/`
+
+输出示例：
+```
+▶ Compiling...
+▶ Syncing to ~/.vscode/extensions/beckliu.vibecoding-vscode-extension-0.1.10...
+✅ Done. Reload VSCode window to apply changes.
+```
+
+### 第二步：Reload VSCode Window
+
+在 VSCode 中执行：
+
+```
+Cmd+Shift+P → Developer: Reload Window
+```
+
+Reload 后扩展重新加载，新代码立即生效。
+
+---
+
+> **注意**：如果扩展版本号升级（`package.json` 中的 `version` 字段变更），需要同步更新 `build-and-sync.sh` 中的目标路径：
+> ```bash
+> VSCODE_EXT=~/.vscode/extensions/beckliu.vibecoding-vscode-extension-<新版本号>
+> ```
+
+---
+
 ## 相关文档
 
 - [workflow-standard.md](workflow-standard.md) — 工作流整体架构和层次职责
