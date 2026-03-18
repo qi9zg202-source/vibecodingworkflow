@@ -28,8 +28,10 @@ payload = json.loads(inspect_path.read_text(encoding="utf-8"))
 
 assert payload["status"] == "ready", payload
 assert payload["task"]["path"] == str(project_root / "task.md"), payload
-assert payload["artifacts"]["expected_session_summary_path"] == str(project_root / "artifacts" / "session-1-summary.md"), payload
-assert payload["artifacts"]["next_session_spec_path"] == str(project_root / "outputs" / "session-specs" / "session-1-spec.json"), payload
+assert payload["next_session"] == "0", payload
+assert payload["next_session_prompt"] == "session-0-prompt.md", payload
+assert payload["artifacts"]["expected_session_summary_path"] == str(project_root / "artifacts" / "session-0-summary.md"), payload
+assert payload["artifacts"]["next_session_spec_path"] == str(project_root / "outputs" / "session-specs" / "session-0-spec.json"), payload
 assert pathlib.Path(payload["artifacts"]["next_session_spec_path"]).exists(), payload
 PY
 

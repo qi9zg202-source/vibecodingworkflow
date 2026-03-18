@@ -1,0 +1,155 @@
+{
+  "session": "R4",
+  "status": "passed",
+  "covered_cases": [
+    "TC-EX-01",
+    "TC-EX-02",
+    "TC-EX-03",
+    "TC-EX-04",
+    "TC-EX-05",
+    "TC-EX-06",
+    "TC-EX-07",
+    "TC-EX-08",
+    "TC-EX-09",
+    "TC-EX-10",
+    "TC-CTX-01",
+    "TC-CTX-02",
+    "TC-CTX-03",
+    "TC-CTX-04",
+    "TC-BEH-02",
+    "TC-BEH-03",
+    "TC-BEH-05",
+    "TC-BEH-06"
+  ],
+  "failed_cases": [],
+  "blocked_cases": [],
+  "evidence": [
+    {
+      "case": "TC-EX-01",
+      "file": "1paperprdasprompt.md",
+      "lines": "708",
+      "result": "passed",
+      "note": "执行前必须读取 tasksubsession 列出的上下文文件。"
+    },
+    {
+      "case": "TC-EX-02",
+      "file": "1paperprdasprompt.md",
+      "lines": "709",
+      "result": "passed",
+      "note": "严格只完成本 Session 子任务。"
+    },
+    {
+      "case": "TC-EX-03",
+      "file": "1paperprdasprompt.md",
+      "lines": "618-624,710",
+      "result": "passed",
+      "note": "测试未通过时不写 summary、不更新 memory.md。"
+    },
+    {
+      "case": "TC-EX-04",
+      "file": "1paperprdasprompt.md",
+      "lines": "625-627,750-760",
+      "result": "passed",
+      "note": "测试通过后输出结果并等待用户验收。"
+    },
+    {
+      "case": "TC-EX-05",
+      "file": "1paperprdasprompt.md",
+      "lines": "631-634,447-455,537-548",
+      "result": "passed",
+      "note": "验收通过后写 summary、更新 memory.md，且 summary 结构完整。"
+    },
+    {
+      "case": "TC-EX-06",
+      "file": "1paperprdasprompt.md",
+      "lines": "636-639",
+      "result": "passed",
+      "note": "用户要求修改时在同一窗口继续。"
+    },
+    {
+      "case": "TC-EX-07",
+      "file": "1paperprdasprompt.md",
+      "lines": "641-642",
+      "result": "passed",
+      "note": "用户拒绝时要求修改 tasksubsession 后开新窗口重新执行。"
+    },
+    {
+      "case": "TC-EX-08",
+      "file": "1paperprdasprompt.md",
+      "lines": "537-548",
+      "result": "passed",
+      "note": "summary 格式包含完成了什么、关键决策、下一 Session 注意事项。"
+    },
+    {
+      "case": "TC-EX-09",
+      "file": "1paperprdasprompt.md",
+      "lines": "451-454",
+      "result": "passed",
+      "note": "memory.md 追加格式符合规范。"
+    },
+    {
+      "case": "TC-EX-10",
+      "file": "1paperprdasprompt.md",
+      "lines": "519-529",
+      "result": "passed",
+      "note": "最终 Session 会写入项目完成状态并输出最终交付确认。"
+    },
+    {
+      "case": "TC-CTX-01",
+      "file": "1paperprdasprompt.md",
+      "lines": "717",
+      "result": "passed",
+      "note": "Session 1 无前序 summary 为正常情况。"
+    },
+    {
+      "case": "TC-CTX-02",
+      "file": "1paperprdasprompt.md",
+      "lines": "718-736",
+      "result": "passed",
+      "note": "前序 summary 缺失时必须停止、读取 memory.md、提示用户后续处理。"
+    },
+    {
+      "case": "TC-CTX-03",
+      "file": "1paperprdasprompt.md",
+      "lines": "727-729",
+      "result": "passed",
+      "note": "上一 Session 已记录完成但 summary 丢失时，建议重跑补写 summary。"
+    },
+    {
+      "case": "TC-CTX-04",
+      "file": "1paperprdasprompt.md",
+      "lines": "730-733",
+      "result": "passed",
+      "note": "上一 Session 未完成或未执行时，建议先完成上一 Session。"
+    },
+    {
+      "case": "TC-BEH-02",
+      "file": "1paperprdasprompt.md",
+      "lines": "741-742",
+      "result": "passed",
+      "note": "已定义多 tasksubsession 请求时的显式回复与引导。"
+    },
+    {
+      "case": "TC-BEH-03",
+      "file": "1paperprdasprompt.md",
+      "lines": "708,740",
+      "result": "passed",
+      "note": "执行前必须读取 CLAUDE.md、task.md 和其他上下文文件。"
+    },
+    {
+      "case": "TC-BEH-05",
+      "file": "1paperprdasprompt.md",
+      "lines": "750-760",
+      "result": "passed",
+      "note": "测试通过后的输出格式完整。"
+    },
+    {
+      "case": "TC-BEH-06",
+      "file": "1paperprdasprompt.md",
+      "lines": "763-771",
+      "result": "passed",
+      "note": "验收通过后的输出格式完整。"
+    }
+  ],
+  "next_session": "R5"
+}

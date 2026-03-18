@@ -96,12 +96,17 @@ export function getConfiguredProjectRoot(): string | null {
 }
 
 function resolveDiscoveryRoot(): string | null {
+    const configuredRoot = getConfiguredProjectRoot();
+    if (configuredRoot && fs.existsSync(configuredRoot)) {
+        return configuredRoot;
+    }
+
     const folder = (vscode.workspace.workspaceFolders ?? [])[0];
     if (folder?.uri.fsPath) {
         return folder.uri.fsPath;
     }
 
-    return getConfiguredProjectRoot();
+    return configuredRoot;
 }
 
 function findWorkflowRoots(workspaceRoot: string): string[] {

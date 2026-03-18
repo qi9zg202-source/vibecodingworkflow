@@ -51,6 +51,14 @@
       {
         "command": "vibeCoding.configurePythonDriverPath",
         "title": "VibeCoding: Configure Python Driver Path"
+      },
+      {
+        "command": "vibeCoding.configureLangGraphServerUrl",
+        "title": "VibeCoding: Configure LangGraph Server URL"
+      },
+      {
+        "command": "vibeCoding.reopenSession",
+        "title": "VibeCoding: Reopen Current Session"
       }
     ],
     "configuration": {
@@ -66,23 +74,40 @@
           "default": "",
           "description": "run-vibecoding-loop.py 的绝对路径。留空表示后续版本自动推断。"
         },
+        "vibeCoding.langGraphServerUrl": {
+          "type": "string",
+          "default": "http://localhost:2024",
+          "description": "LangGraph Local Server 的 HTTP 地址。扩展会优先用它做健康检查，并为后续直连接入做准备。"
+        },
+        "vibeCoding.langGraphStartScript": {
+          "type": "string",
+          "default": "",
+          "description": "LangGraph 服务启动脚本的绝对路径（如 /path/to/start-langgraph-dev.sh）。点击启动按钮时若服务离线，扩展会自动在终端中执行此脚本。"
+        },
         "vibeCoding.defaultProjectRoot": {
           "type": "string",
           "default": "",
-          "description": "默认 vibecoding workflow 项目根目录。留空优先使用当前 workspace。"
+          "description": "默认 vibecoding workflow 项目根目录。设置后，Dashboard 和工作流发现将优先只扫描这个目录；留空时才扫描当前 workspace。"
         },
         "vibeCoding.runnerCommandTemplate": {
           "type": "string",
-          "default": "claude --dangerously-skip-permissions",
+          "default": "",
+          "description": "可选：用于 fresh session 启动的自定义 runner 命令模板。留空时由 preferredRunner 决定实际 CLI。"
+        },
+        "vibeCoding.preferredRunner": {
+          "type": "string",
+          "default": "codex",
           "enum": [
-            "claude --dangerously-skip-permissions",
-            "codex --dangerously-skip-permissions"
+            "auto",
+            "claude",
+            "codex"
           ],
           "enumDescriptions": [
-            "Claude Code（Anthropic）— 跳过权限确认",
-            "Codex（OpenAI）— 跳过权限确认"
+            "自动选择已安装的 runner（优先 Codex，其次 Claude）",
+            "始终优先使用 Claude CLI",
+            "始终优先使用 Codex CLI"
           ],
-          "description": "用于 fresh session 启动的 runner 命令。"
+          "description": "当 runnerCommandTemplate 留空时，LangGraph 应优先使用的 runner。"
         }
       }
     },
@@ -128,10 +153,16 @@
   },
   "scripts": {
     "compile": "tsc -p ./",
+    "smoke:dashboard-state": "node ./scripts/dashboard_state_smoke.js",
     "watch": "tsc -watch -p ./",
     "smoke:session8": "node ./scripts/session8_smoke.js",
     "regression:session9": "node ./scripts/session9_regression.js",
-    "smoke:session11": "node ./scripts/session11_real_scenario.js"
+    "smoke:session11": "node ./scripts/session11_real_scenario.js",
+    "smoke:session12": "node ./scripts/session12_langgraph_hitl.js",
+    "smoke:session13": "node ./scripts/session13_cold_resume.js",
+    "smoke:session13:offline": "node ./scripts/session13_offline_fallback.js",
+    "smoke:preferred-runner": "node ./scripts/preferred_runner_smoke.js",
+    "smoke:studio": "node ./scripts/studio_link_smoke.js"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

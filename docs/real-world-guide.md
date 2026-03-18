@@ -60,6 +60,30 @@ flowchart TD
 验收通过   → next_session = N+1，session_gate = ready
 ```
 
+如果使用 LangGraph / driver / Codex，这条规则也不变。调度器只负责“跑”，不负责替代 `memory.md` 成为业务真相。
+
+```mermaid
+flowchart LR
+    A["task.md / design.md / work-plan.md"] --> B["memory.md\n官方 workflow 状态"]
+    B --> C["startup-prompt.md\n统一入口"]
+    C --> D["LangGraph / driver runtime\n当前执行状态"]
+    D --> E["codex / claude\nfresh session 执行"]
+    E --> F["summary / tests / artifacts"]
+    F --> B
+
+    D --> G["checkpoint / runner_result / stdout\n运行时内部状态"]
+
+    style B fill:#dff1ec,stroke:#0f766e
+    style D fill:#eff6ff,stroke:#3b82f6
+    style G fill:#fef9c3,stroke:#ca8a04
+```
+
+可以这样理解：
+
+- `memory.md` 决定“官方做到哪一轮”
+- runtime 决定“这次执行跑到哪里”
+- 只有写完 summary、tests、artifacts，并更新 `memory.md`，这次执行结果才算正式生效
+
 ### 2. 同一个 session task 可以跨多个窗口
 
 这不违反 workflow。只要 `memory.md` 的 `next_session` 没有推进，新窗口依然在同一个 session task 里工作。

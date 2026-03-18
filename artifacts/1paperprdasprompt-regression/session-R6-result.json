@@ -1,0 +1,27 @@
+{
+  "session": "R6",
+  "status": "passed",
+  "covered_cases": [
+    "TC-E-06b"
+  ],
+  "failed_cases": [],
+  "blocked_cases": [],
+  "evidence": [
+    {
+      "case": "TC-E-06b",
+      "file": "1paperprdasprompt.md",
+      "lines": "38-42",
+      "result": "passed",
+      "note": "入口协议已显式处理项目全部完成终态，读取 memory.md 后不会再建议执行不存在的后续 tasksubsession。"
+    }
+  ],
+  "aggregate": {
+    "declared_cases": 64,
+    "unique_covered_cases": 64,
+    "failed_cases": 0,
+    "blocked_cases": 0,
+    "all_cases_mapped": true,
+    "delivery_ready": true
+  },
+  "next_session": "done"
+}

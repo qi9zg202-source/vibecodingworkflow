@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STIC Fab CUS Strategy Workbench</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./core-models.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Session 3 / Operations Overview</p>
+        <h1>STIC Fab CUS 制冷站节能策略编排与执行验证工作台</h1>
+        <p class="hero-text">
+          本轮只补制冷站运行概览与异常提示，让值班工程师在进入策略、审批和执行前，先判断当前负荷、
+          供回水温、流量、N+1 冗余与湿球条件是否允许动作。
+        </p>
+      </div>
+      <div class="hero-panel">
+        <div class="hero-chip-group" id="hero-chips"></div>
+        <div class="hero-meta" id="hero-meta"></div>
+      </div>
+    </header>
+
+    <nav class="workspace-nav" aria-label="Business Areas">
+      <button class="nav-link is-active" data-target="overview">Operations Overview</button>
+      <button class="nav-link" data-target="workbench">Strategy Workbench</button>
+      <button class="nav-link" data-target="execution">Approval &amp; Execution</button>
+      <button class="nav-link" data-target="audit">Audit &amp; Evidence</button>
+    </nav>
+
+    <main class="workspace-grid">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <div class="content-stack">
+        <section id="overview" class="work-area" data-workspace-area="overview">
+          <div class="section-head">
+            <div>
+              <p class="card-label">Area 1</p>
+              <h2>Operations Overview</h2>
+            </div>
+            <p class="section-note">值班运行工程师先确认当前负荷、约束边界和异常提示，再判断现在能不能动。</p>
+          </div>
+          <div class="overview-kpi-grid" id="overview-kpis"></div>
+          <div class="overview-split">
+            <article class="panel decision-panel" id="operator-decision"></article>
+            <article class="panel alert-panel" id="alert-summary"></article>
+          </div>
+          <div class="loop-grid" id="constraint-snapshots"></div>
+          <article class="panel baseline-panel" id="baseline-strip"></article>
+        </section>
+
+        <section id="workbench" class="work-area" data-workspace-area="workbench">
+          <div class="section-head">
+            <div>
+              <p class="card-label">Area 2</p>
+              <h2>Strategy Workbench</h2>
+            </div>
+            <p class="section-note">节能优化工程师在这里查看策略包入口、适用工况占位和风险审查结构。</p>
+          </div>
+          <div class="panel-grid panel-grid-two" id="workbench-entry"></div>
+          <div class="panel-grid panel-grid-three" id="workbench-details"></div>
+        </section>
+
+        <section id="execution" class="work-area" data-workspace-area="execution">
+          <div class="section-head">
+            <div>
+              <p class="card-label">Area 3</p>
+              <h2>Approval &amp; Execution</h2>
+            </div>
+            <p class="section-note">审批、下发、稳态观察和回退入口在本轮只保留骨架步骤与最小说明。</p>
+          </div>
+          <div class="panel-grid panel-grid-two" id="execution-entry"></div>
+          <div class="panel-grid panel-grid-three" id="execution-details"></div>
+        </section>
+
+        <section id="audit" class="work-area" data-workspace-area="audit">
+          <div class="section-head">
+            <div>
+              <p class="card-label">Area 4</p>
+              <h2>Audit &amp; Evidence</h2>
+            </div>
+            <p class="section-note">课长与审查方可从这里进入审计轨迹、证据清单和 Session 交付物占位。</p>
+          </div>
+          <div class="panel-grid panel-grid-two" id="audit-entry"></div>
+          <div class="panel-grid panel-grid-three" id="audit-details"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

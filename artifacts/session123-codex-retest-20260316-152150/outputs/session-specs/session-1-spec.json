@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "project_root": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150",
+  "task": {
+    "path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/task.md",
+    "title": "STIC 北方创新中心 Fab CUS 制冷站节能策略编排与执行验证工作台"
+  },
+  "session_status": {
+    "current_phase": "development",
+    "last_completed_session": "0",
+    "last_completed_session_tests": "passed",
+    "next_session": "1",
+    "next_session_prompt": "session-1-prompt.md",
+    "session_gate": "ready"
+  },
+  "paths": {
+    "task_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/task.md",
+    "startup_prompt_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/startup-prompt.md",
+    "memory_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/memory.md",
+    "design_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/design.md",
+    "work_plan_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/work-plan.md",
+    "next_session_prompt_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/session-1-prompt.md",
+    "previous_session_summary_path": null,
+    "expected_session_summary_path": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/artifacts/session-1-summary.md"
+  },
+  "instructions": {
+    "entry_point": "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/startup-prompt.md",
+    "must_read": [
+      "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/memory.md",
+      "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/task.md",
+      "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/design.md",
+      "/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150/work-plan.md"
+    ],
+    "read_previous_summary_first": false,
+    "write_summary_before_memory_update": true
+  }
+}

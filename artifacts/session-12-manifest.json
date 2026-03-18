@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "session": "12",
+  "session_date": "2026-03-17",
+  "title": "LangGraph Extension HTTP Driver and HITL Resume Integration",
+  "status": "passed",
+  "validation_gates": [
+    {
+      "gate": "typescript_compile",
+      "result": "passed",
+      "detail": "npm run compile succeeded in vscode-ext"
+    },
+    {
+      "gate": "langgraph_runtime_unit",
+      "result": "passed",
+      "detail": "python -m unittest tests.test_langgraph_runtime"
+    },
+    {
+      "gate": "langgraph_e2e_single_session",
+      "result": "passed",
+      "detail": "python scripts/test_langgraph_e2e.py confirmed one run advances only one session"
+    },
+    {
+      "gate": "langgraph_http_smoke",
+      "result": "passed",
+      "detail": "python scripts/test_langgraph_http_smoke.py confirmed HTTP start path with approval_required=false"
+    },
+    {
+      "gate": "langgraph_hitl_http_smoke",
+      "result": "passed",
+      "detail": "python scripts/test_langgraph_hitl_http.py confirmed real HTTP approve/reject branches"
+    },
+    {
+      "gate": "extension_langgraph_hitl_smoke",
+      "result": "passed",
+      "detail": "npm run smoke:session12 confirmed extension refresh/read path and approve/reject command chain against real LangGraph server"
+    }
+  ],
+  "runtime_constraints_verified": [
+    "langgraph_api_0_7_71_has_no_runs_run_id_resume_endpoint",
+    "command_resume_fallback_requires_assistant_id",
+    "review_wait_detected_via_thread_state_task_interrupts",
+    "state_next_alone_is_not_sufficient_for_review_wait_detection",
+    "single_run_advances_only_one_session_after_approve"
+  ],
+  "extension_capabilities": [
+    {
+      "name": "langgraph_inspect_state",
+      "implemented": true,
+      "detail": "Reads /threads/{thread_id}/state and maps runtime metadata into DriverResult"
+    },
+    {
+      "name": "langgraph_start_run",
+      "implemented": true,
+      "detail": "Triggers /threads/{thread_id}/runs with approval_required=true"
+    },
+    {
+      "name": "langgraph_resume_approve_reject",
+      "implemented": true,
+      "detail": "Uses /runs/{run_id}/resume when available and falls back to /threads/{thread_id}/runs + command.resume"
+    },
+    {
+      "name": "interrupted_runtime_mapping",
+      "implemented": true,
+      "detail": "Maps thread state interrupt tasks to runtime run_status=interrupted"
+    },
+    {
+      "name": "dashboard_review_actions",
+      "implemented": true,
+      "detail": "Shows approve/reject actions when runtime run_status=interrupted"
+    }
+  ],
+  "files_changed": [
+    "integrations/vibecoding-vscode-extension/vscode-ext/src/driver/langgraphDriver.ts",
+    "integrations/vibecoding-vscode-extension/vscode-ext/src/extension.ts",
+    "integrations/vibecoding-vscode-extension/vscode-ext/src/ui/dashboard.ts",
+    "integrations/vibecoding-vscode-extension/interfaces/langgraph-runtime-contract.md",
+    "integrations/vibecoding-vscode-extension/work-plan.md",
+    "integrations/vibecoding-vscode-extension/session-12-prompt.md",
+    "integrations/vibecoding-vscode-extension/vscode-ext/package.json",
+    "integrations/vibecoding-vscode-extension/vscode-ext/scripts/session12_langgraph_hitl.js",
+    "integrations/vibecoding-vscode-extension/artifacts/session12-langgraph-hitl-report.json",
+    "src/vibecoding_langgraph/graph.py",
+    "tests/test_langgraph_runtime.py",
+    "scripts/test_langgraph_e2e.py",
+    "scripts/test_langgraph_http_smoke.py",
+    "scripts/test_langgraph_hitl_http.py",
+    "artifacts/session-12-summary.md",
+    "artifacts/session-12-manifest.json"
+  ],
+  "artifacts": [
+    "integrations/vibecoding-vscode-extension/artifacts/session12-langgraph-hitl-report.json",
+    "artifacts/session-12-summary.md",
+    "artifacts/session-12-manifest.json"
+  ]
+}

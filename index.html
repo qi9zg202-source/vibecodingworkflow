@@ -262,9 +262,12 @@
       <code>startup → memory → session</code>，调度权在文件，不在聊天窗口记忆。
     </p>
     <div class="callout">
-      最新状态：2026-03-12 已完成 core workflow 验证、fixture 校验、VS Code extension
-      <code>compile / smoke:session8 / regression:session9 / smoke:session11</code>，并修复了集成脚本
-      <code>passed</code> 后未及时退出的问题。
+      最新状态：2026-03-17 已确认
+      <code>verify-vibecoding-workflow.sh / unittest / run_langgraph_test_suite.py / compile / smoke:session8 / regression:session9 / smoke:session11</code>
+      全部通过。当前统一契约为
+      <code>current_phase = design|development|done</code>、
+      <code>last_completed_session_tests = n/a|passed|failed|blocked</code>、
+      <code>session_gate = ready|blocked|in_progress|done</code>。
     </div>
   </section>
 
@@ -948,6 +951,72 @@
     </div>
   </section>
 
+  <!-- ═══ LANGGRAPH TESTING ═══ -->
+  <section class="section mb22">
+    <h2>LangGraph 测试标准与最新结果</h2>
+    <p>
+      2026-03-16 已把 LangGraph 编排层测试沉淀为标准文档
+      <code>tests/langgraph-test-standard.md</code>。标准目标不是验证外部账号是否可用，
+      而是验证执行图、状态推进、summary / manifest / loop log 和 HTTP runtime 是否稳定一致。
+    </p>
+
+    <div class="cards" style="margin-top:16px;">
+      <article class="card">
+        <h3>测试流程</h3>
+        <ul>
+          <li>先验证图可 import，并确认 <code>vibecoding_workflow</code> 可加载。</li>
+          <li>再验证进程内同步入口 <code>graph.invoke(...)</code>。</li>
+          <li>再验证进程内异步入口 <code>graph.ainvoke(...)</code>。</li>
+          <li>之后使用 deterministic mock runner 执行多 Session E2E。</li>
+          <li>最后通过 LangGraph Local Server 做 HTTP <code>/runs/wait</code> + <code>/state</code> smoke。</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h3>执行图节点</h3>
+        <ul>
+          <li><code>load_workflow_state</code>：读取 <code>memory.md</code> / <code>task.md</code> 并构造 state。</li>
+          <li><code>select_session</code>：根据 <code>session_gate</code> 决定 ready / blocked / done。</li>
+          <li><code>build_runner_input</code>：组装 startup、session prompt 和 runner payload。</li>
+          <li><code>review_gate</code>：需要人工确认时触发 <code>interrupt()</code>。</li>
+          <li><code>run_session_task</code>：执行自定义 runner 或默认 <code>claude → codex → dry-run</code>。</li>
+          <li><code>collect_outputs</code>：检查 <code>summary</code>、<code>manifest</code> 和 post-run memory。</li>
+          <li><code>persist_workflow_files</code>：写入 <code>vibecoding-loop.jsonl</code>。</li>
+          <li><code>route_next</code>：重新加载最新 <code>memory.md</code>，决定继续推进或结束。</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h3>时间与命令</h3>
+        <ul>
+          <li>2026-03-16：修复同步入口报错 <code>No synchronous function provided</code>。</li>
+          <li>2026-03-16：修复多轮推进卡死，确保每轮 Session 后重新读取 <code>memory.md</code>。</li>
+          <li>2026-03-16：新增 <code>scripts/mock_langgraph_runner.py</code>。</li>
+          <li>2026-03-16：新增 <code>scripts/test_langgraph_e2e.py</code>。</li>
+          <li>2026-03-16：新增 <code>scripts/test_langgraph_http_smoke.py</code>。</li>
+          <li>最低通过门槛：<code>./.venv/bin/python scripts/test_langgraph_e2e.py</code> 与 <code>./.venv/bin/python scripts/test_langgraph_http_smoke.py</code>。</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h3>最新结论</h3>
+        <ul>
+          <li>进程内 <code>graph.invoke(...)</code> 已通过。</li>
+          <li>进程内 <code>graph.ainvoke(...)</code> 已通过。</li>
+          <li>多 Session E2E 已通过，结果为 <code>Session 5 → Session 6 → done</code>。</li>
+          <li>HTTP smoke 已通过，<code>/threads/{thread_id}/runs/wait</code> 与 <code>/threads/{thread_id}/state</code> 返回一致。</li>
+          <li>真实 <code>claude</code> 账号调用可能因订阅或 API 配额失败，该类问题不计入 LangGraph 编排层测试失败。</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="callout" style="margin-top:16px;">
+      标准测试文档：
+      <code>tests/langgraph-test-standard.md</code>
+      。标准判断以 deterministic runner 结果为准；真实外部模型账号只作为补充环境验证，不作为唯一通过门。
+    </div>
+  </section>
+
   <!-- ═══ SESSION 0 CHECKLIST + DISCIPLINE ═══ -->
   <section class="grid mb22">
     <section class="section">
@@ -1018,87 +1087,26 @@
       <code>scripts/run-vibecoding-loop.py</code>
     </div>
     <div class="callout">
-      如果希望在 IDE 内完成 refresh、prepare、open files、runner control 和 HITL 验收，
+      如果希望在 IDE 内完成 refresh、prepare、open files、runner control 和人工复核，
       当前配套实现位于
       <code>integrations/vibecoding-vscode-extension/</code>，
-      架构为 <strong>Python core + VS Code Dashboard UI</strong>。Dashboard 提供 phase/gate 状态感知、<strong>HITL 验收 Banner（✅ 批准 / ❌ 驳回按钮，自动写回 memory.md）</strong>与 Session 时间线，无需切出 IDE 即可完成工作流审核与推进。
+      架构为 <strong>Python core + VS Code Dashboard UI</strong>。Dashboard 提供 workflow gate / run status 分离显示、runner controls 与 Session 时间线。当前基线不使用 <code>pending_review</code> 持久态；人工复核结果通过 <code>ready / blocked / done</code> 回写到 <code>memory.md</code>。
     </div>
   </section>
 
-  <!-- ═══ HITL REVIEW GATE ═══ -->
+  <!-- ═══ REVIEW / BLOCKED FLOW ═══ -->
   <section class="section mb22">
-    <h2>人工验收门控（HITL Review Gate）</h2>
+    <h2>人工复核与阻塞处理</h2>
     <p>
-      每个 Session 完成后，<strong>不得自动推进</strong>到下一 Session。
-      驱动器将 <code>session_gate</code> 设为 <code>pending_review</code>，
-      等待人工验收通过后才推进。这是防止错误链式传播的关键设计。
+      每个 Session 结束后，仍然要求人工复核，但当前基线不再引入
+      <code>pending_review</code> 这一额外持久态。Session 完成后，状态直接落到
+      <code>ready</code> 或 <code>done</code>；如果发现问题，则人工将
+      <code>session_gate</code> 改为 <code>blocked</code> 并写入
+      <code>review_notes</code>。
     </p>
-    <div style="overflow-x:auto;">
-      <svg viewBox="0 0 860 120" xmlns="http://www.w3.org/2000/svg" font-family="'Avenir Next','PingFang SC',sans-serif" style="width:100%;max-width:860px;">
-        <defs>
-          <marker id="harr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0,10 3.5,0 7" fill="#0f766e"/>
-          </marker>
-          <marker id="harr-o" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0,10 3.5,0 7" fill="#c2410c"/>
-          </marker>
-          <marker id="harr-g" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0,10 3.5,0 7" fill="#64748b"/>
-          </marker>
-        </defs>
-
-        <!-- ready -->
-        <rect x="10" y="38" width="80" height="44" rx="10" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
-        <text x="50" y="63" text-anchor="middle" font-size="12" fill="#155e57" font-weight="700">ready</text>
-        <text x="50" y="77" text-anchor="middle" font-size="10" fill="#58655f">就绪</text>
-
-        <!-- in_progress -->
-        <rect x="140" y="38" width="105" height="44" rx="10" fill="#1d2725" stroke="#0f766e" stroke-width="1.5"/>
-        <text x="192" y="63" text-anchor="middle" font-size="12" fill="#6ee7b7" font-weight="700">in_progress</text>
-        <text x="192" y="77" text-anchor="middle" font-size="10" fill="#94a3a0">执行中</text>
-
-        <!-- pending_review -->
-        <rect x="300" y="30" width="130" height="60" rx="10" fill="#fef9c3" stroke="#d97706" stroke-width="2"/>
-        <text x="365" y="57" text-anchor="middle" font-size="12" fill="#92400e" font-weight="700">pending_review</text>
-        <text x="365" y="72" text-anchor="middle" font-size="10" fill="#b45309">⏸ 待人工验收</text>
-        <text x="365" y="84" text-anchor="middle" font-size="9" fill="#b45309">Dashboard 展示 amber 横幅</text>
-
-        <!-- human icon -->
-        <text x="490" y="68" text-anchor="middle" font-size="28" fill="#0f766e">👤</text>
-        <text x="490" y="84" text-anchor="middle" font-size="9" fill="#58655f">工程师验收</text>
-
-        <!-- approved → ready (next) -->
-        <rect x="560" y="38" width="80" height="44" rx="10" fill="#dff1ec" stroke="#0f766e" stroke-width="1.5"/>
-        <text x="600" y="63" text-anchor="middle" font-size="12" fill="#155e57" font-weight="700">ready</text>
-        <text x="600" y="77" text-anchor="middle" font-size="10" fill="#58655f">N+1 推进</text>
-
-        <!-- blocked -->
-        <rect x="560" y="2" width="80" height="36" rx="10" fill="#fee2e2" stroke="#c2410c" stroke-width="1.5"/>
-        <text x="600" y="21" text-anchor="middle" font-size="11" fill="#991b1b" font-weight="700">blocked</text>
-        <text x="600" y="33" text-anchor="middle" font-size="9" fill="#b91c1c">重做本 Session</text>
-
-        <!-- done -->
-        <rect x="700" y="38" width="60" height="44" rx="10" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
-        <text x="730" y="63" text-anchor="middle" font-size="12" fill="#4338ca" font-weight="700">done</text>
-        <text x="730" y="77" text-anchor="middle" font-size="10" fill="#6366f1">完成</text>
-
-        <!-- arrows -->
-        <line x1="90" y1="60" x2="140" y2="60" stroke="#0f766e" stroke-width="1.8" marker-end="url(#harr)"/>
-        <line x1="245" y1="60" x2="300" y2="60" stroke="#0f766e" stroke-width="1.8" marker-end="url(#harr)"/>
-        <line x1="430" y1="60" x2="490" y2="60" stroke="#d97706" stroke-width="1.6" marker-end="url(#harr)"/>
-        <line x1="510" y1="68" x2="560" y2="68" stroke="#0f766e" stroke-width="1.8" marker-end="url(#harr)"/>
-        <line x1="510" y1="52" x2="560" y2="25" stroke="#c2410c" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#harr-o)"/>
-        <line x1="640" y1="60" x2="700" y2="60" stroke="#0f766e" stroke-width="1.8" marker-end="url(#harr)"/>
-        <!-- blocked → in_progress loop -->
-        <path d="M 600 2 Q 600 -10 192 -10 Q 192 38 192 38" stroke="#c2410c" stroke-width="1.2" fill="none" stroke-dasharray="4,3" marker-end="url(#harr-o)"/>
-
-        <!-- labels on arrows -->
-        <text x="115" y="55" text-anchor="middle" font-size="9" fill="#0f766e">驱动器启动</text>
-        <text x="272" y="55" text-anchor="middle" font-size="9" fill="#0f766e">Claude 完成</text>
-        <text x="515" y="78" text-anchor="middle" font-size="9" fill="#0f766e">✓ 通过</text>
-        <text x="540" y="37" text-anchor="middle" font-size="9" fill="#c2410c">✗ 驳回</text>
-      </svg>
-    </div>
+    <pre>ready → in_progress → ready
+ready → in_progress → blocked → in_progress
+ready → done</pre>
     <div class="callout" style="margin-top:16px;">
       <strong>核心原则：越早的 Session，验收越严格。</strong>
       Session 0（设计）和 Session 1-3（核心架构）必须严格验收，
@@ -1107,16 +1115,16 @@
     </div>
     <div class="cards" style="margin-top:14px;">
       <article class="card">
-        <h3>⏸ pending_review（待验收）</h3>
-        <p>Claude 完成 Session，写入 summary + manifest，设 <code>session_gate = pending_review</code>。驱动器暂停，VS Code Dashboard 展示<strong>琥珀色横幅</strong>，并提供 <strong>✅ 批准</strong> 和 <strong>❌ 驳回</strong> 操作按钮。</p>
+        <h3>▶ ready / done（通过）</h3>
+        <p>Claude 完成 Session，写入 summary + manifest，并将 <code>memory.md</code> 更新为 <code>ready</code>（继续）或 <code>done</code>（全部完成）。调度程序下次读取时按业务 gate 决定是否推进。</p>
       </article>
       <article class="card">
-        <h3>✓ 验收通过</h3>
-        <p>点击 Dashboard 中的 <strong>✅ 批准，推进下一 Session</strong>，扩展自动将 <code>session_gate</code> 改为 <code>ready</code>，<code>next_session</code> 递增。驱动器检测到 ready 后自动推进 Session N+1。</p>
+        <h3>✓ 人工复核通过</h3>
+        <p>人工复核通过后，保持 <code>session_gate = ready</code>（或最终的 <code>done</code>）。如果需要推进下一轮，确保 <code>next_session</code> 与 <code>next_session_prompt</code> 已同步到正确值。</p>
       </article>
       <article class="card">
         <h3>⛔ blocked（驳回重做）</h3>
-        <p>点击 <strong>❌ 驳回</strong>，在弹出框填写原因，扩展自动写入 <code>review_notes</code> 并将 <code>session_gate</code> 改为 <code>blocked</code>（展示<strong>红色横幅</strong>）。下一轮 Claude 读取 review_notes，针对性修复，重做同一 Session。点击 <strong>🔄 重新开放</strong> 可重置为 ready。</p>
+        <p>如果人工复核发现问题，将 <code>session_gate</code> 改为 <code>blocked</code> 并写入 <code>review_notes</code>。下一轮 Claude 读取 review_notes，针对性修复，重做同一 Session；问题解除后再改回 <code>ready</code>。</p>
       </article>
     </div>
   </section>

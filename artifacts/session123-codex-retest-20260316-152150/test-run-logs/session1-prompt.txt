@@ -1,0 +1,2 @@
+工作目录切到 /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/artifacts/session123-codex-retest-20260316-152150
+请执行 startup-prompt.md 中的启动流程。

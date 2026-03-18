@@ -66,20 +66,20 @@
     "title": "task title"
   },
   "session_status": {
-    "current_phase": "planning",
-    "last_completed_session": "0",
-    "last_completed_session_tests": "passed",
-    "next_session": "1",
-    "next_session_prompt": "session-1-prompt.md",
+    "current_phase": "design",
+    "last_completed_session": "none",
+    "last_completed_session_tests": "n/a",
+    "next_session": "0",
+    "next_session_prompt": "session-0-prompt.md",
     "session_gate": "ready"
   },
   "paths": {
     "task_path": "/abs/path/to/task-root/task.md",
     "startup_prompt_path": "/abs/path/to/task-root/startup-prompt.md",
     "memory_path": "/abs/path/to/task-root/memory.md",
-    "next_session_prompt_path": "/abs/path/to/task-root/session-1-prompt.md",
+    "next_session_prompt_path": "/abs/path/to/task-root/session-0-prompt.md",
     "previous_session_summary_path": null,
-    "expected_session_summary_path": "/abs/path/to/task-root/artifacts/session-1-summary.md"
+    "expected_session_summary_path": "/abs/path/to/task-root/artifacts/session-0-summary.md"
   },
   "instructions": {
     "must_read": [

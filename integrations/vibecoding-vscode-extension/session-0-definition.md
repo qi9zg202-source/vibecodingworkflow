@@ -1,6 +1,7 @@
 # Session 0 Definition
 
-> 历史说明：本文件记录最初的 Session 0 定义。当前实现进度已推进到 Session 10，最新状态以 `README.md`、`work-plan.md`、`artifacts/session10-closeout-report.md`、`vscode-ext/docs/vibecoding-workflow-vscode-操作手册.md` 为准。
+> 历史说明：本文件记录最初的 Session 0 定义。当时的主叙事仍然是“Python driver + VS Code UI shell”。
+> 当前基线已切换到 LangGraph Local Server，且实现进度已推进到 Session 13；最新状态以 `README.md`、`work-plan.md`、`interfaces/langgraph-runtime-contract.md`、`artifacts/session-13-summary.md`、`vscode-ext/docs/vibecoding-workflow-vscode-操作手册.md` 为准。
 
 ## Scope
 - 本 Session 只做业务需求、方案定义、工作拆分
@@ -20,6 +21,13 @@
 ```md
 把现有 vibecoding workflow 的外部 session driver 封装为 VS Code 插件，但保持 Python 脚本继续作为核心 orchestration engine。插件只负责命令入口、状态展示、文件打开、调用脚本、展示结果，不替代调度逻辑。必须保证 memory.md 是唯一状态源，startup-prompt.md 是唯一标准入口，插件不能自己决定 next session，也不能绕过 startup-prompt.md 和 memory.md 推进流程。
 ```
+
+上面这段是历史起始提示，不再代表当前实现基线。当前基线应改读为：
+
+- LangGraph Local Server 是执行运行时
+- VS Code 插件是 workflow UI shell
+- `memory.md` 是唯一业务状态源
+- Studio 是辅助调试面，不是业务主控制台
 
 ## Plugin Business Goal
 - 让用户在 VS Code 内完成 workflow 状态查看、fresh-session 准备和关键文件跳转
@@ -63,9 +71,9 @@
 - 不做多项目调度控制台
 
 ## Interface Recommendation
-- `run-vibecoding-loop.py` 应补一个 JSON 输出模式，供插件消费
-- 输出至少包含状态字段、关键路径、下一步建议和错误信息
-- 文本输出继续保留给 CLI 人类阅读
+- 历史建议：`run-vibecoding-loop.py` 应补一个 JSON 输出模式，供插件消费
+- 当前基线：插件直接消费 LangGraph HTTP API，合同见 `interfaces/langgraph-runtime-contract.md`
+- 归档脚本只保留为对照，不再驱动新的主流程设计
 
 ## Risks
 - 若插件直接解析 markdown，容易与 Python 逻辑漂移
@@ -79,6 +87,6 @@
 - 后续 Session 可按文档直接推进
 
 ## Latest Verification Note
-- 2026-03-12 已重新执行插件编译、Session 8 smoke、Session 9 regression、Session 11 real scenario smoke。
+- 2026-03-17 已重新执行插件编译、Session 8 smoke、Session 9 regression、Session 11 real scenario smoke。
 - 已补齐独立 Node 集成脚本的 teardown，当前不会再出现 `passed` 后因 polling timer 未释放而挂起的旧问题。
 - 当前文档定义已由后续实现与验证结果覆盖，收尾状态见 `artifacts/session10-closeout-report.md`。

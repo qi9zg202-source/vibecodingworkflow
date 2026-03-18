@@ -1,0 +1,265 @@
+{
+  "langgraph_base_url": "http://127.0.0.1:2024",
+  "generated_at": "2026-03-18T04:00:55.542Z",
+  "result": "passed",
+  "cases": {
+    "cold_approve": {
+      "project_root": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_approve-jUyw6l/session8-smoke-project",
+      "thread_id": "ce41087a-8683-52c0-a068-46bff600f9f8",
+      "decision": "approve",
+      "final_values": {
+        "session_gate": "ready",
+        "next_session": "6",
+        "last_completed_session": "5",
+        "approval_decision": "approve",
+        "rejection_reason": null
+      },
+      "latest_loop_log_entry": {
+        "schema_version": "1.0",
+        "run_id": "7f65e4bbb27fad2f",
+        "project_root": "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_approve-jUyw6l/session8-smoke-project",
+        "task_title": "session8-smoke-project",
+        "current_phase": "development",
+        "next_session": "5",
+        "next_session_prompt": "session-5-prompt.md",
+        "last_completed_session": "4",
+        "last_completed_session_tests": "passed",
+        "session_gate": "ready",
+        "session_number": 5,
+        "session_prompt": "session-5-prompt.md",
+        "session_prompt_path": "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_approve-jUyw6l/session8-smoke-project/session-5-prompt.md",
+        "approval_decision": "approve",
+        "approval_required": true,
+        "runner_exit_code": 0,
+        "runner_skipped": false,
+        "summary_exists": true,
+        "manifest_path": "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_approve-jUyw6l/session8-smoke-project/artifacts/session-5-manifest.json",
+        "thread_id": "ce41087a-8683-52c0-a068-46bff600f9f8",
+        "checkpoint_id": null,
+        "checkpoint_ns": "persist_workflow_files:e9fd2787-6047-5451-4156-0c6754e8fd23",
+        "parent_checkpoint_id": null,
+        "started_at": "2026-03-18T04:00:28.581037+00:00",
+        "ended_at": "2026-03-18T04:00:32.601222+00:00",
+        "recorded_at": "2026-03-18T04:00:34.647900+00:00"
+      },
+      "output_tail": [
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "[resumeInterruptedRunViaLangGraph] decision=approve thread_id=ce41087a-8683-52c0-a068-46bff600f9f8 run_id=019cff1a-3683-76d2-9554-0f10d9a4c264 status=pending",
+        "",
+        "Detected project root: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_approve-jUyw6l/session8-smoke-project",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "workflow_status=ready",
+        "workflow_gate=ready",
+        "next_session=5",
+        "next_session_prompt=session-5-prompt.md",
+        "last_completed_session=4",
+        "last_completed_session_tests=passed",
+        "next_action=review_session: Approve or reject the interrupted LangGraph run.",
+        "",
+        "Command invoked: vibeCoding.refreshWorkflowStatus",
+        "langGraphServerUrl=http://127.0.0.1:2024",
+        "defaultProjectRoot=/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_approve-jUyw6l/session8-smoke-project",
+        "",
+        "Detected project root: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_approve-jUyw6l/session8-smoke-project",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "workflow_status=ready",
+        "workflow_gate=ready",
+        "next_session=6",
+        "next_session_prompt=session-6-prompt.md",
+        "last_completed_session=5",
+        "last_completed_session_tests=passed",
+        "next_action=start_session: Current session can be triggered via LangGraph."
+      ],
+      "info_messages": [
+        {
+          "message": "Active workflow switched to /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_approve-jUyw6l/session8-smoke-project",
+          "items": []
+        },
+        {
+          "message": "Workflow ready: workflow=ready | gate=ready | next=5",
+          "items": []
+        },
+        {
+          "message": "Session 批准请求已发送到 LangGraph（pending）。",
+          "items": []
+        },
+        {
+          "message": "Workflow ready: workflow=ready | gate=ready | next=5",
+          "items": []
+        },
+        {
+          "message": "Workflow ready: workflow=ready | gate=ready | next=6",
+          "items": []
+        }
+      ]
+    },
+    "cold_reject": {
+      "project_root": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_reject-rZYvuy/session8-smoke-project",
+      "thread_id": "1203b05e-b62e-5047-90ac-805b295b69eb",
+      "decision": "reject",
+      "final_values": {
+        "session_gate": "blocked",
+        "next_session": "5",
+        "last_completed_session": "4",
+        "approval_decision": "reject",
+        "rejection_reason": "cold-start reject test"
+      },
+      "latest_loop_log_entry": null,
+      "output_tail": [
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "[resumeInterruptedRunViaLangGraph] decision=reject thread_id=1203b05e-b62e-5047-90ac-805b295b69eb run_id=019cff1a-5a5e-7850-9b11-1637e349c6a5 status=pending",
+        "",
+        "Detected project root: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_reject-rZYvuy/session8-smoke-project",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "workflow_status=ready",
+        "workflow_gate=ready",
+        "next_session=5",
+        "next_session_prompt=session-5-prompt.md",
+        "last_completed_session=4",
+        "last_completed_session_tests=passed",
+        "next_action=review_session: Approve or reject the interrupted LangGraph run.",
+        "",
+        "Command invoked: vibeCoding.refreshWorkflowStatus",
+        "langGraphServerUrl=http://127.0.0.1:2024",
+        "defaultProjectRoot=/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_reject-rZYvuy/session8-smoke-project",
+        "",
+        "Detected project root: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_reject-rZYvuy/session8-smoke-project",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "workflow_status=blocked",
+        "workflow_gate=blocked",
+        "next_session=5",
+        "next_session_prompt=session-5-prompt.md",
+        "last_completed_session=4",
+        "last_completed_session_tests=passed",
+        "next_action=review_blocker: Review notes or workflow documents before retrying the current session."
+      ],
+      "info_messages": [
+        {
+          "message": "Active workflow switched to /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-cold_reject-rZYvuy/session8-smoke-project",
+          "items": []
+        },
+        {
+          "message": "Workflow ready: workflow=ready | gate=ready | next=5",
+          "items": []
+        },
+        {
+          "message": "Session 驳回请求已发送到 LangGraph（pending）。",
+          "items": []
+        },
+        {
+          "message": "Workflow ready: workflow=ready | gate=ready | next=5",
+          "items": []
+        }
+      ]
+    },
+    "stale_invalid_cache": {
+      "project_root": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project",
+      "thread_id": "fe975ee7-81a0-5223-aa69-666c51d5c1a1",
+      "invalid_error_count": 1,
+      "final_values": {
+        "project_root": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project",
+        "runner_command_template": "'/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/.venv/bin/python' '/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/mock_langgraph_runner.py' --project-root {project_root} --next-session {next_session} --next-prompt {next_prompt} --final-session 6",
+        "preferred_runner": null,
+        "task_title": "session8-smoke-project",
+        "current_phase": "development",
+        "next_session": "5",
+        "next_session_prompt": "session-5-prompt.md",
+        "last_completed_session": "4",
+        "last_completed_session_tests": "passed",
+        "session_gate": "ready",
+        "previous_summary_path": null,
+        "expected_summary_path": "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project/artifacts/session-5-summary.md",
+        "runner_payload": {
+          "project_root": "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project",
+          "startup_prompt_path": "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project/startup-prompt.md",
+          "session_prompt_path": "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project/session-5-prompt.md",
+          "task_path": "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project/task.md",
+          "previous_summary_path": null,
+          "next_session": "5",
+          "next_session_prompt": "session-5-prompt.md",
+          "approval_required": true,
+          "runner_command_template": "'/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/.venv/bin/python' '/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/mock_langgraph_runner.py' --project-root {project_root} --next-session {next_session} --next-prompt {next_prompt} --final-session 6",
+          "runner_command_env": null
+        },
+        "runner_result": {
+          "run_id": "708081e653736627",
+          "runner": "custom",
+          "exit_code": 0,
+          "skipped": false,
+          "command": "'/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/.venv/bin/python' '/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/mock_langgraph_runner.py' --project-root /private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project --next-session 5 --next-prompt session-5-prompt.md --final-session 6",
+          "stdout": "Session 5 complete\nTests: passed\nNext: session-6-prompt.md\nStart a fresh session before running the next startup-prompt.md\n",
+          "stderr": "",
+          "timed_out": false,
+          "timeout_seconds": 240,
+          "started_at": "2026-03-18T04:00:45.986130+00:00",
+          "ended_at": "2026-03-18T04:00:54.092770+00:00",
+          "summary_exists": true,
+          "summary_path": "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project/artifacts/session-5-summary.md",
+          "manifest_path": "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project/artifacts/session-5-manifest.json",
+          "post_memory": {
+            "current_phase": "development",
+            "last_completed_session": "5",
+            "last_completed_session_tests": "passed",
+            "next_session": "6",
+            "next_session_prompt": "session-6-prompt.md",
+            "session_gate": "ready"
+          }
+        },
+        "approval_required": true,
+        "approval_decision": null,
+        "rejection_reason": null,
+        "load_error": null,
+        "run_id": "708081e653736627"
+      },
+      "output_tail": [
+        "[ERROR] Workflow returned invalid: workflow=invalid | gate=invalid_gate | next=5",
+        "",
+        "Validating fresh session run for: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Starting current session via LangGraph for: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project",
+        "Runner selection: custom template",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "LangGraph thread not found for /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project; using memory.md cold-start fallback until the first run creates the thread.",
+        "LangGraph run triggered: thread_id=fe975ee7-81a0-5223-aa69-666c51d5c1a1 run_id=019cff1a-622a-7151-88ce-d6caa721ee5e status=pending",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "",
+        "Command invoked: vibeCoding.refreshWorkflowStatus",
+        "langGraphServerUrl=http://127.0.0.1:2024",
+        "defaultProjectRoot=/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project",
+        "",
+        "Detected project root: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-session13-stale-invalid-cache-i3wbxy/session8-smoke-project",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+        "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+        "workflow_status=ready",
+        "workflow_gate=ready",
+        "next_session=5",
+        "next_session_prompt=session-5-prompt.md",
+        "last_completed_session=4",
+        "last_completed_session_tests=passed",
+        "next_action=review_session: Approve or reject the interrupted LangGraph run."
+      ],
+      "error_messages": [
+        {
+          "message": "Workflow returned invalid: workflow=invalid | gate=invalid_gate | next=5",
+          "items": [
+            "Show Output",
+            "Open Loop Log"
+          ]
+        }
+      ]
+    }
+  }
+}

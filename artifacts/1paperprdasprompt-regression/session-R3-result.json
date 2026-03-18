@@ -1,0 +1,115 @@
+{
+  "session": "R3",
+  "status": "passed",
+  "covered_cases": [
+    "TC-0B-01",
+    "TC-0B-02",
+    "TC-0B-03",
+    "TC-0B-04",
+    "TC-0B-05",
+    "TC-0B-06",
+    "TC-0B-07",
+    "TC-0B-08",
+    "TC-0B-09",
+    "TC-0B-10",
+    "TC-0B-11",
+    "TC-0B-12",
+    "TC-BEH-01"
+  ],
+  "failed_cases": [],
+  "blocked_cases": [],
+  "evidence": [
+    {
+      "case": "TC-0B-01",
+      "file": "1paperprdasprompt.md",
+      "lines": "321-326",
+      "result": "passed",
+      "note": "先读 CLAUDE.md、task.md、PRD.md，再产出规划文档。"
+    },
+    {
+      "case": "TC-0B-02",
+      "file": "1paperprdasprompt.md",
+      "lines": "300",
+      "result": "passed",
+      "note": "design.md 已存在时不得重新生成。"
+    },
+    {
+      "case": "TC-0B-03",
+      "file": "1paperprdasprompt.md",
+      "lines": "328-350",
+      "result": "passed",
+      "note": "design.md 模板结构完整，分层结构包含四层。"
+    },
+    {
+      "case": "TC-0B-04",
+      "file": "1paperprdasprompt.md",
+      "lines": "354-360,383-390",
+      "result": "passed",
+      "note": "Session 数量分档明确，最后一个 Session 固定为 HTML 交付。"
+    },
+    {
+      "case": "TC-0B-05",
+      "file": "1paperprdasprompt.md",
+      "lines": "366,383-390",
+      "result": "passed",
+      "note": "最终 Session 的 Deliverable 和 Test Gate 满足规范，且不承担新功能开发。"
+    },
+    {
+      "case": "TC-0B-06",
+      "file": "1paperprdasprompt.md",
+      "lines": "397-400",
+      "result": "passed",
+      "note": "明确要求目标文件名必须填写具体文件名，不得保留占位符。"
+    },
+    {
+      "case": "TC-0B-07",
+      "file": "1paperprdasprompt.md",
+      "lines": "399,415,424-425",
+      "result": "passed",
+      "note": "Session 1 使用从零新建/无需检查，且不包含前序 summary。"
+    },
+    {
+      "case": "TC-0B-08",
+      "file": "1paperprdasprompt.md",
+      "lines": "400,415,424-425",
+      "result": "passed",
+      "note": "Session 2+ 使用读取已有文件继续开发，并读取上一 Session summary。"
+    },
+    {
+      "case": "TC-0B-09",
+      "file": "1paperprdasprompt.md",
+      "lines": "477-485",
+      "result": "passed",
+      "note": "最终 Session 包含完整 HTML 交付规范。"
+    },
+    {
+      "case": "TC-0B-10",
+      "file": "1paperprdasprompt.md",
+      "lines": "487-493",
+      "result": "passed",
+      "note": "最终 Session 包含完整模拟数据要求。"
+    },
+    {
+      "case": "TC-0B-11",
+      "file": "1paperprdasprompt.md",
+      "lines": "550-573",
+      "result": "passed",
+      "note": "memory.md 初始化模板包含所需四个区块和 Session 0 记录。"
+    },
+    {
+      "case": "TC-0B-12",
+      "file": "1paperprdasprompt.md",
+      "lines": "580-601",
+      "result": "passed",
+      "note": "Session 0b 完成后要求用户确认并开启新会话执行 tasksubsession1.md，然后停止。"
+    },
+    {
+      "case": "TC-BEH-01",
+      "file": "1paperprdasprompt.md",
+      "lines": "328-573,709",
+      "result": "passed",
+      "note": "Session 0b 只产出规划文档和模板，且行为规范禁止写业务实现代码。"
+    }
+  ],
+  "next_session": "R4"
+}

@@ -1,129 +1,237 @@
 # design.md
 
 ## Goal
-- 定义高效制冷机房策略优化建议管理功能的模块边界
-- 定义业务对象、状态流转、输入输出和验证路径
-- 定义以 `Task > Sessions` 为基础的交付工作流
+- 定义一个更贴近真实 Fab CUS 业务的策略工作台设计基线
+- 明确运行监控、策略建议、审批执行和审计追踪的模块边界
+- 为下一次完整 workflow 测试提供可执行的 Session 切分和验证标准
 
 ## Standard Workflow
 
-开发前必须完成两步需求对齐：
+开发前必须完成两步对齐：
 
-1. **对齐项目背景**：与 Agent 聊系统是什么、服务对象、领域约束
-   → 写入 `CLAUDE.md`（项目级，跨所有 Task 共享，基本不变）
+1. **对齐项目背景**
+   - Fab CUS 边界：中温环路、低温环路、热回收协同
+   - 核心负荷：PCW、MAU、一般 HVAC、工艺侧特殊负荷
+   - 运行边界：供回水温、最小流量、N+1、稳态观察窗口
+   - 结果写入 `CLAUDE.md`
 
-2. **对齐功能需求**：与 Agent 聊具体功能目标、范围边界、验收标准
-   → 写入 `task.md` + `PRD.md`（Task 级，本功能独立维护）
+2. **对齐功能需求**
+   - 目标用户、业务场景、闭环目标、验收标准、测试基线
+   - 结果写入 `task.md` + `PRD.md`
 
-需求对齐后触发 Session 0，生成完整规划文档，然后进入 Session 循环：
+完成 Session 0 文档后，进入 Session 循环：
 
-- 每个 Session 从 `startup-prompt.md` 重新进入
-- `memory.md` 决定进入哪个 Session，不依赖聊天记忆
-- 每个 Session 完成一个可测试的具体交付物
-- 通过测试后写 `artifacts/session-N-summary.md` + `session-N-manifest.json`
-- 更新 `memory.md`，结束当前会话，开新会话继续
+- 每轮从 `startup-prompt.md` 重新进入
+- `memory.md` 决定当前 Session
+- 每个 Session 只完成一个可测试 deliverable
+- 每轮通过测试后写 `artifacts/session-N-summary.md`
+- 再更新 `memory.md` 并切换 fresh session
 
 ## Execution Model
 
+```text
+Project
+└── CLAUDE.md
+    └── Task
+        ├── task.md
+        ├── PRD.md
+        ├── design.md
+        ├── work-plan.md
+        ├── memory.md
+        ├── startup-prompt.md
+        ├── session-N-prompt.md
+        ├── artifacts/session-N-summary.md
+└── outputs/session-logs + outputs/session-specs
 ```
-Project（代码仓库）
-└── CLAUDE.md（项目级背景，跨 Task 共享）
-    └── Task（高效制冷机房策略优化建议管理功能）
-        ├── task.md（Task 目标与范围）
-        ├── PRD.md（产品需求）
-        ├── design.md（本文件，技术设计）
-        ├── work-plan.md（Session 0-10 拆分计划）
-        ├── memory.md（workflow 状态真相源）
-        ├── startup-prompt.md（每轮 fresh session 统一入口）
-        └── Session（具体交付物，每轮一个）
-            └── artifacts/session-N-summary.md + session-N-manifest.json
-```
 
-## Orchestration Layer
+## Current Working Tree Snapshot
 
-### Task Object
-- `title`
-- `goal`
-- `constraints`
-- `acceptance criteria`
-- `related files`
-- `allowed tools`
+当前工作树已经包含一批需要纳入设计口径的实现型资产，但它们还没有通过 `memory.md` 正式推进：
 
-### Session Object
-- `task_id`
-- `current plan`
-- `status`
-- `artifacts`
-- `next action`
+- `index.html`
+  - 交付一页式策略工作台骨架
+  - 固定四大区域导航：`Operations Overview`、`Strategy Workbench`、`Approval & Execution`、`Audit & Evidence`
+- `styles.css`
+  - 为 demo 定义浅色、带工业质感的视觉基线
+  - 重点体现大标题、玻璃感卡片、分区导航和移动端降级
+- `app.js`
+  - 用静态配置对象驱动 Sidebar、区域入口卡片和工作区说明
+  - 明确 Session 1 只交付骨架，不引入 ROI 算法、真实系统接入或复杂状态机
+- `core-models.js`
+  - 提前收敛 Session 2 的对象模型和状态流转边界
+  - 让后续页面只能消费统一模型，不在 UI 层私自重定义策略、审批和执行状态
 
-### Persistent Memory
-- repo-level: `CLAUDE.md`
-- task-level: `task.md`
-- run-level: `artifacts/session-N-summary.md`
-- routing-level: `memory.md`
+设计上必须同时接受这两个事实：
 
-### Loop
-- `plan`
-- `execute`
-- `run tests`
-- `write summary + manifest`
-- `update memory.md`
-- `end session → start fresh session`
+- 官方 workflow 仍以 `memory.md` 为准，目前尚未正式完成 Session 1 / 2
+- 设计文档必须覆盖工作树里已经出现的页面结构和数据模型，否则后续 Session 会失去统一边界
+
+## Business Architecture
+
+### 1. Operations Overview
+- 当前负荷、台数、供回水温、湿球条件、能效指标
+- 当前边界占用情况：N+1、最小流量、热回收可用性、告警摘要
+- 值班视角入口：现在能不能动、哪里有风险、有哪些待审批动作
+
+### 2. Baseline & Constraints
+- 按时间窗口划分基线段：白天高负荷、夜间低负荷、周末低负荷、季节切换时段
+- 每个基线段记录：
+  - 负荷范围
+  - 功率范围
+  - 湿球 / 环境条件
+  - 约束与备注
+- 约束对象至少包括：
+  - 供回水温边界
+  - 最小流量
+  - 机组最少运行台数
+  - N+1 冗余
+  - 热回收回路可用性
+
+### 3. Strategy Workbench
+- 策略包列表
+- 策略包详情
+- 工况匹配结果
+- ROI 范围、节能区间、风险等级、回退条件
+- 推荐策略包示例：
+  - 冬季自然冷却优先
+  - 过渡季混合模式
+  - 夏季高负荷机组排序优化
+  - 热回收协同
+  - 温差恢复 / 流量优化
+
+### 4. Approval & Execution
+- 审批单
+- 下发记录
+- 执行反馈
+- 稳态观察窗口
+- 回退记录
+- 关闭结论
+
+### 5. Audit & Evidence
+- 角色权限
+- 审计日志
+- 风险检查结果
+- 业务验证样例
+- Session summary / session spec / loop log
 
 ## Domain Objects
 
-### KPI Metric
-- 指标名称
-- 时间粒度
-- 当前值
-- 趋势值
-- 预警等级
+### Baseline Segment
+- `segment_id`
+- `time_window`
+- `season_tag`
+- `baseline_cooling_load_kwh`
+- `baseline_power_kwh`
+- `wet_bulb_range`
+- `constraints`
+- `notes`
+
+### Constraint Profile
+- `supply_temp_min/max`
+- `return_temp_min/max`
+- `min_flow`
+- `reserve_mode`
+- `heat_recovery_available`
+- `process_side_risk`
 
 ### Strategy Package
-- 策略名称
-- 目标对象
-- 适用工况
-- 预期收益区间
-- 风险等级
-- 控制建议
-- 回退条件
+- `package_id`
+- `package_name`
+- `target_loop`
+- `season_window`
+- `load_window`
+- `applicable_conditions`
+- `expected_roi_range`
+- `expected_kwh_saving_range`
+- `risk_level`
+- `fallback_plan`
+- `constraint_profile_id`
+- `lifecycle_state`
+- `state_history`
 
-### Strategy Execution
-- 下发对象
-- 下发时间
-- 执行负责人
-- 执行反馈
-- 稳态观察窗口
-- 稳态结论
-- 是否回退
+### Approval Ticket
+- `ticket_id`
+- `strategy_package_id`
+- `requested_by`
+- `approver`
+- `risk_summary`
+- `workflow_state`
+- `decision`
+- `decision_time`
+- `approval_window`
+- `fallback_requirement`
+- `state_history`
 
-## Architecture
+### Execution Record
+- `execution_id`
+- `strategy_package_id`
+- `approval_ticket_id`
+- `dispatch_window`
+- `operator`
+- `actual_actions`
+- `feedback`
+- `workflow_state`
+- `stabilization_window`
+- `stabilization_result`
+- `rollback_flag`
+- `rollback_reason`
+- `rollback_plan`
+- `state_history`
 
-### Monitoring Layer
-- 指标总览
-- 趋势曲线
-- 异常预警
+### Audit Log
+- `log_id`
+- `entity_type`
+- `entity_id`
+- `action`
+- `actor`
+- `before_state`
+- `after_state`
+- `timestamp`
+- `comment`
 
-### Strategy Layer
-- 策略包列表
-- 策略包详情
-- 工况匹配和风险说明
+## State Machines
 
-### Execution Layer
-- 下发记录
-- 反馈记录
-- 稳态验证
-- 回退和关闭
+`core-models.js` 已经把下面三条状态机前置建模为设计约束，后续 Session 必须直接复用：
 
-### Persistence Layer
-- 策略状态
-- 执行记录
-- 稳态结论
-- 审计日志
+### Strategy Package Lifecycle
+
+- `candidate -> assessed -> approved -> dispatched -> stabilized -> closed`
+- 任一阶段可进入 `rolled_back`
+- `closed` 与 `rolled_back` 为终态
+
+### Approval Ticket Lifecycle
+
+- `draft -> pending -> approved | rejected | expired | cancelled`
+- `approved`、`rejected`、`expired`、`cancelled` 为终态
+
+### Execution Record Lifecycle
+
+- `draft -> planned -> dispatched -> stabilizing -> stabilized -> closed`
+- 任一执行态可进入 `rolled_back`
+- `closed` 与 `rolled_back` 为终态
+
+## Validation Strategy
+
+### Workflow Validation
+- startup 入口必须固定
+- session handoff 必须来自 `memory.md`
+- 任何 session 未通过测试不得推进
+
+### Business Validation
+- 至少覆盖冬季 / 过渡季 / 夏季三类业务样例
+- 至少覆盖三类高风险边界：
+  - N+1 不足
+  - 最小流量风险
+  - 传感器缺数 / 热回收不可用
+
+### Delivery Validation
+- 每个 Session 交付物必须可审查
+- 任何策略建议都必须包含适用工况、收益范围、风险和回退方案
+- 任何执行闭环都必须有审批、反馈、稳态验证和审计痕迹
 
 ## Rules
 - 不输出不可回退的自动控制方案
-- 不绕过人工审核
+- 不绕过人工审批
 - 不牺牲可靠性换取表面节能
-- 每轮 session 只完成一个明确 deliverable
-- 需求变化不回旧聊天补丁式续写，更新 `task.md` 后开新 Session
+- 每轮 Session 只完成一个明确 deliverable
+- 不允许沿用旧 artifacts / logs 作为新一轮完整测试的起始状态

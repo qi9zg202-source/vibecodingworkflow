@@ -1,0 +1,139 @@
+{
+  "session": "R5",
+  "status": "passed",
+  "covered_cases": [
+    "TC-HTML-01",
+    "TC-HTML-02",
+    "TC-HTML-03",
+    "TC-HTML-04",
+    "TC-HTML-05",
+    "TC-HTML-06",
+    "TC-HTML-07",
+    "TC-HTML-08",
+    "TC-MOD-01",
+    "TC-MOD-02",
+    "TC-MOD-03",
+    "TC-MOD-04",
+    "TC-MOD-05",
+    "TC-MOD-06",
+    "TC-MOD-07",
+    "TC-MOD-08"
+  ],
+  "failed_cases": [],
+  "blocked_cases": [],
+  "evidence": [
+    {
+      "case": "TC-HTML-01",
+      "file": "1paperprdasprompt.md",
+      "lines": "481-485,505",
+      "result": "passed",
+      "note": "HTML 单文件交付、CSS/JS 内联、浏览器直接打开即可运行。"
+    },
+    {
+      "case": "TC-HTML-02",
+      "file": "1paperprdasprompt.md",
+      "lines": "483",
+      "result": "passed",
+      "note": "横向绝对禁止出现滚动条。"
+    },
+    {
+      "case": "TC-HTML-03",
+      "file": "1paperprdasprompt.md",
+      "lines": "484",
+      "result": "passed",
+      "note": "HTML 元素 id 唯一且有命名规范。"
+    },
+    {
+      "case": "TC-HTML-04",
+      "file": "1paperprdasprompt.md",
+      "lines": "482",
+      "result": "passed",
+      "note": "SAP Fiori 标准色系明确。"
+    },
+    {
+      "case": "TC-HTML-05",
+      "file": "1paperprdasprompt.md",
+      "lines": "492",
+      "result": "passed",
+      "note": "列表类数据不少于 5 条。"
+    },
+    {
+      "case": "TC-HTML-06",
+      "file": "1paperprdasprompt.md",
+      "lines": "490-491",
+      "result": "passed",
+      "note": "模拟数据需贴合 CLAUDE.md 业务背景并覆盖 PRD 核心场景。"
+    },
+    {
+      "case": "TC-HTML-07",
+      "file": "1paperprdasprompt.md",
+      "lines": "493",
+      "result": "passed",
+      "note": "跨模块数据一致性明确。"
+    },
+    {
+      "case": "TC-HTML-08",
+      "file": "1paperprdasprompt.md",
+      "lines": "500,506",
+      "result": "passed",
+      "note": "核心交互必须实现且纳入测试 Gate。"
+    },
+    {
+      "case": "TC-MOD-01",
+      "file": "1paperprdasprompt.md",
+      "lines": "666",
+      "result": "passed",
+      "note": "修改 task.md / design.md 归为 Minor，从当前 Session 重新执行，不影响已完成 Session。"
+    },
+    {
+      "case": "TC-MOD-02",
+      "file": "1paperprdasprompt.md",
+      "lines": "667",
+      "result": "passed",
+      "note": "work-plan.md 变化时只局部修订并更新受影响的 tasksubsession 文件。"
+    },
+    {
+      "case": "TC-MOD-03",
+      "file": "1paperprdasprompt.md",
+      "lines": "670-675",
+      "result": "passed",
+      "note": "修改 CLAUDE.md 前需先提醒用户其通常不改，并确认是否真的需要修改。"
+    },
+    {
+      "case": "TC-MOD-04",
+      "file": "1paperprdasprompt.md",
+      "lines": "667,674",
+      "result": "passed",
+      "note": "单模块范围变化但整体 In Scope 不变时，按 Moderate 局部修订，不触发全量重规划。"
+    },
+    {
+      "case": "TC-MOD-05",
+      "file": "1paperprdasprompt.md",
+      "lines": "668,680-688",
+      "result": "passed",
+      "note": "In Scope 有模块增减时进入 Major，停止当前 Session 并重跑 Session 0b。"
+    },
+    {
+      "case": "TC-MOD-06",
+      "file": "1paperprdasprompt.md",
+      "lines": "690-698",
+      "result": "passed",
+      "note": "大改后的 Session 0b 必须输出复用评估表并等待用户逐条确认。"
+    },
+    {
+      "case": "TC-MOD-07",
+      "file": "1paperprdasprompt.md",
+      "lines": "700-704",
+      "result": "passed",
+      "note": "用户确认复用决策后，从第一个重做的 Session 开始重新执行，不得自行改写用户决定。"
+    },
+    {
+      "case": "TC-MOD-08",
+      "file": "1paperprdasprompt.md",
+      "lines": "684",
+      "result": "passed",
+      "note": "大改时 design.md 仅在模块边界变化时重生成，否则只更新变化部分。"
+    }
+  ],
+  "next_session": "R6"
+}

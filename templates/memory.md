@@ -73,22 +73,20 @@ stateDiagram-v2
 
 字段约定：
 - `current_phase`: `design` / `development` / `done`
-- `last_completed_session_tests`: `passed` / `failed` / `blocked`
-- `session_gate`: `ready` / `in_progress` / `pending_review` / `blocked` / `done`
+- `last_completed_session_tests`: `n/a` / `passed` / `failed` / `blocked`
+- `session_gate`: `ready` / `in_progress` / `blocked` / `done`
 
-`pending_review` 说明：
-- Claude 执行完 Session 后，`session_gate` 设为 `pending_review`
-- 调度程序暂停，等待人工验收
-- 验收通过 → 外部操作将 `session_gate` 改为 `ready`，驱动器继续推进
-- 验收拒绝 → 外部操作将 `session_gate` 改为 `blocked`，Claude 重做本 Session
+状态说明：
+- `ready`: 当前 `next_session` 可启动；初始化模板默认使用此值
+- `in_progress`: 外部调度器已启动本轮 Session，尚未完成产物与状态回写
+- `blocked`: 需要人工处理、补充信息或返工后才能继续
+- `done`: Task 全部完成，不再推进新 Session
 
 ```mermaid
 stateDiagram-v2
     [*] --> ready : Session 0 初始化
     ready --> in_progress : 进入 Session N
-    in_progress --> pending_review : Claude 执行完毕\n写 summary + manifest
-    pending_review --> ready : 人工验收通过\n推进 next_session
-    pending_review --> blocked : 人工验收拒绝\n留审核意见
+    in_progress --> ready : 完成 summary + manifest\n并写回 memory
     in_progress --> blocked : 遇到阻塞
     blocked --> in_progress : 修复或解除阻塞后重试
     ready --> done : Session 10 验收通过
@@ -128,11 +126,10 @@ stateDiagram-v2
 若本 Session 已完成：
 - 先写 `artifacts/session-N-summary.md`（人类可读）
 - 再写 `artifacts/session-N-manifest.json`（机器可验证）
-- 再更新本文件：`session_gate: pending_review`（等待人工验收）
+- 再更新本文件：通过则写 `session_gate: ready`，完结则写 `session_gate: done`
 - 再结束当前会话
-- 调度程序暂停，通知用户验收
-- 用户验收通过 → 外部将 `session_gate` 改为 `ready` → 调度程序推进 `next_session`，启动下一个 Session
-- 用户验收拒绝 → 外部将 `session_gate` 改为 `blocked`，填写 `review_notes` → 调度程序重新启动本 Session
+- 若人工验收拒绝或信息不足，保持当前 Session 作为入口并写 `session_gate: blocked`
+- 调度程序只识别 `ready / blocked / in_progress / done`，不使用额外审核态
 
 ## Next Session Entry
 

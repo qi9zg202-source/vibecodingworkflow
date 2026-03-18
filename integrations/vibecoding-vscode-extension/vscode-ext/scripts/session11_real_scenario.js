@@ -1,8 +1,9 @@
 const assert = require('assert');
+const crypto = require('crypto');
 const fs = require('fs');
+const http = require('http');
 const os = require('os');
 const path = require('path');
-const { execSync } = require('child_process');
 const Module = require('module');
 
 const extensionRoot = path.resolve(__dirname, '..');
@@ -12,11 +13,13 @@ const driverPath = '/Users/beckliu/Documents/0agentproject2026/vibecodingworkflo
 const artifactsDir = path.join(skillRoot, 'artifacts');
 const reportPath = path.join(artifactsDir, 'session11-real-scenario-report.json');
 const fixtureMarkerFileName = 'TEST_FIXTURE.md';
+const langGraphBaseUrl = process.env.LANGGRAPH_BASE_URL || 'http://127.0.0.1:2024';
 
 const originalLoad = Module._load;
 
 async function main() {
   fs.mkdirSync(artifactsDir, { recursive: true });
+  await assertLangGraphServerOnline();
 
   const scenario = createRealScenarioFixture();
   const runnerCommandTemplate = [
@@ -48,50 +51,60 @@ async function main() {
     await invoke(state, 'vibeCoding.openMemory');
     await invoke(state, 'vibeCoding.openStartupPrompt');
     await invoke(state, 'vibeCoding.openNextSessionPrompt');
-    await invoke(state, 'vibeCoding.openLoopLog');
     await invoke(state, 'vibeCoding.prepareFreshSession');
     await invoke(state, 'vibeCoding.activateWorkflowRunner', scenario.customerRoot);
 
-    assert(state.terminalCommands.length === 1, 'Ready workflow should start exactly one runner command.');
-    execSync(state.terminalCommands[0].text, {
-      cwd: state.terminalCommands[0].cwd,
-      stdio: 'pipe',
-      shell: '/bin/bash',
-    });
+    const customerThreadId = buildThreadId(scenario.customerRoot, resolveTaskIdentifier(scenario.customerRoot));
+    const interruptedState = await waitForThreadState(customerThreadId, hasInterruptTask);
+    await waitForFile(scenario.customerRunnerSmokePath);
+    await invoke(state, 'vibeCoding.refreshWorkflowStatus');
 
     assert(fs.existsSync(scenario.customerRunnerSmokePath), 'Customer workflow runner smoke file should exist.');
     assert(fs.readFileSync(scenario.customerRunnerSmokePath, 'utf8').trim() === '3|session-3-prompt.md', 'Customer workflow runner smoke file should contain the expected handoff.');
-    await invoke(state, 'vibeCoding.pauseWorkflowRunner', scenario.customerRoot);
-    await invoke(state, 'vibeCoding.resumeWorkflowRunner', scenario.customerRoot);
-    await invoke(state, 'vibeCoding.cancelWorkflowRunner', scenario.customerRoot);
+    assert(state.terminalCommands.length === 0, 'LangGraph path should not spawn a runner terminal command.');
+    assert(
+      state.infoMessages.some((entry) => entry.message.includes('Current session triggered via LangGraph')),
+      `Ready workflow should confirm LangGraph trigger. Messages:\n${JSON.stringify(state.infoMessages, null, 2)}`
+    );
+    assert(
+      state.outputLines.some((line) => String(line).includes('next_action=review_session')),
+      `Ready workflow should refresh into review wait. Output:\n${state.outputLines.slice(-30).join('\n')}`
+    );
 
     await invoke(state, 'vibeCoding.selectWorkflow', scenario.fabRoot);
     await invoke(state, 'vibeCoding.refreshWorkflowStatus');
     await invoke(state, 'vibeCoding.openMemory');
     await invoke(state, 'vibeCoding.openStartupPrompt');
     await invoke(state, 'vibeCoding.openNextSessionPrompt');
-    await invoke(state, 'vibeCoding.openLoopLog');
     await invoke(state, 'vibeCoding.activateWorkflowRunner', scenario.fabRoot);
 
     assert(hasOpenedPath(state.openedDocuments, '/customer-service-workbench/memory.md'), 'Customer workflow memory should open from the selected workflow root.');
     assert(hasOpenedPath(state.openedDocuments, '/customer-service-workbench/startup-prompt.md'), 'Customer workflow startup prompt should open from the selected workflow root.');
     assert(hasOpenedPath(state.openedDocuments, '/customer-service-workbench/session-3-prompt.md'), 'Customer workflow next session prompt should resolve to session-3.');
-    assert(hasOpenedPath(state.openedDocuments, '/customer-service-workbench/outputs/session-logs/vibecoding-loop.jsonl'), 'Customer workflow loop log should open after refresh.');
 
     assert(hasOpenedPath(state.openedDocuments, '/fab-energy-insights/memory.md'), 'Fab workflow memory should open from the selected workflow root.');
     assert(hasOpenedPath(state.openedDocuments, '/fab-energy-insights/startup-prompt.md'), 'Fab workflow startup prompt should open from the selected workflow root.');
     assert(hasOpenedPath(state.openedDocuments, '/fab-energy-insights/session-5-prompt.md'), 'Fab workflow next session prompt should resolve to session-5.');
-    assert(hasOpenedPath(state.openedDocuments, '/fab-energy-insights/outputs/session-logs/vibecoding-loop.jsonl'), 'Fab workflow loop log should open after refresh.');
 
-    assert(state.warningMessages.some((entry) => entry.message.includes('Workflow blocked')), 'Fab workflow should surface a blocked warning after refresh.');
-    assert(state.warningMessages.some((entry) => entry.message.includes('Runner not started because workflow status is blocked.')), 'Blocked workflow must prevent runner execution.');
-    assert(state.terminalCommands.length === 4, 'Ready workflow should record run, pause, resume, and cancel without adding a blocked workflow runner command.');
-    assert(state.terminalCommands[1].text === '\u001A', 'Pause should send Ctrl+Z to the active runner terminal.');
-    assert(state.terminalCommands[2].text === 'fg', 'Resume should send fg to the active runner terminal.');
-    assert(state.terminalCommands[3].text === '\u0003', 'Cancel should send Ctrl+C to the active runner terminal.');
-    assert(state.statusBarHistory.some((entry) => entry.text === 'Vibe: S3 | running'), 'Ready workflow should update the status bar to S3 | running.');
-    assert(state.statusBarHistory.some((entry) => entry.text === 'Vibe: S3 | paused'), 'Pause should update the status bar to S3 | paused.');
-    assert(state.statusBarHistory.some((entry) => entry.text === 'Vibe: S5 | blocked'), 'Blocked workflow should update the status bar to S5 | blocked.');
+    assert(
+      state.warningMessages.some((entry) => entry.message.includes('workflow is blocked') || entry.message.includes('Workflow blocked')),
+      `Fab workflow should surface a blocked warning after refresh. Warnings:\n${JSON.stringify(state.warningMessages, null, 2)}`
+    );
+    assert(state.terminalCommands.length === 0, 'Blocked workflow must not add any runner terminal command.');
+    assert(
+      state.statusBarHistory.some((entry) => entry.text.includes('W ready')),
+      `Ready workflow should update the status bar. History:\n${JSON.stringify(state.statusBarHistory.slice(-8), null, 2)}`
+    );
+    assert(
+      state.statusBarHistory.some((entry) => entry.text.includes('W blocked')),
+      `Blocked workflow should update the status bar. History:\n${JSON.stringify(state.statusBarHistory.slice(-8), null, 2)}`
+    );
+    assert.strictEqual(state.errorMessages.length, 0, `Unexpected errors:\n${JSON.stringify(state.errorMessages, null, 2)}`);
+    const customerLoopLogEntry = readLatestLoopLogEntry(scenario.customerLoopLogPath);
+    if (customerLoopLogEntry) {
+      assert.strictEqual(customerLoopLogEntry.thread_id, customerThreadId, customerLoopLogEntry);
+      assert.strictEqual(customerLoopLogEntry.session_number, 2, customerLoopLogEntry);
+    }
 
     const report = {
       fixture_root: scenario.root,
@@ -104,6 +117,9 @@ async function main() {
           expected_status: 'ready',
           expected_next_session: '3',
           expected_next_prompt: 'session-3-prompt.md',
+          thread_id: customerThreadId,
+          latest_loop_log_entry: customerLoopLogEntry,
+          interrupted_next: interruptedState.next,
           runner_smoke_contents: fs.readFileSync(scenario.customerRunnerSmokePath, 'utf8').trim(),
         },
         {
@@ -246,7 +262,7 @@ function customizeCustomerWorkflow(projectRoot) {
     '# memory.md',
     '',
     '## Session Status',
-    '- current_phase: implementation',
+    '- current_phase: development',
     '- last_completed_session: 2',
     '- last_completed_session_tests: passed',
     '- next_session: 3',
@@ -371,7 +387,7 @@ function customizeFabWorkflow(projectRoot) {
     '# memory.md',
     '',
     '## Session Status',
-    '- current_phase: integration',
+    '- current_phase: development',
     '- last_completed_session: 4',
     '- last_completed_session_tests: blocked',
     '- next_session: 5',
@@ -494,6 +510,21 @@ function markCleanupComplete(filePath) {
   fs.writeFileSync(filePath, JSON.stringify(report, null, 2));
 }
 
+function readLatestLoopLogEntry(loopLogPath) {
+  if (!fs.existsSync(loopLogPath)) {
+    return null;
+  }
+
+  const lines = fs.readFileSync(loopLogPath, 'utf8')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length === 0) {
+    return null;
+  }
+  return JSON.parse(lines[lines.length - 1]);
+}
+
 function createScenarioState(projectRoot, runnerCommandTemplate) {
   const outputLines = [];
   const infoMessages = [];
@@ -512,6 +543,7 @@ function createScenarioState(projectRoot, runnerCommandTemplate) {
     'vibeCoding.driverPath': driverPath,
     'vibeCoding.defaultProjectRoot': projectRoot,
     'vibeCoding.runnerCommandTemplate': runnerCommandTemplate,
+    'vibeCoding.langGraphServerUrl': langGraphBaseUrl,
   };
 
   const mockVscode = {
@@ -675,6 +707,120 @@ async function invoke(state, commandId, ...args) {
   assert(command, `Command not registered: ${commandId}`);
   state.executedCommands.push({ id: commandId, args });
   await command(...args);
+}
+
+function buildThreadId(projectRoot, taskIdentifier) {
+  const digest = crypto.createHash('sha1').update(`${projectRoot}:${taskIdentifier}`).digest();
+  const bytes = Buffer.from(digest.subarray(0, 16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x50;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = bytes.toString('hex');
+  return [
+    hex.slice(0, 8),
+    hex.slice(8, 12),
+    hex.slice(12, 16),
+    hex.slice(16, 20),
+    hex.slice(20, 32),
+  ].join('-');
+}
+
+function resolveTaskIdentifier(projectRoot) {
+  const taskPath = path.join(projectRoot, 'task.md');
+  if (!fs.existsSync(taskPath)) {
+    return path.basename(projectRoot);
+  }
+
+  const lines = fs.readFileSync(taskPath, 'utf8').split(/\r?\n/);
+  let inTitle = false;
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (line === '## Title') {
+      inTitle = true;
+      continue;
+    }
+    if (inTitle && line.startsWith('## ')) {
+      break;
+    }
+    if (inTitle && line) {
+      return line.replace(/^-+\s*/, '').trim();
+    }
+  }
+
+  return path.basename(projectRoot);
+}
+
+async function assertLangGraphServerOnline() {
+  const payload = await requestJson('GET', '/ok');
+  assert.deepStrictEqual(payload, { ok: true });
+}
+
+async function waitForThreadState(threadId, predicate, timeoutMs = 30000) {
+  const startedAt = Date.now();
+  let lastPayload = null;
+  while (Date.now() - startedAt < timeoutMs) {
+    const payload = await requestJson('GET', `/threads/${threadId}/state`);
+    lastPayload = payload;
+    if (predicate(payload)) {
+      return payload;
+    }
+    await sleep(500);
+  }
+  throw new Error(`Timed out waiting for thread state. thread_id=${threadId} last_payload=${JSON.stringify(lastPayload)}`);
+}
+
+function hasInterruptTask(payload) {
+  return Array.isArray(payload.tasks) && payload.tasks.some((task) => Array.isArray(task && task.interrupts) && task.interrupts.length > 0);
+}
+
+async function waitForFile(filePath, timeoutMs = 30000) {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    if (fs.existsSync(filePath)) {
+      return;
+    }
+    await sleep(250);
+  }
+  throw new Error(`Timed out waiting for file: ${filePath}`);
+}
+
+function requestJson(method, targetPath, payload) {
+  const url = new URL(targetPath, langGraphBaseUrl.endsWith('/') ? langGraphBaseUrl : `${langGraphBaseUrl}/`);
+  return new Promise((resolve, reject) => {
+    const body = payload === undefined ? undefined : JSON.stringify(payload);
+    const request = http.request(url, {
+      method,
+      headers: body ? {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      } : undefined,
+    }, (response) => {
+      let responseBody = '';
+      response.setEncoding('utf8');
+      response.on('data', (chunk) => {
+        responseBody += chunk;
+      });
+      response.on('end', () => {
+        if ((response.statusCode || 500) >= 400) {
+          reject(new Error(`HTTP ${response.statusCode}: ${responseBody}`));
+          return;
+        }
+        try {
+          resolve(responseBody ? JSON.parse(responseBody) : null);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+    request.on('error', reject);
+    if (body) {
+      request.write(body);
+    }
+    request.end();
+  });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function purgeExtensionCache() {

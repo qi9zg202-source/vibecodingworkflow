@@ -3,7 +3,8 @@
 > 基于项目评估报告（docs/project-evaluation.md）
 > 制定日期：2026-03-14
 > 预计完成：2026-05-09（8 周）
-> **已完成里程碑（2026-03-15）：** VS Code Dashboard UI 专业重设计 — topbar phase/gate/runner pills、HITL 验收横幅（pending_review amber / blocked red）、stats 统计行、runner 控制卡、Session 时间线双面板布局，TypeScript 零错误编译。详见 `docs/hitl-review-gate.md`。
+> **已完成里程碑（2026-03-15，已在 2026-03-17 回写现状）：** VS Code Dashboard UI 专业重设计 — topbar phase/gate/runner pills、stats 统计行、run status details、runner 控制卡、Session 时间线双面板布局，TypeScript 零错误编译。`pending_review` 专属持久态未进入当前基线契约。
+> **2026-03-17 当前基线说明：** 本路线图中所有 `run-vibecoding-loop.py` 相关任务都属于 LangGraph 迁移前的历史规划。当前主运行时是 LangGraph Local Server；旧脚本已归档到 `scripts/archived/run-vibecoding-loop.py`，应仅作为历史参考而不是当前设计目标。
 
 ---
 

@@ -1,8 +1,36 @@
-export type WorkflowStatus = 'ready' | 'blocked' | 'done' | 'invalid' | 'dry_run' | 'runner_finished' | 'runner_failed';
+export type WorkflowStatus = 'ready' | 'blocked' | 'in_progress' | 'done' | 'invalid' | 'dry_run' | 'runner_finished' | 'runner_failed';
 
 export interface DriverNextAction {
     type: string;
     message: string;
+}
+
+export type LangGraphDaemonManager = 'launchd' | 'nohup' | 'manual' | 'unknown';
+export type LangGraphDaemonLifecycle = 'online' | 'offline' | 'starting' | 'error';
+
+export interface LangGraphDaemonInfo {
+    manager: LangGraphDaemonManager;
+    lifecycle: LangGraphDaemonLifecycle;
+    serverUrl: string;
+    port: number | null;
+    pid: number | null;
+    pidSource: string | null;
+    launchdPid: number | null;
+    workdir: string | null;
+    scriptPath: string | null;
+    pidFilePath: string | null;
+    stdoutLogPath: string | null;
+    stderrLogPath: string | null;
+    launchdStdoutLogPath: string | null;
+    launchdStderrLogPath: string | null;
+    launchdLabel: string | null;
+    launchdPlistPath: string | null;
+    launchdLoaded: boolean;
+    autostartInstalled: boolean;
+    startedAtEpochMs: number | null;
+    summary: string;
+    source: 'script' | 'fallback';
+    errorMessage?: string | null;
 }
 
 export interface DriverErrorPayload {
@@ -38,4 +66,5 @@ export interface DriverResult {
     next_action: DriverNextAction;
     error: DriverErrorPayload | null;
     runner_exit_code?: number;
+    daemon?: LangGraphDaemonInfo | null;
 }

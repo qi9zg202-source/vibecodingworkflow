@@ -1,8 +1,26 @@
-# Human-in-the-Loop (HITL) Review Gate
+# [Archived] Human-in-the-Loop (HITL) Review Gate
 
 > 设计日期：2026-03-14
 > 更新日期：2026-03-15（方案C已通过 VSCode Dashboard 实现）
 > 适用版本：所有使用自动化调度驱动器的场景
+>
+> 2026-03-17 说明：本文件保留的是一版历史 HITL 方案草案。当前仓库基线契约已经收敛为
+> `session_gate = ready | blocked | in_progress | done`，
+> 不再持久化 `pending_review`。实际实现以 `templates/memory.md`、`README.md` 和 VS Code 集成文档中的 2026-03-17 说明为准。
+
+---
+
+## 当前基线速览
+
+当前仓库实现请直接按下面这套契约理解：
+
+- `current_phase = design | development | done`
+- `last_completed_session_tests = n/a | passed | failed | blocked`
+- `session_gate = ready | blocked | in_progress | done`
+- Session 完成后直接写回 `ready` 或 `done`
+- 复核拒绝时写回 `blocked + review_notes`
+
+下面内容保留为历史方案记录，用于说明为什么仓库曾经讨论过 `pending_review`。
 
 ---
 
@@ -27,11 +45,9 @@ Session 3 代码有逻辑 bug
 在每个 Session 完成后，插入**人工验收门控（HITL Review Gate）**：
 
 ```
-Claude 执行完 Session → session_gate = pending_review
-  → 调度程序暂停
-  → 你审核 summary + 代码
-  → 批准 → 驱动器推进下一个 Session
-  → 拒绝 + 留意见 → 驱动器重做本 Session
+历史方案：Claude 执行完 Session → session_gate = pending_review
+当前基线：Claude 执行完 Session → session_gate = ready / done
+        若人工复核拒绝 → session_gate = blocked + review_notes
 ```
 
 这是 AI 自动化流水线的行业标准设计（Human-in-the-Loop），与 GitHub PR Review、金融风控审核、医疗 AI 人工复核是同一模式。

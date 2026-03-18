@@ -35,8 +35,65 @@ async function main() {
       actions: ['vibeCoding.refreshWorkflowStatus', 'vibeCoding.prepareFreshSession', 'vibeCoding.startRunnerInTerminal'],
       verify(result) {
         assert(result.warningMessages.some((entry) => entry.message.includes('Workflow blocked') || entry.message.includes('Fresh session blocked')), 'Blocked scenario should show a blocked warning.');
+        assert(result.errorMessages.every((entry) => !entry.message.includes('Start Runner In Terminal failed')), 'Blocked scenario should not surface a failed start error.');
         assert(result.terminalCommands.length === 0, 'Blocked scenario must not start a runner terminal command.');
-        assert(result.statusBarTail.some((entry) => /Vibe: S\d+ \| blocked/.test(entry.text)), 'Blocked scenario should set the status bar to blocked.');
+        assert(result.statusBarTail.some((entry) => typeof entry.text === 'string' && entry.text.startsWith('Vibe: W blocked')), 'Blocked scenario should set the status bar to a blocked workflow state.');
+        const blockedSection = extractSection(result.dashboardHtml, '<span class="panel-title">工作流列表</span>', '<span class="panel-title">Session 时间线</span>');
+        assert(/data-command="vibeCoding\.activateWorkflowRunner"[^>]*disabled[^>]*title="当前 workflow 已 blocked，请先处理 review notes，再点击“重新开放当前 Session”。"/.test(blockedSection), 'Blocked workflow execute button should be disabled with a blocker hint.');
+        assert(result.dashboardHtml.includes('data-command="vibeCoding.reopenSession"'), 'Blocked banner should expose a reopen action.');
+      },
+    },
+    {
+      name: 'reopen_blocked_session',
+      projectRoot: createFixtureCopy('reopen-blocked-session', (root) => {
+        const memoryPath = path.join(root, 'memory.md');
+        const text = fs.readFileSync(memoryPath, 'utf8').replace('- session_gate: ready', '- session_gate: blocked');
+        fs.writeFileSync(memoryPath, text);
+      }),
+      configOverrides: {},
+      actions: [
+        'vibeCoding.refreshWorkflowStatus',
+        { id: 'vibeCoding.reopenSession', args: [(root) => root] },
+      ],
+      verify(result) {
+        const memoryPath = path.join(result.project_root, 'memory.md');
+        const memoryText = fs.readFileSync(memoryPath, 'utf8');
+        assert(memoryText.includes('- session_gate: ready'), 'Reopen should move memory.md back to ready.');
+        assert(result.infoMessages.some((entry) => entry.message.includes('当前 Session 已重新开放')), 'Reopen should surface a success message.');
+        assert(result.dashboardHtml.includes('data-command="vibeCoding.activateWorkflowRunner"'), 'Dashboard should still render execute controls after reopen.');
+        assert(!result.dashboardHtml.includes('Session 已驳回'), 'Blocked banner should disappear after reopen refresh.');
+      },
+    },
+    {
+      name: 'session_inspector_stale_ready_cache',
+      projectRoot: createFixtureCopy('session-inspector-stale-ready-cache', () => {}),
+      configOverrides: {},
+      actions: [
+        'vibeCoding.refreshWorkflowStatus',
+        {
+          label: 'rewrite_memory_blocked',
+          run({ projectRoot }) {
+            const memoryPath = path.join(projectRoot, 'memory.md');
+            const memoryText = fs.readFileSync(memoryPath, 'utf8')
+              .replace('- session_gate: ready', '- session_gate: blocked')
+              .replace('- workflow_status: ready', '- workflow_status: blocked');
+            fs.writeFileSync(memoryPath, memoryText);
+          },
+        },
+        {
+          id: 'vibeCoding.openSessionRuntimeInspector',
+          args: [
+            (root) => root,
+            (root) => path.join(root, 'session-5-prompt.md'),
+            'session-5-prompt.md',
+          ],
+        },
+      ],
+      verify(result) {
+        assert(/data-command="vibeCoding\.activateWorkflowRunner"[^>]*disabled/.test(result.latestPanelHtml), 'Session Runtime Inspector rerun button should be disabled after memory.md becomes blocked.');
+        assert(/data-command="vibeCoding\.reopenSession"/.test(result.latestPanelHtml), 'Session Runtime Inspector should expose a reopen action for blocked sessions.');
+        assert(result.latestPanelHtml.includes('Workflow Gate') && result.latestPanelHtml.includes('blocked'), 'Session Runtime Inspector should render the effective blocked workflow gate.');
+        assert(result.latestPanelHtml.includes('重新开放当前 Session'), 'Session Runtime Inspector should explain that blocked workflows must be reopened before rerun.');
       },
     },
     {
@@ -66,10 +123,10 @@ async function main() {
         { id: 'vibeCoding.selectWorkflow', args: [(root) => path.join(root, 'inspection')] },
       ],
       verify(result) {
-        const processSection = extractSection(result.dashboardHtml, '<h2>脚本进程</h2>', '<section class="issue">');
-        assert(processSection.includes('runner-state-running'), 'Process table should keep showing the active runner after switching tree selection.');
-        assert(processSection.includes('VibeCoding Runner: asset-ledger'), 'Process table should remain bound to the actual runner workflow.');
-        assert(!processSection.includes('runner-state-idle">停止</span>'), 'Process table should not flip to stopped when selection changes.');
+        const processSection = extractSection(result.dashboardHtml, '<span class="runner-card-title">LangGraph 运行时</span>', '<!-- ── Workflow + Session panels ── -->');
+        assert(processSection.includes('执行中'), 'Process table should keep showing the active runner after switching tree selection.');
+        assert(processSection.includes('/asset-ledger/.vibecoding/runner-state.sqlite'), 'Process table should remain bound to the actual runner workflow.');
+        assert(!processSection.includes('Run: 空闲'), 'Process table should not flip to idle when selection changes.');
       },
     },
     {
@@ -86,10 +143,10 @@ async function main() {
       },
       actions: ['vibeCoding.refreshWorkflowStatus'],
       verify(result) {
-        const startupSection = extractSection(result.dashboardHtml, '<h2>StartupPrompt Tree</h2>', '<h2>Session Prompt Table</h2>');
+        const startupSection = extractSection(result.dashboardHtml, '<span class="panel-title">工作流列表</span>', '<span class="panel-title">Session 时间线</span>');
         assert(startupSection.includes('✓ 完成'), 'Completed workflow row should still show completed status.');
-        assert(startupSection.includes('runner-state-completed">已完成</span>'), 'Runtime column should resolve to completed for done workflows.');
-        assert(!startupSection.includes('runner-state-running">执行中</span>'), 'Completed workflow runtime should not show running.');
+        assert(startupSection.includes('pill pill-done">✓ 完成</span>'), 'Runtime column should resolve to completed for done workflows.');
+        assert(!startupSection.includes('pill pill-running'), 'Completed workflow runtime should not show running.');
       },
     },
     {
@@ -101,7 +158,7 @@ async function main() {
       actions: ['vibeCoding.refreshWorkflowStatus'],
       verify(result) {
         assert(result.errorMessages.some((entry) => entry.message.includes('Python executable not found')), 'Bad python path should surface a Python executable error.');
-        assert(result.settingsRequests.length === 0, 'Bad python path should not silently rewrite settings.');
+        assert(!result.settingsRequests.some((entry) => entry.id === 'workbench.action.openSettings' || entry.id === 'vibeCoding.configurePythonDriverPath'), 'Bad python path should not silently rewrite settings.');
       },
     },
     {
@@ -141,7 +198,7 @@ async function main() {
         assert(fs.existsSync(doneStateRunnerSmokePath), 'Done workflow runner command should execute against the copied fixture.');
         assert(fs.readFileSync(doneStateRunnerSmokePath, 'utf8').trim() === 'none|none', 'Done workflow should pass through none-valued next session placeholders.');
         assert(result.outputLines.some((line) => line.includes('Preparing workflow via')), 'Done workflow should still call prepare before deciding whether to start.');
-        assert(result.outputLines.some((line) => line.includes('Prepare status=done')), 'Done workflow should log the driver prepare status.');
+        assert(result.outputLines.some((line) => line.includes('prepare workflow_status=done')), 'Done workflow should log the driver prepare status.');
       },
     },
     {
@@ -201,27 +258,72 @@ async function main() {
       actions: ['vibeCoding.refreshWorkflowStatus'],
       verify(result) {
         assert(result.warningMessages.some((entry) => entry.message.includes('Workflow files are incomplete')), 'Missing startup prompt should show a workflow file warning.');
-        assert(result.statusBarTail.some((entry) => entry.text === 'Vibe: invalid'), 'Missing startup prompt should push status bar to invalid.');
+        assert(result.statusBarTail.some((entry) => entry.text === 'Vibe: workflow invalid'), 'Missing startup prompt should push status bar to workflow invalid.');
       },
     },
   ];
 
+  const scenarioFilter = process.env.SESSION9_SCENARIO;
+  const selectedScenarios = scenarioFilter
+    ? scenarios.filter((scenario) => scenario.name === scenarioFilter)
+    : scenarios;
+  assert(selectedScenarios.length > 0, `No Session 9 regression scenario matched filter: ${scenarioFilter}`);
+
   const reports = [];
-  for (const scenario of scenarios) {
+  for (const scenario of selectedScenarios) {
     const result = await runScenario(scenario);
     scenario.verify(result);
     reports.push(result);
   }
+  verifyGatePrecedenceInCompiledStateMachine();
 
   const report = {
     fixture_root: fixtureRoot,
     driver_path: driverPath,
+    scenario_filter: scenarioFilter || null,
     scenarios: reports,
     result: 'passed',
   };
 
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   console.log(`Session 9 regression passed. Report written to ${reportPath}`);
+}
+
+function verifyGatePrecedenceInCompiledStateMachine() {
+  const stateMachine = require(path.join(extensionRoot, 'out', 'ui', 'sessionStateMachine.js'));
+  const workflowDisplay = stateMachine.resolveWorkflowRowDisplay({
+    workflow: {
+      sessionGate: 'blocked',
+    },
+    result: {
+      status: 'ready',
+      session_gate: 'ready',
+      inputs: {},
+    },
+    runnerState: 'idle',
+  });
+  assert.strictEqual(workflowDisplay.state, 'blocked', 'Blocked workflow summary must override stale ready inspect state.');
+
+  const sessionDisplay = stateMachine.resolveSessionTimelineDisplay({
+    file: {
+      label: 'session-5-prompt.md',
+      path: '/tmp/session-5-prompt.md',
+    },
+    workflow: {
+      nextSession: 5,
+      sessionGate: 'blocked',
+    },
+    result: {
+      status: 'ready',
+      session_gate: 'ready',
+      next_session: '5',
+      last_completed_session: '4',
+      inputs: {},
+    },
+    runnerState: 'idle',
+    isNextSession: true,
+  });
+  assert.strictEqual(sessionDisplay.state, 'blocked', 'Blocked workflow summary must override stale ready inspect state in the session timeline.');
 }
 
 async function runScenario(scenario) {
@@ -246,20 +348,35 @@ async function runScenario(scenario) {
     extensionModule.activate(context);
     assert(state.registeredWebviewProviders.includes('vibeCodingDashboardView'), 'Dashboard sidebar view provider should register during activation.');
 
+    const executedActions = [];
     for (const action of scenario.actions) {
+      if (typeof action === 'function') {
+        executedActions.push(action.name || 'anonymous-action');
+        await action({ projectRoot: scenario.projectRoot, state });
+        continue;
+      }
+
+      if (action && typeof action === 'object' && typeof action.run === 'function') {
+        executedActions.push(action.label || 'custom-action');
+        await action.run({ projectRoot: scenario.projectRoot, state });
+        continue;
+      }
+
       const commandId = typeof action === 'string' ? action : action.id;
       const commandArgs = typeof action === 'string'
         ? []
         : (action.args || []).map((arg) => typeof arg === 'function' ? arg(scenario.projectRoot) : arg);
       const command = state.commandRegistry.get(commandId);
       assert(command, `Command not registered: ${commandId}`);
+      executedActions.push(commandId);
       await command(...commandArgs);
     }
 
+    const latestPanelHtml = state.getLatestPanelHtml();
     return {
       name: scenario.name,
       project_root: scenario.projectRoot,
-      commands_executed: scenario.actions,
+      commands_executed: executedActions,
       infoMessages: state.infoMessages,
       warningMessages: state.warningMessages,
       errorMessages: state.errorMessages,
@@ -269,6 +386,7 @@ async function runScenario(scenario) {
       registeredWebviewProviders: state.registeredWebviewProviders,
       statusBarTail: state.statusBarHistory.slice(-4),
       outputLines: state.outputLines.slice(-20),
+      latestPanelHtml,
       dashboardHtml: renderDashboardHtml(state),
     };
   } finally {
@@ -373,6 +491,7 @@ function createScenarioState(projectRoot, configOverrides) {
   const webviewProviders = new Map();
   const commandRegistry = new Map();
   const spawnedTerminalProcesses = [];
+  let latestPanelHtml = '';
 
   const configState = {
     'vibeCoding.pythonPath': 'python3',
@@ -386,6 +505,9 @@ function createScenarioState(projectRoot, configOverrides) {
     StatusBarAlignment: {
       Left: 1,
       Right: 2,
+    },
+    ViewColumn: {
+      One: 1,
     },
     ThemeColor: class ThemeColor {
       constructor(id) {
@@ -435,6 +557,43 @@ function createScenarioState(projectRoot, configOverrides) {
           show() {},
           dispose() {},
         };
+      },
+      createWebviewPanel(_viewType, _title, _viewColumn, _options) {
+        const disposeListeners = [];
+        const panel = {
+          webview: {
+            html: '',
+            options: undefined,
+            onDidReceiveMessage() {
+              return {
+                dispose() {},
+              };
+            },
+          },
+          reveal() {},
+          onDidDispose(listener) {
+            disposeListeners.push(listener);
+            return {
+              dispose() {},
+            };
+          },
+          dispose() {
+            for (const listener of disposeListeners) {
+              listener();
+            }
+          },
+        };
+
+        Object.defineProperty(panel.webview, 'html', {
+          get() {
+            return latestPanelHtml;
+          },
+          set(value) {
+            latestPanelHtml = String(value);
+          },
+        });
+
+        return panel;
       },
       createStatusBarItem() {
         const item = {
@@ -553,6 +712,9 @@ function createScenarioState(projectRoot, configOverrides) {
     registeredWebviewProviders,
     webviewProviders,
     commandRegistry,
+    getLatestPanelHtml() {
+      return latestPanelHtml;
+    },
     cleanup() {
       for (const shellProcess of spawnedTerminalProcesses) {
         if (!shellProcess.killed) {
@@ -575,8 +737,16 @@ function renderDashboardHtml(state) {
       };
     },
   };
-  provider.resolveWebviewView({ webview });
-  return webview.html;
+  provider.resolveWebviewView({
+    webview,
+    visible: true,
+    onDidChangeVisibility() {
+      return {
+        dispose() {},
+      };
+    },
+  });
+  return state.getLatestPanelHtml() || webview.html;
 }
 
 function extractSection(html, startMarker, endMarker) {

@@ -1,144 +1,112 @@
 # 两阶段架构详解
 
+> 2026-03-17 设计更新：本文同步到“LangGraph 常驻服务 + 单 session 显式触发 + 人工验收通过后才推进”的目标架构。
+
 ## 概述
 
-VibeCoding Workflow 采用**两阶段架构**，将每个 Task 的执行分为两个明确的阶段：
+VibeCoding Workflow 仍然采用两阶段模型，但开发阶段的推进口径改为：
+
+- LangGraph Server 常驻
+- 每次 run 只执行当前 `next_session` 的一次 attempt
+- runner 完成后先进入人工验收
+- 只有验收通过，才写 summary / manifest 并推进 `memory.md`
+- 验收不通过时，可以先修订 `PRD.md`、`design.md`、`task.md`，再更新 `work-plan.md` 和当前/后续 Session prompt
 
 | 阶段 | current_phase | Sessions | 目标 | 产出 |
 |------|--------------|----------|------|------|
-| **设计阶段** | `design` | Session 0 | 产出全部规划文档和 Session prompts | 文档 + prompts |
-| **开发阶段** | `development` | Sessions 1–10 | 逐个执行 Session prompts，实现功能 | 代码 + 测试 |
+| **设计阶段** | `design` | Session 0 | 产出初始规划文档、初始 `work-plan.md`、初始 Session prompts | 文档 + prompts |
+| **开发阶段** | `development` | Sessions 1–10 | LangGraph 每次只执行一个 Session，人工验收通过后再推进 | 代码 + 测试 + 验收 |
 | **完成** | `done` | — | 流程结束 | — |
 
----
-
-## Phase 1 — 设计阶段（Design Phase）
+## Phase 1 — 设计阶段
 
 ### 目标
 
 Session 0 产出：
-1. **6 个核心文档**：`CLAUDE.md`, `task.md`, `PRD.md`, `design.md`, `work-plan.md`, `memory.md`
-2. **11 个 Session prompts**：`session-0-prompt.md` 到 `session-10-prompt.md`
-3. **Session 0 handoff artifacts**：`artifacts/session-0-summary.md` + `artifacts/session-0-manifest.json`
 
-### 完整流程图
+1. `CLAUDE.md`
+2. `task.md`
+3. `PRD.md`
+4. `design.md`
+5. `work-plan.md`
+6. `memory.md`
+7. 第一版 `session-0-prompt.md` 到 `session-10-prompt.md`
+8. `artifacts/session-0-summary.md`
+9. `artifacts/session-0-manifest.json`
+
+### 流程图
 
 ```mermaid
 flowchart TD
-    START["用户描述需求\n项目背景 + 功能目标"] --> ONBOARD["Agent 执行 onboarding-prompt.md\n引导问答"]
-    ONBOARD --> INIT["运行 init-web-vibecoding-project.sh\n初始化项目目录"]
+    START["用户描述需求"] --> ONBOARD["Agent 执行 onboarding-prompt.md"]
+    ONBOARD --> INIT["初始化项目目录"]
     INIT --> S0["执行 Session 0"]
 
-    S0 --> DOC["生成所有文档"]
-    DOC --> DOC1["CLAUDE.md\n项目背景和约束"]
-    DOC --> DOC2["task.md\n功能目标和验收标准"]
-    DOC --> DOC3["PRD.md\n需求文档"]
-    DOC --> DOC4["design.md\n技术设计"]
-    DOC --> DOC5["work-plan.md\nSession 0-10 拆分计划"]
-    DOC --> DOC6["memory.md\n初始状态路由\ncurrent_phase: design\nnext_session: 0"]
+    S0 --> DOC["生成规划文档"]
+    DOC --> D1["CLAUDE.md"]
+    DOC --> D2["task.md"]
+    DOC --> D3["PRD.md"]
+    DOC --> D4["design.md"]
+    DOC --> D5["work-plan.md"]
+    DOC --> D6["memory.md"]
 
-    DOC --> PROMPTS["生成所有 Session prompts"]
-    PROMPTS --> P0["session-0-prompt.md"]
+    S0 --> PROMPTS["生成初始 Session prompts"]
     PROMPTS --> P1["session-1-prompt.md"]
     PROMPTS --> P2["session-2-prompt.md"]
     PROMPTS --> P3["session-3-prompt.md"]
-    PROMPTS --> P4["..."]
     PROMPTS --> P10["session-10-prompt.md"]
 
-    DOC1 & DOC2 & DOC3 & DOC4 & DOC5 & DOC6 & P0 & P1 & P2 & P3 & P4 & P10 --> TEST{"文档测试"}
-    TEST -->|"passed"| SUMMARY["写 artifacts/session-0-summary.md\n写 artifacts/session-0-manifest.json"]
-    TEST -->|"failed/blocked"| FIX["修复问题\n保持在 Session 0"]
-    FIX --> S0
-
-    SUMMARY --> UPDATE["更新 memory.md:\ncurrent_phase: development\nnext_session: 1\nsession_gate: ready"]
-    UPDATE --> DONE["✅ Session 0 完成\n阶段转换：design → development"]
-    DONE --> STOP["关闭当前会话"]
-
-    style START fill:#f0fdf4,stroke:#0f766e
-    style S0 fill:#dff1ec,stroke:#0f766e
-    style DOC1 fill:#fef3c7,stroke:#d97706
-    style DOC2 fill:#fef3c7,stroke:#d97706
-    style DOC3 fill:#fef3c7,stroke:#d97706
-    style DOC4 fill:#fef3c7,stroke:#d97706
-    style DOC5 fill:#fef3c7,stroke:#d97706
-    style DOC6 fill:#fef3c7,stroke:#d97706
-    style P1 fill:#dbeafe,stroke:#3b82f6
-    style P2 fill:#dbeafe,stroke:#3b82f6
-    style P3 fill:#dbeafe,stroke:#3b82f6
-    style P10 fill:#dbeafe,stroke:#3b82f6
-    style UPDATE fill:#fed7aa,stroke:#d97706
-    style DONE fill:#1d2725,color:#6ee7b7,stroke:#0f766e
+    D1 & D2 & D3 & D4 & D5 & D6 & P1 & P2 & P3 & P10 --> REVIEW["客户审核规划结果"]
+    REVIEW -->|"通过"| CLOSEOUT["写 session-0 summary / manifest\n更新 memory: development + next_session=1"]
+    REVIEW -->|"不通过"| REPLAN["继续修改文档与 prompts"]
+    REPLAN --> REVIEW
 ```
 
 ### 关键点
 
-1. **Session prompts 在 Session 0 就全部生成好了**
-   - `session-1-prompt.md` 到 `session-10-prompt.md` 在设计阶段就写好
-   - 每个 prompt 包含该 Session 的 Deliverable、Test Gate、执行指令
-   - 开发阶段不需要再生成 prompts，只需逐个执行
+1. Session 0 负责生成第一版计划，而不是生成永不变化的计划。
+2. `work-plan.md` 和 `session-N-prompt.md` 是规划产物，不是只读合同。
+3. 只要客户在后续验收中调整范围、顺序或验收口径，就允许回写规划文档。
 
-2. **阶段转换条件**
-   - Session 0 测试通过 → `current_phase: development`, `next_session: 1`
-   - 测试失败 → 保持 `current_phase: design`, `next_session: 0`
-
-3. **产出验证**
-   - 所有文档存在且内容完整
-   - `memory.md` 状态有效
-   - `work-plan.md` 包含 Session 0-10 的 Deliverable + Test Gate
-
----
-
-## Phase 2 — 开发阶段（Development Phase）
+## Phase 2 — 开发阶段
 
 ### 目标
 
-逐个执行 Session 1 到 Session 10，每个 Session：
-1. 读取对应的 `session-N-prompt.md`
-2. 完成一个可测试的 Deliverable
-3. 通过 Test Gate
-4. 写 handoff artifacts
-5. 更新 `memory.md`
-6. 关闭会话
+逐个执行 Session 1 到 Session 10。每次 LangGraph run 最多推进一个 Session attempt：
 
-### 完整流程图
+1. 读取 `memory.md`
+2. 解析 `next_session` 与 `next_session_prompt`
+3. 执行当前 Session deliverable
+4. 等待人工验收
+5. 通过后推进 `memory.md`
+6. 驳回后保持在当前 Session，并允许修订文档与计划
+
+### 流程图
 
 ```mermaid
 flowchart TD
-    START["开新会话"] --> STARTUP["执行 startup-prompt.md"]
-    STARTUP --> READ["读取 memory.md"]
+    SERVER["LangGraph Server 常驻"] --> TRIGGER["显式触发本次 run"]
+    TRIGGER --> READ["读取 memory.md"]
     READ --> CHECK{"current_phase?"}
 
-    CHECK -->|"done"| COMPLETE["🎉 Task 完成\n两阶段全部通过"]
-    CHECK -->|"design"| S0["执行 Session 0\n（不应该到这里）"]
-    CHECK -->|"development"| ROUTE["路由到 session-N-prompt.md\n（N = next_session）"]
+    CHECK -->|"done"| COMPLETE["🎉 Task 完成"]
+    CHECK -->|"development"| ROUTE["路由到 session-N-prompt.md"]
+    CHECK -->|"design"| PLAN["回到 Session 0 规划"]
 
-    ROUTE --> EXEC["执行 Session N\n完成 Deliverable"]
-    EXEC --> TEST{"测试结果"}
+    ROUTE --> EXEC["执行 Session N"]
+    EXEC --> TEST["tests / gate check"]
+    TEST --> REVIEW["客户人工验收"]
 
-    TEST -->|"failed/blocked"| FIX["修复问题\n保持在 Session N"]
-    FIX --> EXEC
+    REVIEW -->|"通过"| WRITE1["写 session-N-summary.md"]
+    WRITE1 --> WRITE2["写 session-N-manifest.json"]
+    WRITE2 --> ADVANCE{"N = 10?"}
+    ADVANCE -->|"No"| UPDATE1["更新 memory:\nnext_session = N+1\nsession_gate = ready"]
+    ADVANCE -->|"Yes"| UPDATE2["更新 memory:\ncurrent_phase = done\nsession_gate = done"]
 
-    TEST -->|"passed"| WRITE1["写 artifacts/session-N-summary.md"]
-    WRITE1 --> WRITE2["写 artifacts/session-N-manifest.json"]
-    WRITE2 --> UPDATE{"N = 10?"}
-
-    UPDATE -->|"No"| UPDATE1["更新 memory.md:\nnext_session = N+1\nsession_gate: ready"]
-    UPDATE -->|"Yes"| UPDATE2["更新 memory.md:\ncurrent_phase: done\nsession_gate: done"]
-
-    UPDATE1 --> CLOSE1["关闭当前会话"]
-    UPDATE2 --> CLOSE2["关闭当前会话\n✅ 开发阶段完成"]
-
-    CLOSE1 --> START
-    CLOSE2 --> COMPLETE
-
-    style START fill:#eff6ff,stroke:#3b82f6
-    style ROUTE fill:#dbeafe,stroke:#3b82f6
-    style EXEC fill:#dbeafe,stroke:#3b82f6
-    style WRITE1 fill:#fef3c7,stroke:#d97706
-    style WRITE2 fill:#fef3c7,stroke:#d97706
-    style UPDATE1 fill:#fed7aa,stroke:#d97706
-    style UPDATE2 fill:#fed7aa,stroke:#d97706
-    style COMPLETE fill:#1d2725,color:#6ee7b7,stroke:#0f766e
+    REVIEW -->|"不通过"| BLOCK["保持 next_session = N\nsession_gate = blocked"]
+    BLOCK --> REPLAN["更新 PRD.md / design.md / task.md\n修订 work-plan.md / session-N-prompt.md"]
+    REPLAN --> RETRY["再次触发当前 Session"]
+    RETRY --> READ
 ```
 
 ### 每个 Session 的执行模式
@@ -146,212 +114,130 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant U as 用户
-    participant A as Agent (Fresh Session)
+    participant L as LangGraph Server
     participant M as memory.md
     participant P as session-N-prompt.md
-    participant S as artifacts/
+    participant R as Runner
+    participant A as artifacts/
 
-    U->>A: 开新会话，执行 startup-prompt.md
-    A->>M: 读取 current_phase + next_session
-    M-->>A: development, next_session: N
-    A->>P: 读取 session-N-prompt.md
-    P-->>A: Session N 执行指令
-    A->>A: 完成 Deliverable + 测试
-    A->>S: 写 session-N-summary.md
-    A->>S: 写 session-N-manifest.json
-    A->>M: 更新 next_session = N+1
-    A-->>U: Session N 完成，关闭会话
+    U->>L: POST /threads/{thread_id}/runs
+    L->>M: 读取 current_phase + next_session
+    M-->>L: development, next_session: N
+    L->>P: 读取 session-N-prompt.md
+    P-->>R: Session N 执行指令
+    R->>R: 完成 deliverable + tests
+    R-->>L: runner result
+    L-->>U: interrupt / 等待验收
 
-    Note over U,A: 关闭会话，开新会话
-
-    U->>A: 开新会话，执行 startup-prompt.md
-    A->>M: 读取 next_session
-    M-->>A: next_session: N+1
-    A->>P: 读取 session-(N+1)-prompt.md
-    P-->>A: Session N+1 执行指令
+    alt 验收通过
+        U->>L: resume approve
+        L->>A: 写 session-N-summary.md
+        L->>A: 写 session-N-manifest.json
+        L->>M: 更新 next_session = N+1
+    else 验收不通过
+        U->>M: 保持 next_session = N
+        U->>P: 修订当前/后续 Session prompt
+    end
 ```
 
-### 关键规则
+## 关键规则
 
 1. **不是批量执行，而是逐个执行**
-   ```
-   执行 Session 1 → 测试 → 更新 memory.md → 停止 → 关闭会话
-   ↓
-   开新会话 → 执行 startup-prompt.md → 读取 memory.md → 执行 Session 2 → ...
-   ```
 
-2. **每个 Session 在独立的 fresh context 中执行**
-   - 不依赖聊天历史
-   - 不依赖上一个 Session 的内存状态
-   - 只依赖文件：`memory.md`, `task.md`, `design.md`, `work-plan.md`, `session-N-summary.md`
+```text
+触发 Session 1 -> 执行 -> 人工验收 -> 更新 memory -> 停止
+再次显式触发 -> 执行 Session 2
+```
+
+2. **runner 成功不等于 workflow 官方推进**
+
+- 只有客户验收通过后，才能写 summary / manifest 并推进 `memory.md`
+- LangGraph 的 runtime 成功只代表“本次尝试跑完了”
 
 3. **`memory.md` 是唯一路由真相**
-   - `current_phase` 决定是设计阶段还是开发阶段
-   - `next_session` 决定该执行哪个 Session
-   - `session_gate` 决定是否允许推进
 
-4. **阶段转换条件**
-   - Session 10 测试通过 → `current_phase: done`, `session_gate: done`
-   - 测试失败 → 保持 `current_phase: development`, `next_session: 10`
+- `current_phase` 决定当前阶段
+- `next_session` 决定当前要跑哪个 Session
+- `session_gate` 决定当前是否允许推进
 
----
+4. **规划文档允许回写**
+
+- 验收不通过时，可以更新 `PRD.md`
+- 可以更新 `design.md`
+- 可以更新 `task.md`
+- 可以据此重算 `work-plan.md`
+- 可以修订当前或后续 `session-N-prompt.md`
+
+5. **阶段转换条件**
+
+- Session 0 审核通过 -> `current_phase: development`
+- Session 10 审核通过 -> `current_phase: done`
+- 任意 Session 驳回 -> 保持当前 `next_session`
 
 ## 两阶段对比
 
-| 维度 | 设计阶段（Phase 1） | 开发阶段（Phase 2） |
-|------|-------------------|-------------------|
+| 维度 | 设计阶段 | 开发阶段 |
+|------|---------|---------|
 | **Sessions** | Session 0 | Sessions 1–10 |
 | **current_phase** | `design` | `development` |
-| **产出类型** | 文档 + Session prompts | 代码 + 测试 |
-| **执行次数** | 1 次 | 10 次（逐个） |
-| **是否写业务代码** | ❌ 否 | ✅ 是 |
-| **Session prompts** | 生成所有 prompts | 逐个执行 prompts |
-| **阶段转换** | Session 0 passed → development | Session 10 passed → done |
-
----
+| **产出类型** | 文档 + 初始 prompts | 代码 + 测试 + 验收结果 |
+| **Session prompts** | 生成第一版 | 按需修订并逐个执行 |
+| **推进方式** | 审核通过后进入开发阶段 | 每个 session 验收通过后推进下一轮 |
+| **调度方式** | 规划完成后停止 | 单次 run 只处理一个 Session attempt |
 
 ## 常见误解澄清
 
-### ❌ 误解 1：开发阶段需要先生成 Session prompts
+### ❌ 误解 1：开发阶段完全不需要再动 `work-plan.md` 和 prompts
 
-**错误理解**：
-```
-开发阶段 = 计划节点（生成 sessionsubtask.md）→ 执行所有 sessionsubtask.md
-```
+**错误理解**
 
-**正确理解**：
-```
-Session prompts 在 Session 0 就全部生成好了
-开发阶段只是逐个执行这些 prompts
+```text
+Session 0 生成一次，后面绝不改
 ```
 
-### ❌ 误解 2：调度器批量执行所有 Sessions
+**正确理解**
 
-**错误理解**：
-```
-调度器一次性执行 Session 1-10
-```
-
-**正确理解**：
-```
-调度器每次只执行一个 Session
-执行完后停止，等待下一次调用
+```text
+Session 0 生成第一版
+验收驳回后，可以修订 work-plan 和当前/后续 prompts
 ```
 
-### ❌ 误解 3：Session 之间可以在同一个会话中连续执行
+### ❌ 误解 2：LangGraph 会自动批量执行所有 Sessions
 
-**错误理解**：
-```
-Session 1 → Session 2 → Session 3（同一个会话）
-```
+**错误理解**
 
-**正确理解**：
-```
-Session 1 → 关闭会话 → 开新会话 → Session 2 → 关闭会话 → 开新会话 → Session 3
+```text
+一次触发后自动跑完 Session 1-10
 ```
 
----
+**正确理解**
 
-## 实际执行示例
-
-### Session 0（设计阶段）
-
-```bash
-# 用户发送
-请读取 vibecodingworkflow/templates/onboarding-prompt.md，
-然后按照其中的步骤引导我开始开发。
-
-# Agent 执行
-1. 引导问答，收集需求
-2. 运行 init-web-vibecoding-project.sh
-3. 生成所有文档（CLAUDE.md, task.md, PRD.md, design.md, work-plan.md, memory.md）
-4. 生成所有 Session prompts（session-0-prompt.md 到 session-10-prompt.md）
-5. 写 artifacts/session-0-summary.md
-6. 写 artifacts/session-0-manifest.json
-7. 更新 memory.md: current_phase: development, next_session: 1
-8. 停止
-
-# memory.md 状态
-current_phase: development
-next_session: 1
-session_gate: ready
+```text
+LangGraph server 常驻，但每次 run 只处理一个 Session attempt
+执行完后等待人工验收与下一次显式触发
 ```
 
-### Session 1（开发阶段）
+### ❌ 误解 3：runner 成功就代表可以直接进下一轮
 
-```bash
-# 用户关闭会话，开新会话，发送
-工作目录切到 <项目目录>
-请执行 startup-prompt.md 中的启动流程。
+**错误理解**
 
-# Agent 执行
-1. 读取 memory.md → current_phase: development, next_session: 1
-2. 读取 session-1-prompt.md
-3. 完成 Session 1 Deliverable（项目骨架）
-4. 运行测试
-5. 写 artifacts/session-1-summary.md
-6. 写 artifacts/session-1-manifest.json
-7. 更新 memory.md: next_session: 2
-8. 停止
-
-# memory.md 状态
-current_phase: development
-next_session: 2
-session_gate: ready
+```text
+Session 3 runner 成功 -> 自动执行 Session 4
 ```
 
-### Session 2（开发阶段）
+**正确理解**
 
-```bash
-# 用户关闭会话，开新会话，发送
-工作目录切到 <项目目录>
-请执行 startup-prompt.md 中的启动流程。
-
-# Agent 执行
-1. 读取 memory.md → current_phase: development, next_session: 2
-2. 读取 session-2-prompt.md
-3. 完成 Session 2 Deliverable（Schema）
-4. 运行测试
-5. 写 artifacts/session-2-summary.md
-6. 写 artifacts/session-2-manifest.json
-7. 更新 memory.md: next_session: 3
-8. 停止
-
-# memory.md 状态
-current_phase: development
-next_session: 3
-session_gate: ready
+```text
+Session 3 runner 成功 -> 人工验收 -> approve 后才推进到 Session 4
 ```
-
-### ... 重复直到 Session 10
-
-### Session 10（开发阶段最后一个）
-
-```bash
-# Agent 执行
-1. 读取 memory.md → current_phase: development, next_session: 10
-2. 读取 session-10-prompt.md
-3. 完成 Session 10 Deliverable（收尾）
-4. 运行测试
-5. 写 artifacts/session-10-summary.md
-6. 写 artifacts/session-10-manifest.json
-7. 更新 memory.md: current_phase: done, session_gate: done
-8. 停止
-
-# memory.md 状态
-current_phase: done
-next_session: none
-session_gate: done
-```
-
----
 
 ## 总结
 
-两阶段架构的核心原则：
+两阶段架构的新口径是：
 
-1. **Session prompts 在 Session 0 就全部生成好了**
-2. **开发阶段只是逐个执行这些 prompts**
-3. **每个 Session 在独立的 fresh context 中执行**
-4. **`memory.md` 是唯一路由真相**
-5. **不是批量执行，而是逐个执行 → 停止 → 开新会话 → 执行下一个**
+1. Session 0 生成第一版规划文档和 Session prompts。
+2. LangGraph 作为常驻执行运行时存在。
+3. 每次只执行一个当前 Session。
+4. 每次执行后必须经过客户验收。
+5. 验收不通过时，允许先修订规划文档，再重跑同一 Session。
+6. `memory.md` 只在验收通过后推进。

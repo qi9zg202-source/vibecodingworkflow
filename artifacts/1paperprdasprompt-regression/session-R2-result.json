@@ -1,0 +1,91 @@
+{
+  "session": "R2",
+  "status": "passed",
+  "covered_cases": [
+    "TC-0A-01",
+    "TC-0A-02",
+    "TC-0A-03",
+    "TC-0A-04",
+    "TC-0A-05",
+    "TC-0A-06",
+    "TC-0A-07",
+    "TC-0A-08",
+    "TC-0A-09",
+    "TC-BEH-01"
+  ],
+  "failed_cases": [],
+  "blocked_cases": [],
+  "evidence": [
+    {
+      "case": "TC-0A-01",
+      "file": "1paperprdasprompt.md",
+      "lines": "127-146",
+      "result": "passed",
+      "note": "项目背景问卷三大区块与字段齐全。"
+    },
+    {
+      "case": "TC-0A-02",
+      "file": "1paperprdasprompt.md",
+      "lines": "148",
+      "result": "passed",
+      "note": "要求先复述摘要并确认，再进入功能需求收集。"
+    },
+    {
+      "case": "TC-0A-03",
+      "file": "1paperprdasprompt.md",
+      "lines": "150-165",
+      "result": "passed",
+      "note": "功能需求问卷三大区块与字段齐全。"
+    },
+    {
+      "case": "TC-0A-04",
+      "file": "1paperprdasprompt.md",
+      "lines": "167",
+      "result": "passed",
+      "note": "功能描述模糊时必须主动追问。"
+    },
+    {
+      "case": "TC-0A-05",
+      "file": "1paperprdasprompt.md",
+      "lines": "173-194",
+      "result": "passed",
+      "note": "CLAUDE.md 结构完整，并固化技术栈与界面约束。"
+    },
+    {
+      "case": "TC-0A-06",
+      "file": "1paperprdasprompt.md",
+      "lines": "198-219",
+      "result": "passed",
+      "note": "task.md 模板新增强制替换占位符和按用户确认内容填写的约束。"
+    },
+    {
+      "case": "TC-0A-07",
+      "file": "1paperprdasprompt.md",
+      "lines": "222-267",
+      "result": "passed",
+      "note": "PRD.md 必需章节、表格与功能规格字段齐全。"
+    },
+    {
+      "case": "TC-0A-08",
+      "file": "1paperprdasprompt.md",
+      "lines": "273-288",
+      "result": "passed",
+      "note": "Session 0a 完成后要求用户确认并停止等待。"
+    },
+    {
+      "case": "TC-0A-09",
+      "file": "1paperprdasprompt.md",
+      "lines": "284-288,711",
+      "result": "passed",
+      "note": "用户未确认需求文档前不得进入 Session 0b。"
+    },
+    {
+      "case": "TC-BEH-01",
+      "file": "1paperprdasprompt.md",
+      "lines": "173-267,709",
+      "result": "passed",
+      "note": "Session 0a 只产出文档文件，且行为规范禁止写业务实现代码。"
+    }
+  ],
+  "next_session": "R3"
+}

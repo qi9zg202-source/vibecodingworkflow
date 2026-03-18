@@ -1,252 +1,651 @@
 # VibeCoding Workflow 用户手册
 
-## 这个工作流的两个主体
-
-| 主体 | 角色 |
-|------|------|
-| **你（用户）** | 提供业务背景和需求，做决策和确认 |
-| **Agent** | 读取 workflow 规范，主动引导提问，生成文档，执行 Session |
-
-你不需要提前准备好所有信息。Agent 会主动问你。
-
-```mermaid
-graph LR
-    U["👤 用户\n提供业务背景\n做决策确认"]
-    A["🤖 Agent\n读取 workflow 规范\n引导提问 + 执行"]
-    F["📁 文件层\nmemory.md / task.md\nsession prompts"]
-
-    U -->|"描述需求 / 回答问题"| A
-    A -->|"生成文档 / 执行 Session"| F
-    F -->|"路由状态 / 上下文"| A
-    A -->|"确认产出 / 请求决策"| U
-```
+> 适用版本：v2.2 | 适用角色：产品经理 | 最后更新：2026-03-18
+>
+> **v2.2 新增能力：**
+> - 需求大改处理流程（自动重新规划 + 复用评估表）
+> - CLAUDE.md 修改确认机制（防止误改项目级约束）
+> - 项目完成终态识别（memory.md 含"全部完成"时不再推荐后续 Session）
 
 ---
 
-## 准备工作：Clone 项目
+## 概览：这个工作流做什么
 
-```bash
-git clone <repo-url> vibecodingworkflow
-```
+**输入：** 你的业务背景 + 功能需求（口述即可）
 
----
+**输出：**
+- `PRD.md` — 产品需求文档（评审核心文档）
+- `[功能名].html` — 可交互 HTML 原型，含基于真实业务背景的模拟数据（演示核心产物）
 
-## 第一步：让 Agent 读取项目并开始引导
+**你需要做的事只有三件：**
 
-给你的 Agent（Claude Code、Cursor、Codex 等）发送**这一句话**：
-
-```
-请读取 vibecodingworkflow/templates/onboarding-prompt.md，
-然后按照其中的步骤引导我开始开发。
-```
-
-Agent 读取完成后，会主动告知你它已理解工作流，然后开始引导你填写项目信息。
+1. 把 `1paperprdasprompt.md` 放到你的项目目录
+2. 让 Codex/Claude 读取它，回答问题
+3. 逐步确认每个 Session 的结果
 
 ---
 
-## Agent 引导的对话流程
+## 快速开始（3 步）
 
-### Agent 读取完成后的输出示例
+**第 1 步：** 在你的项目目录放入 `1paperprdasprompt.md`
+
+**第 2 步：** 在 Codex/Claude 对话框发送：
 
 ```
-你好！我已读取 VibeCoding Workflow 规范，明白接下来的工作流程。
+请读取 1paperprdasprompt.md，然后按照其中的入口协议开始执行。
+```
 
-我将引导你完成以下步骤：
-1. 收集项目背景信息 → 生成 CLAUDE.md
-2. 确认具体功能需求 → 生成 task.md + PRD.md
-3. 生成技术设计和开发计划 → 生成 design.md + work-plan.md
-4. 正式进入 Session 循环开发
+**第 3 步：** 按 Agent 的引导回答问题，确认文档，逐步执行 Session。
 
-我们现在开始。请先告诉我项目基本信息：
+---
 
+## 完整示例：从零到 HTML 原型
+
+> 以下是一个真实场景的完整演示，展示整个工作流的每一步对话和产出。
+>
+> **示例背景：** 产品经理小王，负责 STIC 北方创新中心 Fab 厂务平台，这次要做「制冷机房优化策略管理」功能。
+
+---
+
+### 阶段一：Session 0 — 设计阶段
+
+> 目标：产出所有稳定规划文档 + 预生成全量执行文件。不写任何业务代码。
+>
+> Session 0 分两步：**0a（需求阶段）** 产出 CLAUDE.md / task.md / PRD.md，用户确认后；**0b（规划阶段）** 在同一窗口继续，产出 design.md / work-plan.md / tasksubsession1~N.md / memory.md。
+
+---
+
+#### Step 1 — 小王发送启动指令
+
+```
+请读取 1paperprdasprompt.md，然后按照其中的入口协议开始执行。
+```
+
+Agent 读取文件，发现当前目录没有 `memory.md`，判断为**首次运行**，进入 Session 0 设计阶段。
+
+---
+
+#### Step 2 — Agent 引导收集项目背景
+
+Agent 输出：
+
+```
+你好！我已读取 VibeCoding Workflow 规范。当前目录没有 memory.md，这是新项目。
+
+我将引导你完成 Session 0（设计阶段），产出所有规划文档。
+Session 0 不写业务代码，只产出文档。
+
+请先填写项目基本信息：
+
+【项目基本信息】
 - 项目名称：
-- 客户 / 团队：
-- 客户所在地（可选）：
 - 系统类型（Web / App / 后端服务 / 其他）：
-- 这个系统是做什么的？
-- 主要服务对象是谁？
-- 有哪些不可违反的约束？
+- 主要服务对象（用户角色）：
+
+【业务背景】
+- 这个系统是做什么的？（1-3句话）
+- 核心业务场景是什么？
+
+【领域约束】
+- 有哪些不可违反的业务规则或安全约束？
+- 有哪些明确的技术或合规限制？
 ```
 
-### 你的回复示例
+小王回复：
 
 ```
 项目名称：STIC 能效管理平台
-客户：STIC 北方创新中心 Fab 厂务部门机械课
-客户所在地：北京
 系统类型：Web
+主要服务对象：Fab 厂务部门机械课工程师
 
-这个系统用于制冷机房优化策略管理，帮助工程师看指标、管策略、追踪执行结果。
-不是 DCS/PLC 控制系统，不直接下发底层指令。
-必须保留人工审核和回退入口，可靠性优先于节能收益。
+业务背景：
+制冷机房管理系统，帮助工程师监控 EER/COP 等核心指标、管理节能策略包、
+追踪策略执行结果。不是 DCS/PLC 控制系统，不直接下发底层指令。
+
+领域约束：
+- 必须保留人工审核和回退入口，可靠性优先于节能收益
+- 不得直接控制制冷设备，所有操作需人工确认
+- 数据展示需支持 7×24h 历史趋势查询
 ```
 
-### Agent 确认背景后继续引导功能需求
+Agent 复述摘要确认后继续：
 
 ```
 项目背景已确认。接下来请描述这次要做的具体功能：
 
+【功能基本信息】
 - 功能名称（简短，用作目录名）：
 - 功能目标（一句话）：
-- 明确要做什么？（主要模块）
-- 明确不做什么？
-- 用户能做到什么就算完成？
+
+【功能范围】
+- 明确要做什么？（列出主要模块或能力）
+- 明确不做什么？（排除项）
+
+【验收标准】
+- 用户能做到什么就算完成？（列出可验证的条件）
 ```
 
-### 你的回复示例
+小王回复：
 
 ```
 功能名称：chiller-strategy
-功能目标：高效制冷机房策略优化建议管理
+功能目标：高效管理制冷机房节能策略优化建议，实现从建议到执行的完整闭环
 
 要做：
-1. 核心指标监控分析（EER/COP/负荷/电量趋势图、预警）
+1. 核心指标看板（EER/COP/负荷/电量趋势图、预警提示）
 2. 优化策略包管理（列表、详情、收益区间、风险等级）
-3. 策略执行闭环（下发→反馈→稳态验证→完成/回退）
+3. 策略执行闭环（下发 → 反馈 → 稳态验证 → 完成/回退）
 
-不做：实时自动控制，全厂 CUS/HVAC 全覆盖
+不做：实时自动控制、全厂 CUS/HVAC 覆盖、移动端适配
 
 验收标准：
-- 能看核心指标趋势和异常预警
-- 能完成策略从建议到稳态验证的完整闭环
-- 所有记录可追溯可回退
+- 工程师能看到核心指标趋势和异常预警
+- 能完成策略从「建议」到「稳态验证」的完整闭环操作
+- 所有执行记录可追溯、可回退
 ```
 
 ---
 
-## Agent 自动完成 Session 0（设计阶段）
+#### Step 3 — Agent 产出所有文档
 
-需求确认后，Agent 会自动：
+Agent 分两批生成文件并报告进度：
 
-1. 运行 `init-web-vibecoding-project.sh` 初始化项目目录
-2. 生成所有规划文档：
+**Session 0a 产出（需求文档）：**
 
-| 文件 | 内容来源 |
-|------|---------|
-| `CLAUDE.md` | 你描述的项目背景和约束 |
-| `task.md` | 你确认的功能目标和验收标准 |
-| `PRD.md` | 问题定义、用户价值、功能范围 |
-| `design.md` | 技术架构、模块边界、业务对象 |
-| `work-plan.md` | Session 0-10 拆分，每条含 Deliverable + Test Gate |
-| `memory.md` | 初始状态，`current_phase: design`，`next_session: 0` |
+```
+✅ CLAUDE.md        项目背景与约束（不含工作流规则，只含业务上下文）
+✅ task.md          功能目标与验收标准
+✅ PRD.md           产品需求文档（含 User Stories + Feature Specs）
 
-3. 写入 `artifacts/session-0-summary.md` 和 `artifacts/session-0-manifest.json`
-4. 更新 `memory.md`：`current_phase: development`，`next_session: 1`（阶段转换）
-5. 停止，等待你确认
+→ 停止，等待你确认需求文档
+```
 
-```mermaid
-flowchart TD
-    A["你描述需求\n项目背景 + 功能目标"] --> B["Agent 引导问答\nonboarding-prompt.md"]
-    B --> C["运行 init-web-vibecoding-project.sh"]
-    C --> D["生成规划文档"]
-    D --> D1["CLAUDE.md"]
-    D --> D2["task.md + PRD.md"]
-    D --> D3["design.md + work-plan.md"]
-    D --> D4["memory.md\ncurrent_phase: design\nnext_session: 0"]
-    D --> D5["session-0~10-prompt.md"]
-    D1 & D2 & D3 & D4 & D5 --> E["写 artifacts/session-0-summary.md\n写 artifacts/session-0-manifest.json"]
-    E --> F["更新 memory.md\ncurrent_phase: development\nnext_session: 1"]
-    F --> G["停止，等待你确认\n✅ Session 0 完成\n阶段转换：design → development"]
-    G --> H["关闭当前 Session\n开启新 Session"]
-    H --> I["执行 startup-prompt.md\n进入 Session 1（开发阶段）"]
+小王检查三个文件，确认无误后在**同一窗口**回复：`"需求已确认，请继续规划"`
+
+**Session 0b 产出（规划文档）：**
+
+```
+✅ design.md        技术架构与模块设计
+✅ work-plan.md     Session 1–5 开发计划（Session 5 固定为 HTML 交付）
+✅ tasksubsession1.md ~ tasksubsession5.md  执行单元（共 5 个）
+✅ memory.md        进度日志（初始状态）
+```
+
+**产出文件预览：**
+
+`work-plan.md` 中 Session 规划如下（本例 PRD 有 3 个功能模块，按决策标准拆为 4+1 个 Session）：
+
+| Session | Deliverable | Test Gate |
+|---------|-------------|-----------|
+| Session 1 | 核心指标看板（EER/COP 趋势图 + 预警组件） | 图表可渲染，预警逻辑可触发 |
+| Session 2 | 策略包列表与详情页 | 列表可筛选，详情展示收益区间和风险等级 |
+| Session 3 | 策略执行下发与反馈模块 | 下发流程完整，反馈可记录 |
+| Session 4 | 稳态验证与回退逻辑 | 验证流程完整，回退操作可执行 |
+| **Session 5（固定）** | **`chiller-strategy.html` 可交互原型** | HTML 可直接浏览器打开，模拟数据符合 STIC 业务背景 |
+
+---
+
+#### Step 4 — Agent 停止，等待小王确认
+
+```
+Session 0b 完成！规划文档已生成：
+
+【技术设计】
+- design.md, work-plan.md
+
+【执行单元（可直接使用）】
+- tasksubsession1.md ~ tasksubsession5.md（共 5 个）
+
+【进度日志】
+- memory.md（Session 0 已完成，下一步：Session 1）
+
+请检查以上文件，确认内容准确。
+如需修改，直接编辑对应文件。
+
+确认无误后，开启新会话，发送：
+"请读取 tasksubsession1.md 并按其中步骤执行"
+```
+
+小王检查文档，确认无误。**Session 0 结束，关闭此对话窗口。**
+
+---
+
+### 阶段二：Session 1–4 — 执行阶段（功能实现）
+
+> 每个 Session 开启新对话窗口，Agent 读取对应 tasksubsession 文件后执行。
+
+---
+
+#### Session 1 执行
+
+小王**开启新对话窗口**，发送：
+
+```
+请读取 tasksubsession1.md 并按其中步骤执行
+```
+
+Agent 读取 `tasksubsession1.md`，其中"上下文读取"清单为：
+- `CLAUDE.md`（项目背景）
+- `task.md`（功能目标）
+- `design.md`（架构设计）
+- ~~artifacts/session-0-summary.md~~ ← **Session 1 无前序 summary，这是正常情况，直接执行**
+
+Agent 测试通过后，先输出结果等待验收：
+
+```
+Session 1 测试通过
+Tests: passed ✅
+
+完成内容：核心指标看板组件，EER/COP 趋势图可渲染，预警逻辑已实现
+
+请确认结果是否符合预期：
+- 验收通过 → 回复"通过"或"继续"，我将写 summary 并更新 memory.md
+- 需要修改 → 直接说明修改内容，我在本窗口继续调整
+```
+
+小王确认结果满意，回复**"通过"**。Agent 写入 summary 并更新进度：
+
+```
+Session 1 完成
+Summary: artifacts/session-1-summary.md
+memory.md 已更新
+
+下一步：当你准备好后，开启新会话并发送：
+"请读取 tasksubsession2.md 并按其中步骤执行"
+```
+
+小王**关闭此对话窗口。**
+
+---
+
+#### Session 2、3、4 — 同样流程
+
+每次开新窗口 → 发送指令 → Agent 测试通过后等待验收 → 回复"通过" → 关闭窗口。
+
+Agent 每次执行前都会读取上一 Session 的 `artifacts/session-N-summary.md` 作为上下文交接。
+
+**上下文交接链：**
+
+```
+Session 2 读取 → artifacts/session-1-summary.md
+Session 3 读取 → artifacts/session-2-summary.md
+Session 4 读取 → artifacts/session-3-summary.md
 ```
 
 ---
 
-## 正式开发：Session 循环（开发阶段）
+#### 真实场景：Session 3 验收时发现需求大改
 
-Session 0 完成后，**关闭当前会话，开一个新会话**，每次只发：
+小王在 Session 3 验收时发现策略执行流程与实际业务不符，与 Codex 讨论后决定：
+- 新增一个"策略模拟预演"模块（In Scope 模块增加）
+- 修改 PRD.md，将原 Session 3 的"策略执行下发"拆分为"模拟预演"和"正式下发"两个模块
+
+这属于**大改**（In Scope 模块增减），触发大改流程。
+
+**Step 1：停止当前 Session**
+
+小王停止 Session 3，不写 summary，不更新 memory.md。
+
+**Step 2：修改需求文档**
+
+小王编辑 `PRD.md`，在 Feature Specifications 中新增"策略模拟预演"模块。
+
+**Step 3：重新执行 Session 0b**
+
+小王开启新窗口，发送：
 
 ```
-工作目录切到 <你的项目目录>
-请执行 startup-prompt.md 中的启动流程。
+请读取 1paperprdasprompt.md，重新执行 Session 0b
 ```
 
-Agent 自动从 `memory.md` 读取 `current_phase` 和 `next_session`，执行一个 Deliverable，测试通过后更新状态，然后停止。
+Agent 读取更新后的 PRD.md，重新产出：
+- `design.md`（模块边界变化，重新生成）
+- `work-plan.md`（Session 数从 5 个变为 6 个）
+- `tasksubsession1.md ~ tasksubsession6.md`（全量重新生成）
+- `memory.md` 追加变更记录：
+  ```
+  需求变更 2026-03-18：新增"策略模拟预演"模块，work-plan.md 已更新
+  变更级别：Major / 重新规划：work-plan.md 已更新
+  ```
 
-**每个 Session 完成后确认三件事：**
+**Step 4：Agent 输出复用评估表**
 
 ```
-✅ artifacts/session-N-summary.md 已写入
-✅ artifacts/session-N-manifest.json 已写入
-✅ memory.md 的 next_session 已更新
-✅ 若 Session 10 完成，current_phase 已转为 done
+需求变更后，已完成 Session 的交付物复用评估：
+
+| Session | 交付物 | 与新需求兼容性 | 建议 | 用户决定 |
+|---------|--------|--------------|------|---------|
+| Session 1 | 核心指标看板 | ✅ 兼容 | 复用 | □ 复用 □ 重做 |
+| Session 2 | 策略包列表与详情 | ✅ 兼容 | 复用 | □ 复用 □ 重做 |
+| Session 3 | 策略执行下发 | ❌ 不兼容（已拆分为两个模块） | 重做 | □ 复用 □ 重做 |
+
+请逐行确认后回复，我将从第一个"重做"的 Session 开始执行。
 ```
 
-然后关闭会话，开新会话，重复上面那句 Prompt。
+**Step 5：小王确认复用决策**
 
-```mermaid
-graph TD
-    START["开新 Session\n发送 startup-prompt.md"] --> R["Agent 读取 memory.md\n确定 current_phase + next_session"]
-    R --> PC{"current_phase?"}
-    PC -->|"design"| S0["执行 Session 0\n设计阶段"]
-    PC -->|"development"| SN["执行 Session N\n开发阶段"]
-    PC -->|"done"| DONE["🎉 Task 完成\n两阶段全部通过"]
+小王回复：
 
-    S0 --> T0{"测试结果"}
-    T0 -->|"✅ passed"| W0["写 session-0-summary.md\n写 session-0-manifest.json"]
-    T0 -->|"❌ failed/blocked"| FIX0["修复问题\n保持在 Session 0"]
-    FIX0 --> S0
-    W0 --> PHASE["更新 memory.md\ncurrent_phase: development\nnext_session: 1"]
-    PHASE --> STOP0["关闭当前 Session"]
-    STOP0 --> START
+```
+Session 1 复用
+Session 2 复用
+Session 3 重做
+```
 
-    SN --> TN{"测试结果"}
-    TN -->|"✅ passed"| W1["写 session-N-summary.md"]
-    TN -->|"❌ failed/blocked"| FIX["修复问题\n保持在 Session N"]
-    FIX --> SN
-    W1 --> W2["写 session-N-manifest.json"]
-    W2 --> W3["更新 memory.md\nnext_session = N+1"]
-    W3 --> CHECK{"N = 10?"}
-    CHECK -->|"No"| STOP["关闭当前 Session"]
-    CHECK -->|"Yes"| PHASE2["更新 memory.md\ncurrent_phase: done\nsession_gate: done"]
-    STOP --> START
-    PHASE2 --> DONE
+Agent 追加 memory.md：
+
+```
+复用决策：Session 1 复用 / Session 2 复用 / Session 3 重做
+```
+
+**Step 6：从 Session 3 重新开始**
+
+小王开启新窗口，发送：
+
+```
+请读取 tasksubsession3.md 并按其中步骤执行
+```
+
+Agent 按新的 tasksubsession3.md（现在是"策略模拟预演"模块）执行，后续 Session 4（正式下发）、Session 5（稳态验证与回退）、Session 6（HTML 交付）依次执行。
+
+---
+
+#### 异常情况：如果 summary 文件缺失
+
+假设小王在执行 Session 3 时，Agent 发现 `artifacts/session-2-summary.md` 为空：
+
+```
+⚠️ 上下文缺失：artifacts/session-2-summary.md 不存在或为空
+
+memory.md 检查结果：
+- Session 2 无完成记录。
+
+建议：先执行 tasksubsession2.md，完成后再执行本 Session。
+
+请确认处理方式后继续。
+```
+
+Agent **停止等待**，小王回头先执行 Session 2。
+
+---
+
+### 阶段三：Session 5 — 最终 HTML 原型交付
+
+> 这是核心交付物产出阶段。
+
+小王**开启新对话窗口**，发送：
+
+```
+请读取 tasksubsession5.md 并按其中步骤执行
+```
+
+Agent 读取文件，进入 HTML 原型生成模式。执行清单：
+
+```
+上下文读取：
+✅ CLAUDE.md        STIC 厂务平台业务背景
+✅ PRD.md           功能范围 + User Stories
+✅ design.md        四层架构设计
+✅ artifacts/session-4-summary.md  上一轮交接
+```
+
+Agent 生成 `chiller-strategy.html`，模拟数据严格按照 CLAUDE.md 业务背景编写：
+
+| 模拟数据项 | 内容示例 |
+|-----------|---------|
+| 机组列表 | 1# 离心机、2# 离心机、3# 螺杆机…（≥5条） |
+| 策略包列表 | 夜间低负荷优化包、夏季峰值节能包… |
+| EER 趋势数据 | 基于 STIC 北京厂区实际运行时段的模拟曲线 |
+| 执行记录 | 含工程师姓名、下发时间、稳态验证结果… |
+
+Agent 生成完成后，先输出结果等待验收：
+
+```
+Session 5 测试通过
+Tests: passed ✅
+
+chiller-strategy.html 已生成，可在浏览器直接打开。
+模拟数据覆盖：机组列表、策略包、EER 趋势、执行记录，均基于 STIC 业务背景。
+
+请确认结果是否符合预期：
+- 验收通过 → 回复"通过"或"继续"，我将写 summary 并更新 memory.md
+- 需要修改 → 直接说明修改内容，我在本窗口继续调整
+```
+
+小王打开文件确认演示效果，回复**"通过"**。Agent 完成收尾：
+
+```
+✅ 核心交付物已完成：
+
+- PRD.md（产品需求文档）
+- chiller-strategy.html（可交互原型 + 模拟数据）
+
+Session 5 完成
+Summary: artifacts/session-5-summary.md
+memory.md 已更新 → 项目状态: 全部完成
+```
+
+**小王直接用 `chiller-strategy.html` 在浏览器中演示给评审方。**
+
+---
+
+### 最终文件结构
+
+```
+my-project/
+├── 1paperprdasprompt.md     ← 工作流规范（只需一个文件）
+├── CLAUDE.md                  ← STIC 项目背景与约束
+├── PRD.md                     ← ✅ 核心交付物①：产品需求文档
+├── task.md                    ← chiller-strategy 功能目标
+├── design.md                  ← 四层架构设计
+├── work-plan.md               ← Session 1–5 计划
+├── chiller-strategy.html      ← ✅ 核心交付物②：可交互原型
+├── tasksubsession1.md         ← 已执行
+├── tasksubsession2.md         ← 已执行
+├── tasksubsession3.md         ← 已执行
+├── tasksubsession4.md         ← 已执行
+├── tasksubsession5.md         ← 已执行
+├── memory.md                  ← 进度日志（全部完成）
+└── artifacts/
+    ├── session-1-summary.md
+    ├── session-2-summary.md
+    ├── session-3-summary.md
+    ├── session-4-summary.md
+    └── session-5-summary.md
 ```
 
 ---
 
-## 参考 Demo
+## 核心机制说明
 
-`demo/stic-fab-chiller-strategy/` 展示了完整流程的真实结果：
+### Session 数量是怎么决定的
 
-| 文件 | 说明 |
+Agent 根据 PRD 中 Feature Specifications 的模块数量决定 Session 数：
+
+| PRD 功能模块数 | Session 数（含最终 HTML Session） |
+|---|---|
+| 1–2 个 | 2–3 个 |
+| 3–4 个 | 3–5 个 |
+| 5 个及以上 | 5–8 个 |
+
+本例 PRD 有 3 个功能模块（指标看板、策略包管理、执行闭环），拆为 4 个执行 Session + 1 个 HTML Session，共 5 个。
+
+---
+
+### 每个 Session 的上下文链
+
+每个 tasksubsession 文件都是**自包含的执行单元**，明确列出需要读取的文件：
+
+```
+普通 Session（N > 1）读取：
+  CLAUDE.md + task.md + design.md + artifacts/session-[N-1]-summary.md
+
+最终 HTML Session 读取：
+  CLAUDE.md + PRD.md + design.md + artifacts/session-[N-1]-summary.md
+```
+
+**你不需要手动传递任何上下文。** 文件即上下文，session summary 是跨窗口的交接文档。
+
+---
+
+### memory.md 的作用
+
+memory.md 是**给你（人类）看的进度日志**，不是给 Agent 的路由指令。
+
+| 谁用 | 何时用 | 用途 |
+|------|--------|------|
+| 你 | 随时 | 查看"现在做到哪一步了" |
+| Agent | summary 缺失时 | 辅助判断上一 Session 是否完成 |
+
+---
+
+### 用户决策点
+
+每个 Session Agent 输出结果后，你有三种选择：
+
+| 决策 | 操作 |
 |------|------|
-| `CLAUDE.md` | 项目背景：厂务平台、安全约束 |
-| `task.md` | 功能：制冷机房策略管理目标和验收标准 |
-| `PRD.md` | 问题定义、用户价值、功能范围 |
-| `design.md` | 四层架构、业务对象、执行模型 |
-| `work-plan.md` | Session 0-10，每条含 Deliverable + Test Gate |
-| `memory.md` | Session 3 完成，`session_gate: ready`，等待 Session 4 |
-| `artifacts/session-3-summary.md` | Session 3 交接文档 |
+| ✅ 验收通过 | 回复"通过"/"继续"→ Agent 写 summary、更新 memory.md → 开新会话执行下一个 |
+| 🔧 需要修改 | 直接说明修改内容 → Agent 在同一窗口调整 → 再次等待你验收 |
+| ❌ 方向不对 | 修改 tasksubsessionN.md，开新窗口重新执行 |
+| 🔄 需求小改 | 更新 task.md / design.md，修改受影响的 tasksubsession 文件，从当前 Session 重新执行 |
+| 🔄 需求大改 | 见下方"需求大改处理流程" |
+
+---
+
+### 需求大改处理流程（v2.2 新增）
+
+**什么情况算"大改"？**
+
+满足任一条件即视为大改：
+- In Scope 有模块增减（新增或删除功能模块）
+- 已完成 Session 的交付物与新需求不兼容
+- 核心数据模型或交互流程根本性变化
+
+**大改处理步骤：**
+
+```
+1. 停止当前 Session（不写 summary，不更新 memory.md）
+
+2. 开启新窗口，发送：
+   "请读取 1paperprdasprompt.md，重新执行 Session 0b"
+
+   Agent 会：
+   → 读取更新后的 CLAUDE.md / task.md / PRD.md
+   → 重新产出 design.md（模块边界变化时）、work-plan.md、tasksubsession1~N.md
+   → memory.md 追加变更记录
+
+3. Session 0b 完成后，Agent 输出复用评估表：
+
+   需求变更后，已完成 Session 的交付物复用评估：
+
+   | Session | 交付物 | 与新需求兼容性 | 建议 | 用户决定 |
+   |---------|--------|--------------|------|---------|
+   | Session 1 | 核心指标看板 | ✅ 兼容 | 复用 | □ 复用 □ 重做 |
+   | Session 2 | 策略包列表 | ⚠️ 部分兼容 | 修改后复用 | □ 复用 □ 重做 |
+   | Session 3 | 执行下发模块 | ❌ 不兼容 | 重做 | □ 复用 □ 重做 |
+
+4. 你逐条确认后，Agent 从第一个"重做"的 Session 开始重新执行
+```
+
+**示例场景：**
+
+小王在 Session 3 验收时发现需求不对，与 Codex 讨论后修改了 PRD.md，新增了一个"策略模拟预演"模块。这属于 In Scope 模块增减，触发大改流程。
+
+Agent 重新规划后输出评估表，小王确认 Session 1（指标看板）可复用，Session 2（策略包列表）需修改后复用，Session 3（执行下发）需重做。Agent 从 Session 2 开始重新执行。
+
+---
+
+### 恢复进度（已有 memory.md 时）
+
+如果中断后重新开始，发送同样的启动指令：
+
+```
+请读取 1paperprdasprompt.md，然后按照其中的入口协议开始执行。
+```
+
+Agent 发现 `memory.md` 已存在，会主动推断并建议：
+
+```
+当前进度：Session 3 已完成。
+
+建议执行 tasksubsession4.md。
+发送 "请读取 tasksubsession4.md 并按其中步骤执行" 即可继续。
+```
+
+**特殊情况：规划文档已存在但 memory.md 缺失**
+
+如果 CLAUDE.md / task.md / PRD.md / work-plan.md 都在，但 memory.md 被误删，Agent 会自动创建 memory.md 并初始化为 Session 0 完成状态，然后等待你确认下一步。不需要重新执行 Session 0。
+
+**特殊情况：项目已全部完成**
+
+如果 memory.md 中包含"项目状态: 全部完成"，Agent 会输出：
+
+```
+✅ 项目已全部完成。核心交付物：PRD.md + chiller-strategy.html
+
+如需迭代新功能，请更新 task.md / PRD.md 后告知我，我将重新规划。
+```
+
+Agent 不会建议执行不存在的后续 tasksubsession。
 
 ---
 
 ## 关键概念速查
 
-| 概念 | 定义 |
-|------|------|
-| **Project** | 你的整个产品（`CLAUDE.md` 跨所有功能共享） |
-| **Task** | 一个二级功能点，3-15 个 Session（`task.md`） |
-| **设计阶段** | `current_phase: design`，只含 Session 0，产出全部规划文档 |
-| **开发阶段** | `current_phase: development`，Sessions 1-10，逐步实现功能 |
-| **Session 0** | 规划 Session，只产文档，不写业务代码，完成后触发阶段转换 |
-| **Session 1+** | 每轮一个可测试交付物 |
-| **memory.md** | Workflow 路由真相，决定 `current_phase` 和下一个 Session |
-| **work-plan.md** | Session 拆分计划，每条含 Deliverable + Test Gate |
+| 概念                                 | 定义                             |
+| ---------------------------------- | ------------------------------ |
+| **Session 0**                      | 设计阶段，只产文档，不写业务代码               |
+| **Session 1–N**                    | 执行阶段，每轮一个可交付物                  |
+| **最后一个 Session**                   | 固定产出可交互 HTML 原型                |
+| **tasksubsessionN.md**             | 自包含执行单元，你执行时发送给 Agent 的指令文件    |
+| **artifacts/session-N-summary.md** | Session 完成报告，下一 Session 的上下文交接 |
+| **memory.md**                      | 人类可读的进度日志                      |
+| **CLAUDE.md**                      | 项目级背景，跨所有功能共享，基本不变             |
+| **PRD.md**                         | 核心交付物①，产品评审文档                  |
+| **[功能名].html**                     | 核心交付物②，可直接演示的交互原型              |
 
 ---
 
 ## 常见问题
 
 **Q: 我需要提前准备什么？**
-A: 不需要。只需知道"我要做什么系统"和"这次要实现哪个功能"，Agent 会通过问答帮你整理。
+A: 不需要。只需知道"做什么系统"和"这次实现哪个功能"，Agent 会通过问答帮你整理。
 
-**Q: Session 0 会自动生成 work-plan.md 吗？**
-A: 是的。Agent 根据你确认的功能需求，将整个功能拆分为 Session 0-10，每个 Session 都有明确的 Deliverable 和 Test Gate。
+**Q: 测试通过了，Agent 会不会自动写 summary？**
+A: 不会。测试通过后 Agent 只输出结果并等待你验收。只有你明确回复"通过"/"继续"后，Agent 才会写 `artifacts/session-N-summary.md` 并更新 `memory.md`。测试通过 ≠ Session 完成，你的验收确认 = Session 完成。
+
+**Q: 我已经有 CLAUDE.md 了，但没有 task.md，会怎么处理？**
+A: Agent 会判断需求文档"部分存在"，进入 Session 0a 补全缺失的文件，然后停止等待你确认。不会直接跳到 Session 0b。
+
+**Q: 每个 Session 必须开新对话窗口吗？**
+A: 是的。每个 Session 对应独立的对话窗口。新窗口保证 Agent 以干净状态读取 tasksubsession 文件，避免旧对话上下文干扰执行。
+
+**Q: Session 0 产出的 tasksubsession 文件能修改吗？**
+A: 可以。执行前可以直接编辑对应的 tasksubsession 文件调整子任务或验收标准。修改后重新执行即可。
 
 **Q: Session 测试失败了怎么办？**
-A: `memory.md` 里 `session_gate` 保持 `blocked`，下一个 Session 继续修复同一个 Deliverable，不跳过。
+A: Agent 会告知失败原因，memory.md 不更新。你可以修改 tasksubsessionN.md 后重新执行，或直接让 Agent 修复后重跑测试。
 
 **Q: 需求中途变了怎么办？**
-A: 更新 `task.md` 和 `work-plan.md`，在 `memory.md` 里记录变更，然后继续 Session 循环。
+A: 分两种情况：
+- **小改/中改**（措辞调整、单模块范围变化）：更新 task.md / design.md，修改受影响的 tasksubsession 文件，从当前 Session 重新执行。
+- **大改**（In Scope 模块增减、核心流程根本变化）：触发大改流程，Agent 重新执行 Session 0b 产出新规划，输出复用评估表，你逐条确认后从第一个"重做"的 Session 开始执行。详见"需求大改处理流程"。
+
+**Q: 我想修改 CLAUDE.md，Agent 会怎么处理？**
+A: Agent 会先提醒你"CLAUDE.md 通常不改，只有项目级约束发生根本变化时才需要更新"，然后明确确认"是否真的需要修改 CLAUDE.md？"。只有你确认"需要"且确属项目级约束根本变化时，才会进入大改流程。如果只是局部需求或实现细节变化，Agent 会按小改/中改处理，不修改 CLAUDE.md。
+
+**Q: 大改后，已完成的 Session 会被全部推倒重做吗？**
+A: 不会。Agent 会输出复用评估表，逐条评估每个已完成 Session 的交付物与新需求的兼容性（✅ 兼容 / ⚠️ 部分兼容 / ❌ 不兼容），你逐条确认后，Agent 只重做你标记为"重做"的 Session，其余复用。
+
+**Q: 最终 HTML 的模拟数据从哪里来？**
+A: Agent 从 `CLAUDE.md` 的业务背景中提取行业、角色、场景等信息，结合 `PRD.md` 的功能范围生成。你在 Session 0 填写的业务背景越详细，模拟数据越贴近真实。
+
+**Q: 只有一个文件 `1paperprdasprompt.md` 就够了吗？**
+A: 是的。这是单文件交付模式的核心设计——客户只需获取这一个文件，大模型即运行时，零依赖。
+
+**Q: Session 0b 执行到一半中断了怎么办？**
+A: 重新发送启动指令，Agent 会检测到 design.md 已存在但 work-plan.md 不存在，自动从 work-plan.md 开始继续产出，不会覆盖已有的 design.md。
+
+**Q: CLAUDE.md 里为什么没有工作流规则了？**
+A: v2.2 版本将工作流规则移到了 1paperprdasprompt.md 的 SECTION 4，CLAUDE.md 只保留项目业务上下文。这样每个 Session 读取 CLAUDE.md 时不会被工作流规则占用上下文空间。

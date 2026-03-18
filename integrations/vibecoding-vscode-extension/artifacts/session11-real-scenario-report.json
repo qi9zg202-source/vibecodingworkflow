@@ -1,19 +1,24 @@
 {
-  "fixture_root": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0",
+  "fixture_root": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1",
   "fixture_marker": "TEST_FIXTURE.md",
   "cleanup_policy": "Temporary fixture is deleted automatically after the script completes.",
   "workflows": [
     {
       "name": "customer-service-workbench",
-      "project_root": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench",
+      "project_root": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/customer-service-workbench",
       "expected_status": "ready",
       "expected_next_session": "3",
       "expected_next_prompt": "session-3-prompt.md",
+      "thread_id": "808f6a8e-5eaf-57c1-acbd-9458875bf3e7",
+      "latest_loop_log_entry": null,
+      "interrupted_next": [
+        "review_gate"
+      ],
       "runner_smoke_contents": "3|session-3-prompt.md"
     },
     {
       "name": "fab-energy-insights",
-      "project_root": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights",
+      "project_root": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights",
       "expected_status": "blocked",
       "expected_next_session": "5",
       "expected_next_prompt": "session-5-prompt.md"
@@ -23,7 +28,7 @@
     {
       "id": "vibeCoding.selectWorkflow",
       "args": [
-        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench"
+        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/customer-service-workbench"
       ]
     },
     {
@@ -40,10 +45,6 @@
     },
     {
       "id": "vibeCoding.openNextSessionPrompt",
-      "args": []
-    },
-    {
-      "id": "vibeCoding.openLoopLog",
       "args": []
     },
     {
@@ -53,31 +54,17 @@
     {
       "id": "vibeCoding.activateWorkflowRunner",
       "args": [
-        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench"
+        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/customer-service-workbench"
       ]
     },
     {
-      "id": "vibeCoding.pauseWorkflowRunner",
-      "args": [
-        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench"
-      ]
-    },
-    {
-      "id": "vibeCoding.resumeWorkflowRunner",
-      "args": [
-        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench"
-      ]
-    },
-    {
-      "id": "vibeCoding.cancelWorkflowRunner",
-      "args": [
-        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench"
-      ]
+      "id": "vibeCoding.refreshWorkflowStatus",
+      "args": []
     },
     {
       "id": "vibeCoding.selectWorkflow",
       "args": [
-        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights"
+        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights"
       ]
     },
     {
@@ -97,184 +84,144 @@
       "args": []
     },
     {
-      "id": "vibeCoding.openLoopLog",
-      "args": []
-    },
-    {
       "id": "vibeCoding.activateWorkflowRunner",
       "args": [
-        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights"
+        "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights"
       ]
     }
   ],
   "opened_documents": [
-    "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench/memory.md",
-    "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench/startup-prompt.md",
-    "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench/session-3-prompt.md",
-    "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench/outputs/session-logs/vibecoding-loop.jsonl",
-    "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights/memory.md",
-    "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights/startup-prompt.md",
-    "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights/session-5-prompt.md",
-    "/private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights/outputs/session-logs/vibecoding-loop.jsonl"
+    "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/customer-service-workbench/memory.md",
+    "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/customer-service-workbench/startup-prompt.md",
+    "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/customer-service-workbench/session-3-prompt.md",
+    "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights/memory.md",
+    "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights/startup-prompt.md",
+    "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights/session-5-prompt.md"
   ],
-  "terminal_commands": [
-    {
-      "name": "VibeCoding Runner: customer-service-workbench",
-      "cwd": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench",
-      "text": "RUNNER_LOG_PATH='/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench/.vibecoding/runner.log' RUNNER_CMD=''\"'\"'python3'\"'\"' '\"'\"'/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/run-vibecoding-loop.py'\"'\"' '\"'\"'/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench'\"'\"' '\"'\"'--action'\"'\"' '\"'\"'run'\"'\"' '\"'\"'--runner-cmd'\"'\"' '\"'\"'python3 -c \"from pathlib import Path; Path(r'\"'\"'\"'\"'\"'\"'\"'\"'outputs/session-logs/runner-smoke.txt'\"'\"'\"'\"'\"'\"'\"'\"').write_text('\"'\"'\"'\"'\"'\"'\"'\"' {next_session}|{next_prompt}\\n '\"'\"'\"'\"'\"'\"'\"'\"', encoding='\"'\"'\"'\"'\"'\"'\"'\"'utf-8'\"'\"'\"'\"'\"'\"'\"'\"')\"'\"'\"'' /bin/bash -lc 'mkdir -p \"$(dirname \"$RUNNER_LOG_PATH\")\"; printf \"\\n===== [%s] Runner start =====\\n\" \"$(date '\"'\"'+%Y-%m-%d %H:%M:%S'\"'\"')\" >> \"$RUNNER_LOG_PATH\"; stdin_tty=no; stdout_tty=no; stderr_tty=no; if [ -t 0 ]; then stdin_tty=yes; fi; if [ -t 1 ]; then stdout_tty=yes; fi; if [ -t 2 ]; then stderr_tty=yes; fi; runner_term=\"${TERM:-}\"; if [ -z \"$runner_term\" ] || [ \"$runner_term\" = \"dumb\" ]; then runner_term=\"xterm-256color\"; fi; printf \"Runner env: stdin_tty=%s stdout_tty=%s stderr_tty=%s TERM=%s\\n\" \"$stdin_tty\" \"$stdout_tty\" \"$stderr_tty\" \"$runner_term\" >> \"$RUNNER_LOG_PATH\"; if [ \"$stdin_tty\" = \"yes\" ] && [ \"$stdout_tty\" = \"yes\" ] && [ \"$stderr_tty\" = \"yes\" ]; then TERM=\"$runner_term\" script -aqF \"$RUNNER_LOG_PATH\" /bin/bash -lc \"$RUNNER_CMD\" 2>>\"$RUNNER_LOG_PATH\"; status=$?; else set -o pipefail; eval \"$RUNNER_CMD\" 2>&1 | tee -a \"$RUNNER_LOG_PATH\"; status=${PIPESTATUS[0]}; fi; printf \"===== [%s] Runner end (exit=%s) =====\\n\" \"$(date '\"'\"'+%Y-%m-%d %H:%M:%S'\"'\"')\" \"$status\" >> \"$RUNNER_LOG_PATH\"; exit \"$status\"'"
-    },
-    {
-      "name": "VibeCoding Runner: customer-service-workbench",
-      "cwd": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench",
-      "text": "\u001a"
-    },
-    {
-      "name": "VibeCoding Runner: customer-service-workbench",
-      "cwd": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench",
-      "text": "fg"
-    },
-    {
-      "name": "VibeCoding Runner: customer-service-workbench",
-      "cwd": "/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench",
-      "text": "\u0003"
-    }
-  ],
+  "terminal_commands": [],
   "info_messages": [
     {
-      "message": "Active workflow switched to /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench",
+      "message": "Active workflow switched to /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/customer-service-workbench",
       "items": []
     },
     {
-      "message": "Workflow ready: status=ready | gate=ready | next=3",
+      "message": "Workflow ready: workflow=ready | gate=ready | next=3",
       "items": []
     },
     {
-      "message": "Fresh session prepared: status=ready | gate=ready | next=3",
+      "message": "Workflow ready: workflow=ready | gate=ready | next=3",
+      "items": []
+    },
+    {
+      "message": "Current session triggered via LangGraph (019cff17-9d28-7fa3-8903-d4286cd5a9a3).",
       "items": [
-        "Open Startup Prompt",
-        "Open Next Session Prompt",
-        "Open Memory"
+        "Refresh Workflow Status"
       ]
     },
     {
-      "message": "Runner command sent to integrated terminal.",
+      "message": "Workflow ready: workflow=ready | gate=ready | next=3",
       "items": []
     },
     {
-      "message": "Workflow runner paused.",
-      "items": []
-    },
-    {
-      "message": "Workflow runner resumed.",
-      "items": []
-    },
-    {
-      "message": "Workflow runner cancelled.",
-      "items": []
-    },
-    {
-      "message": "Active workflow switched to /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights",
+      "message": "Active workflow switched to /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights",
       "items": []
     }
   ],
   "warning_messages": [
     {
-      "message": "Workflow blocked: status=blocked | gate=blocked | next=5",
+      "message": "Workflow blocked: workflow=blocked | gate=blocked | next=5",
       "items": []
     },
     {
-      "message": "Fresh session blocked: status=blocked | gate=blocked | next=5",
+      "message": "LangGraph run cannot start while the workflow is blocked. Fix the review notes first, then use “Reopen Current Session” so the workflow returns to ready.",
       "items": [
-        "Open Memory"
+        "Reopen Current Session",
+        "Show Output"
       ]
-    },
-    {
-      "message": "Runner not started because workflow status is blocked.",
-      "items": []
     }
   ],
   "error_messages": [],
   "status_bar_tail": [
     {
-      "text": "Vibe: S3 | running",
-      "tooltip": "**VibeCoding Workflow**\n\n- status: `ready`\n- session_gate: `ready`\n- next_session: `3`\n- next_session_prompt: `session-3-prompt.md`\n- last_completed_session: `2`\n- last_completed_session_tests: `passed`\n- next_action: `start_fresh_session`\n- message: Fresh session handoff is prepared\\.\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench`\n\nLast updated: 3/12/2026, 11:21:07 AM",
-      "command": "vibeCoding.openDashboard",
-      "backgroundColor": "statusBarItem.prominentBackground"
+      "text": "Vibe: workflow invalid | D manual",
+      "tooltip": "**VibeCoding Workflow**\n\n- workflow_status: `invalid`\n- workflow_gate: `n/a` (business gate)\n- next_session: `n/a`\n- next_session_prompt: `n/a`\n- last_completed_session: `n/a`\n- last_completed_session_tests: `n/a`\n- next_action: `investigate`\n- message: LangGraph returned an invalid workflow state payload\\.\n- daemon: `manual`\n- daemon_lifecycle: `online`\n- daemon_pid: `n/a`\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/customer-service-workbench`\n\nLast updated: 3/18/2026, 11:57:43 AM",
+      "command": "vibeCoding.refreshWorkflowStatus",
+      "backgroundColor": "statusBarItem.errorBackground"
     },
     {
-      "text": "Vibe: S3 | paused",
-      "tooltip": "**VibeCoding Workflow**\n\n- status: `ready`\n- session_gate: `ready`\n- next_session: `3`\n- next_session_prompt: `session-3-prompt.md`\n- last_completed_session: `2`\n- last_completed_session_tests: `passed`\n- next_action: `start_fresh_session`\n- message: Fresh session handoff is prepared\\.\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench`\n\nLast updated: 3/12/2026, 11:21:08 AM",
-      "command": "vibeCoding.openDashboard",
-      "backgroundColor": "statusBarItem.warningBackground"
-    },
-    {
-      "text": "Vibe: S3 | running",
-      "tooltip": "**VibeCoding Workflow**\n\n- status: `ready`\n- session_gate: `ready`\n- next_session: `3`\n- next_session_prompt: `session-3-prompt.md`\n- last_completed_session: `2`\n- last_completed_session_tests: `passed`\n- next_action: `start_fresh_session`\n- message: Fresh session handoff is prepared\\.\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench`\n\nLast updated: 3/12/2026, 11:21:08 AM",
-      "command": "vibeCoding.openDashboard",
-      "backgroundColor": "statusBarItem.prominentBackground"
-    },
-    {
-      "text": "Vibe: S3 | ready",
-      "tooltip": "**VibeCoding Workflow**\n\n- status: `ready`\n- session_gate: `ready`\n- next_session: `3`\n- next_session_prompt: `session-3-prompt.md`\n- last_completed_session: `2`\n- last_completed_session_tests: `passed`\n- next_action: `start_fresh_session`\n- message: Fresh session handoff is prepared\\.\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/customer-service-workbench`\n\nLast updated: 3/12/2026, 11:21:08 AM",
+      "text": "Vibe: W ready | D manual | S3",
+      "tooltip": "**VibeCoding Workflow**\n\n- workflow_status: `ready`\n- workflow_gate: `ready` (business gate)\n- next_session: `3`\n- next_session_prompt: `session-3-prompt.md`\n- last_completed_session: `2`\n- last_completed_session_tests: `passed`\n- next_action: `review_session`\n- message: LangGraph run is waiting for customer review\\. next\\_session=3\n- daemon: `manual`\n- daemon_lifecycle: `online`\n- daemon_pid: `n/a`\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/customer-service-workbench`\n\nLast updated: 3/18/2026, 11:57:45 AM",
       "command": "vibeCoding.prepareFreshSession",
       "backgroundColor": "statusBarItem.warningBackground"
     },
     {
-      "text": "Vibe: S5 | blocked",
-      "tooltip": "**VibeCoding Workflow**\n\n- status: `blocked`\n- session_gate: `blocked`\n- next_session: `5`\n- next_session_prompt: `session-5-prompt.md`\n- last_completed_session: `4`\n- last_completed_session_tests: `blocked`\n- next_action: `review_memory`\n- message: Workflow is not ready to advance\\.\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights`\n\nLast updated: 3/12/2026, 11:21:08 AM",
+      "text": "Vibe: W ready | D manual | S3",
+      "tooltip": "**VibeCoding Workflow**\n\n- workflow_status: `ready`\n- workflow_gate: `ready` (business gate)\n- next_session: `3`\n- next_session_prompt: `session-3-prompt.md`\n- last_completed_session: `2`\n- last_completed_session_tests: `passed`\n- next_action: `review_session`\n- message: LangGraph run is waiting for customer review\\. next\\_session=3\n- daemon: `manual`\n- daemon_lifecycle: `online`\n- daemon_pid: `n/a`\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/customer-service-workbench`\n\nLast updated: 3/18/2026, 11:57:45 AM",
+      "command": "vibeCoding.prepareFreshSession",
+      "backgroundColor": "statusBarItem.warningBackground"
+    },
+    {
+      "text": "Vibe: W blocked | D manual | S5",
+      "tooltip": "**VibeCoding Workflow**\n\n- workflow_status: `blocked`\n- workflow_gate: `blocked` (business gate)\n- next_session: `5`\n- next_session_prompt: `session-5-prompt.md`\n- last_completed_session: `4`\n- last_completed_session_tests: `n/a`\n- next_action: `review_blocker`\n- message: LangGraph thread has not been created yet\\. Using memory\\.md workflow state\\. next\\_session=5\n- daemon: `manual`\n- daemon_lifecycle: `online`\n- daemon_pid: `n/a`\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights`\n\nLast updated: 3/18/2026, 11:57:45 AM",
       "command": "vibeCoding.refreshWorkflowStatus",
       "backgroundColor": "statusBarItem.errorBackground"
     },
     {
-      "text": "Vibe: S5 | starting",
-      "tooltip": "**VibeCoding Workflow**\n\n- status: `blocked`\n- session_gate: `blocked`\n- next_session: `5`\n- next_session_prompt: `session-5-prompt.md`\n- last_completed_session: `4`\n- last_completed_session_tests: `blocked`\n- next_action: `review_memory`\n- message: Workflow is not ready to advance\\.\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights`\n\nLast updated: 3/12/2026, 11:21:08 AM",
+      "text": "Vibe: W blocked | R starting | D manual | S5",
+      "tooltip": "**VibeCoding Workflow**\n\n- workflow_status: `blocked`\n- workflow_gate: `blocked` (business gate)\n- next_session: `5`\n- next_session_prompt: `session-5-prompt.md`\n- last_completed_session: `4`\n- last_completed_session_tests: `n/a`\n- next_action: `review_blocker`\n- message: LangGraph thread has not been created yet\\. Using memory\\.md workflow state\\. next\\_session=5\n- daemon: `manual`\n- daemon_lifecycle: `online`\n- daemon_pid: `n/a`\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights`\n\nLast updated: 3/18/2026, 11:57:45 AM",
       "command": "vibeCoding.openDashboard",
       "backgroundColor": "statusBarItem.warningBackground"
     },
     {
-      "text": "Vibe: S5 | blocked",
-      "tooltip": "**VibeCoding Workflow**\n\n- status: `blocked`\n- session_gate: `blocked`\n- next_session: `5`\n- next_session_prompt: `session-5-prompt.md`\n- last_completed_session: `4`\n- last_completed_session_tests: `blocked`\n- next_action: `review_memory`\n- message: Workflow is not ready to advance\\.\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights`\n\nLast updated: 3/12/2026, 11:21:08 AM",
+      "text": "Vibe: W blocked | D manual | S5",
+      "tooltip": "**VibeCoding Workflow**\n\n- workflow_status: `blocked`\n- workflow_gate: `blocked` (business gate)\n- next_session: `5`\n- next_session_prompt: `session-5-prompt.md`\n- last_completed_session: `4`\n- last_completed_session_tests: `n/a`\n- next_action: `review_blocker`\n- message: LangGraph thread has not been created yet\\. Using memory\\.md workflow state\\. next\\_session=5\n- daemon: `manual`\n- daemon_lifecycle: `online`\n- daemon_pid: `n/a`\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights`\n\nLast updated: 3/18/2026, 11:57:45 AM",
       "command": "vibeCoding.refreshWorkflowStatus",
       "backgroundColor": "statusBarItem.errorBackground"
     },
     {
-      "text": "Vibe: S5 | blocked",
-      "tooltip": "**VibeCoding Workflow**\n\n- status: `blocked`\n- session_gate: `blocked`\n- next_session: `5`\n- next_session_prompt: `session-5-prompt.md`\n- last_completed_session: `4`\n- last_completed_session_tests: `blocked`\n- next_action: `review_memory`\n- message: Workflow is not ready to advance\\.\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights`\n\nLast updated: 3/12/2026, 11:21:08 AM",
+      "text": "Vibe: workflow invalid",
+      "tooltip": "**VibeCoding Workflow**\n\nLangGraph run cannot start while the workflow is blocked\\. Fix the review notes first, then use “Reopen Current Session” so the workflow returns to ready\\.\n\nLast updated: 3/18/2026, 11:57:45 AM",
+      "command": "vibeCoding.refreshWorkflowStatus",
+      "backgroundColor": "statusBarItem.errorBackground"
+    },
+    {
+      "text": "Vibe: W blocked | D manual | S5",
+      "tooltip": "**VibeCoding Workflow**\n\n- workflow_status: `blocked`\n- workflow_gate: `blocked` (business gate)\n- next_session: `5`\n- next_session_prompt: `session-5-prompt.md`\n- last_completed_session: `4`\n- last_completed_session_tests: `n/a`\n- next_action: `review_blocker`\n- message: LangGraph thread has not been created yet\\. Using memory\\.md workflow state\\. next\\_session=5\n- daemon: `manual`\n- daemon_lifecycle: `online`\n- daemon_pid: `n/a`\n- project_root: `/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights`\n\nLast updated: 3/18/2026, 11:57:45 AM",
       "command": "vibeCoding.refreshWorkflowStatus",
       "backgroundColor": "statusBarItem.errorBackground"
     }
   ],
   "output_tail": [
-    "driverPath=/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/run-vibecoding-loop.py",
-    "defaultProjectRoot=/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0",
     "",
-    "Opening memory.md: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights/memory.md",
+    "Command invoked: vibeCoding.openMemory",
+    "langGraphServerUrl=http://127.0.0.1:2024",
+    "defaultProjectRoot=/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1",
+    "",
+    "Opening memory.md: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights/memory.md",
     "",
     "Command invoked: vibeCoding.openStartupPrompt",
-    "pythonPath=python3",
-    "driverPath=/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/run-vibecoding-loop.py",
-    "defaultProjectRoot=/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0",
+    "langGraphServerUrl=http://127.0.0.1:2024",
+    "defaultProjectRoot=/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1",
     "",
-    "Opening startup-prompt.md: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights/startup-prompt.md",
+    "Opening startup-prompt.md: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights/startup-prompt.md",
     "",
     "Command invoked: vibeCoding.openNextSessionPrompt",
-    "pythonPath=python3",
-    "driverPath=/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/run-vibecoding-loop.py",
-    "defaultProjectRoot=/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0",
+    "langGraphServerUrl=http://127.0.0.1:2024",
+    "defaultProjectRoot=/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1",
     "",
-    "Resolving next session prompt for: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights",
+    "Resolving next session prompt for: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights",
     "Using cached inspect result for next session prompt resolution.",
-    "Opened next session prompt: /private/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights/session-5-prompt.md",
+    "Opened next session prompt: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights/session-5-prompt.md",
     "",
-    "Command invoked: vibeCoding.openLoopLog",
-    "pythonPath=python3",
-    "driverPath=/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/run-vibecoding-loop.py",
-    "defaultProjectRoot=/var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0",
+    "Validating fresh session run for: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights",
+    "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+    "Starting current session via LangGraph for: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights",
+    "Runner selection: custom template",
+    "LangGraph probe before refresh: online (http://127.0.0.1:2024, status=200)",
+    "Inspecting workflow via LangGraph HTTP state: http://127.0.0.1:2024",
+    "LangGraph thread not found for /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-oDHiN1/fab-energy-insights; using memory.md cold-start fallback until the first run creates the thread.",
     "",
-    "Validating fresh session run for: /var/folders/lg/bz3yv0q10rv0n6dk0zwytz300000gn/T/vibe-real-scenario-k5QKR0/fab-energy-insights",
-    "Preparing workflow via /Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/run-vibecoding-loop.py before starting runner (force refresh).",
-    "Prepare status=blocked",
-    "prepare next_action=review_memory: Open memory.md and resolve the blocked session state before continuing."
+    "[WARNING] LangGraph run cannot start while the workflow is blocked. Fix the review notes first, then use “Reopen Current Session” so the workflow returns to ready."
   ],
   "cleanup_completed": true,
   "result": "passed"

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STIC Fab CUS Strategy Workbench</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Session 1 / Workbench Skeleton</p>
+        <h1>STIC Fab CUS 制冷站节能策略编排与执行验证工作台</h1>
+        <p class="hero-text">
+          本轮只交付四大业务区域骨架与最小导航入口，用于验证 Operations Overview、Strategy Workbench、
+          Approval &amp; Execution、Audit &amp; Evidence 的页面边界与用户进入路径。
+        </p>
+      </div>
+      <div class="hero-panel">
+        <div class="hero-chip">人工审批不可绕过</div>
+        <div class="hero-chip">N+1 冗余必须保留</div>
+        <div class="hero-chip">策略建议必须可回退</div>
+        <div class="hero-meta">
+          <span>Session 1 边界</span>
+          <strong>只做工作台骨架，不实现 ROI 算法、对象模型和真实系统接入</strong>
+        </div>
+      </div>
+    </header>
+
+    <nav class="workspace-nav" aria-label="Business Areas">
+      <a class="nav-link is-active" data-target="overview" href="#overview" aria-current="page">Operations Overview</a>
+      <a class="nav-link" data-target="workbench" href="#workbench">Strategy Workbench</a>
+      <a class="nav-link" data-target="execution" href="#execution">Approval &amp; Execution</a>
+      <a class="nav-link" data-target="audit" href="#audit">Audit &amp; Evidence</a>
+    </nav>
+
+    <section class="workspace-map" id="workspace-map" aria-label="Workspace Map"></section>
+    <section class="boundary-ledger" id="boundary-ledger" aria-label="Session Boundary Ledger"></section>
+
+    <main class="workspace-grid">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <div class="content-stack">
+        <section id="overview" class="work-area" data-workspace-area="overview">
+          <div class="section-head">
+            <div>
+              <p class="card-label">Area 1</p>
+              <h2>Operations Overview</h2>
+            </div>
+            <p class="section-note">值班运行工程师先确认当前负荷、边界占用和是否存在待审批动作。</p>
+          </div>
+          <div class="panel-grid panel-grid-two" id="overview-entry"></div>
+          <div class="panel-grid panel-grid-three" id="overview-details"></div>
+        </section>
+
+        <section id="workbench" class="work-area" data-workspace-area="workbench">
+          <div class="section-head">
+            <div>
+              <p class="card-label">Area 2</p>
+              <h2>Strategy Workbench</h2>
+            </div>
+            <p class="section-note">节能优化工程师在这里查看策略包入口、适用工况占位和风险审查结构。</p>
+          </div>
+          <div class="panel-grid panel-grid-two" id="workbench-entry"></div>
+          <div class="panel-grid panel-grid-three" id="workbench-details"></div>
+        </section>
+
+        <section id="execution" class="work-area" data-workspace-area="execution">
+          <div class="section-head">
+            <div>
+              <p class="card-label">Area 3</p>
+              <h2>Approval &amp; Execution</h2>
+            </div>
+            <p class="section-note">审批、下发、稳态观察和回退入口在本轮只保留骨架步骤与最小说明。</p>
+          </div>
+          <div class="panel-grid panel-grid-two" id="execution-entry"></div>
+          <div class="panel-grid panel-grid-three" id="execution-details"></div>
+        </section>
+
+        <section id="audit" class="work-area" data-workspace-area="audit">
+          <div class="section-head">
+            <div>
+              <p class="card-label">Area 4</p>
+              <h2>Audit &amp; Evidence</h2>
+            </div>
+            <p class="section-note">课长与审查方可从这里进入审计轨迹、证据清单和 Session 交付物占位。</p>
+          </div>
+          <div class="panel-grid panel-grid-two" id="audit-entry"></div>
+          <div class="panel-grid panel-grid-three" id="audit-details"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

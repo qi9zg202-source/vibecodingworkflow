@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">VibeCoding Workflow and LangGraph Integration</title>
+  <desc id="desc">Architecture and execution flow showing project documents as business truth, LangGraph as runtime orchestration, Codex as runner, and human review as approval gate.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f7f7f2; }
+      .panel { fill: #ffffff; stroke: #1f2937; stroke-width: 2; rx: 18; ry: 18; }
+      .title { font: 700 28px 'SFMono-Regular', Menlo, Consolas, monospace; fill: #111827; }
+      .subtitle { font: 600 18px 'SFMono-Regular', Menlo, Consolas, monospace; fill: #1f2937; }
+      .label { font: 500 16px 'SFMono-Regular', Menlo, Consolas, monospace; fill: #111827; }
+      .small { font: 500 14px 'SFMono-Regular', Menlo, Consolas, monospace; fill: #374151; }
+      .node { stroke: #0f172a; stroke-width: 2; rx: 12; ry: 12; }
+      .doc { fill: #e0f2fe; }
+      .runtime { fill: #dcfce7; }
+      .runner { fill: #fef3c7; }
+      .review { fill: #fee2e2; }
+      .storage { fill: #ede9fe; }
+      .arrow { stroke: #334155; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+      .dashed { stroke-dasharray: 10 8; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <polygon points="0 0, 10 5, 0 10" fill="#334155" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="980" />
+
+  <text class="title" x="60" y="60">VibeCoding + LangGraph Target Architecture</text>
+  <text class="small" x="60" y="90">Business truth stays in files. Runtime orchestration moves to LangGraph. Codex remains the execution runner.</text>
+
+  <rect class="panel" x="50" y="130" width="470" height="760" />
+  <text class="subtitle" x="80" y="170">1. Business Definition Layer</text>
+  <text class="small" x="80" y="195">Owned by this project. Human-readable and Git-trackable.</text>
+
+  <rect class="node doc" x="80" y="230" width="170" height="70" />
+  <text class="label" x="103" y="272">Requirements</text>
+  <rect class="node doc" x="280" y="230" width="170" height="70" />
+  <text class="label" x="336" y="272">Prototype</text>
+
+  <rect class="node doc" x="80" y="340" width="170" height="70" />
+  <text class="label" x="145" y="382">PRD.md</text>
+  <rect class="node doc" x="280" y="340" width="170" height="70" />
+  <text class="label" x="330" y="382">design.md</text>
+
+  <rect class="node doc" x="80" y="450" width="170" height="70" />
+  <text class="label" x="135" y="492">task.md</text>
+  <rect class="node doc" x="280" y="450" width="170" height="70" />
+  <text class="label" x="298" y="492">work-plan.md</text>
+
+  <rect class="node doc" x="80" y="560" width="170" height="70" />
+  <text class="label" x="112" y="602">memory.md</text>
+  <rect class="node doc" x="280" y="560" width="170" height="70" />
+  <text class="label" x="292" y="602">session-N-prompt.md</text>
+
+  <rect class="node doc" x="80" y="670" width="370" height="90" />
+  <text class="label" x="145" y="710">artifacts/session-N-summary.md</text>
+  <text class="small" x="118" y="736">manifest, tests, logs, review notes, produced files</text>
+
+  <path class="arrow" d="M165 300 L165 340" />
+  <path class="arrow" d="M365 300 L365 340" />
+  <path class="arrow" d="M165 410 L165 450" />
+  <path class="arrow" d="M365 410 L365 450" />
+  <path class="arrow" d="M165 520 L165 560" />
+  <path class="arrow" d="M365 520 L365 560" />
+  <path class="arrow" d="M265 715 L265 760" />
+
+  <rect class="panel" x="565" y="130" width="480" height="760" />
+  <text class="subtitle" x="595" y="170">2. LangGraph Runtime Layer</text>
+  <text class="small" x="595" y="195">Checkpointed orchestration with thread_id, interrupts, and durable execution.</text>
+
+  <rect class="node runtime" x="600" y="235" width="200" height="72" />
+  <text class="label" x="619" y="278">load_workflow_state</text>
+
+  <rect class="node runtime" x="810" y="235" width="200" height="72" />
+  <text class="label" x="845" y="278">select_session</text>
+
+  <rect class="node runtime" x="600" y="355" width="200" height="72" />
+  <text class="label" x="620" y="398">build_runner_input</text>
+
+  <rect class="node review" x="810" y="355" width="200" height="72" />
+  <text class="label" x="846" y="398">review_gate</text>
+
+  <rect class="node runner" x="600" y="475" width="200" height="72" />
+  <text class="label" x="632" y="518">run_runner_task</text>
+
+  <rect class="node runtime" x="810" y="475" width="200" height="72" />
+  <text class="label" x="837" y="518">collect_outputs</text>
+
+  <rect class="node runtime" x="600" y="595" width="200" height="72" />
+  <text class="label" x="612" y="638">persist_workflow_files</text>
+
+  <rect class="node runtime" x="810" y="595" width="200" height="72" />
+  <text class="label" x="865" y="638">route_next</text>
+
+  <rect class="node storage" x="650" y="735" width="310" height="95" />
+  <text class="label" x="730" y="775">LangGraph Checkpointer</text>
+  <text class="small" x="684" y="803">thread_id, state snapshots, interrupts, resume</text>
+
+  <path class="arrow" d="M800 271 L810 271" />
+  <path class="arrow" d="M910 307 L910 355" />
+  <path class="arrow" d="M810 391 L800 391" />
+  <path class="arrow" d="M700 427 L700 475" />
+  <path class="arrow" d="M800 511 L810 511" />
+  <path class="arrow" d="M810 547 L800 547" />
+  <path class="arrow" d="M700 667 L700 700" />
+  <path class="arrow" d="M910 667 L910 700" />
+  <path class="arrow" d="M910 547 L910 595" />
+
+  <rect class="panel" x="1090" y="130" width="460" height="760" />
+  <text class="subtitle" x="1120" y="170">3. Execution and Review Layer</text>
+  <text class="small" x="1120" y="195">External side effects and human decisions stay explicit.</text>
+
+  <rect class="node runner" x="1130" y="250" width="180" height="80" />
+  <text class="label" x="1180" y="285">Codex</text>
+  <text class="small" x="1168" y="310">CLI / API runner</text>
+
+  <rect class="node runner" x="1330" y="250" width="180" height="80" />
+  <text class="label" x="1366" y="285">Runner Logs</text>
+  <text class="small" x="1367" y="310">stdout / stderr / traces</text>
+
+  <rect class="node review" x="1130" y="410" width="380" height="110" />
+  <text class="label" x="1205" y="450">Human Review / Approve / Reject</text>
+  <text class="small" x="1172" y="478">interrupt payload, approval decision, rejection reason</text>
+
+  <rect class="node storage" x="1130" y="610" width="380" height="120" />
+  <text class="label" x="1218" y="652">Git + File System Truth</text>
+  <text class="small" x="1170" y="680">PRD / design / task / memory / summaries / manifests</text>
+  <text class="small" x="1232" y="704">visible, editable, auditable</text>
+
+  <path class="arrow" d="M1010 391 L1130 391" />
+  <path class="arrow" d="M1010 511 L1130 290" />
+  <path class="arrow" d="M1310 290 L1330 290" />
+  <path class="arrow" d="M1220 330 L1220 410" />
+  <path class="arrow" d="M1320 520 L1320 610" />
+
+  <path class="arrow dashed" d="M450 595 L600 595" />
+  <path class="arrow dashed" d="M450 715 L600 625" />
+  <path class="arrow dashed" d="M1130 670 L800 635" />
+  <path class="arrow dashed" d="M960 782 L1130 670" />
+
+  <text class="small" x="468" y="575">read business truth</text>
+  <text class="small" x="454" y="705">collect produced artifacts</text>
+  <text class="small" x="1030" y="372">interrupt / approval request</text>
+  <text class="small" x="1040" y="660">atomic write back</text>
+
+  <rect x="60" y="915" width="1480" height="40" fill="none" />
+  <text class="small" x="65" y="940">Flow: Requirements/Prototype -> PRD/design/task/session prompts -> LangGraph selects next session -> optional review interrupt -> Codex runner executes -> outputs collected -> memory/artifacts updated -> route next session.</text>
+</svg>

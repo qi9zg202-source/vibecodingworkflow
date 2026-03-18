@@ -35,6 +35,7 @@ __FEATURE_NAME__
 - `memory.md`
 
 ## Allowed Tools
-- Codex
-- Python driver
+- LangGraph Local Server（执行运行时）
+- Claude Code / Codex CLI（session 执行器，由 LangGraph subprocess 调用）
 - 编辑器 / 终端
+- `scripts/archived/run-vibecoding-loop.py`（历史归档参考，不属于当前主路径）

@@ -1,0 +1,67 @@
+{
+  "session": "R1",
+  "status": "passed",
+  "covered_cases": [
+    "TC-E-01",
+    "TC-E-02",
+    "TC-E-03",
+    "TC-E-04",
+    "TC-E-05",
+    "TC-E-06",
+    "TC-BEH-04"
+  ],
+  "failed_cases": [],
+  "blocked_cases": [],
+  "evidence": [
+    {
+      "case": "TC-E-01",
+      "file": "1paperprdasprompt.md",
+      "lines": "14-19",
+      "result": "passed",
+      "note": "无需求文档时进入 Session 0a，并停止等待用户确认。"
+    },
+    {
+      "case": "TC-E-02",
+      "file": "1paperprdasprompt.md",
+      "lines": "21-23",
+      "result": "passed",
+      "note": "部分需求文档存在时补全缺失文档，并停止等待确认。"
+    },
+    {
+      "case": "TC-E-03",
+      "file": "1paperprdasprompt.md",
+      "lines": "25-27",
+      "result": "passed",
+      "note": "三份需求文档齐全且 work-plan 缺失时进入 Session 0b。"
+    },
+    {
+      "case": "TC-E-04",
+      "file": "1paperprdasprompt.md",
+      "lines": "29-33",
+      "result": "passed",
+      "note": "规划文档齐全但 memory 缺失时仅重建 memory.md。"
+    },
+    {
+      "case": "TC-E-05",
+      "file": "1paperprdasprompt.md",
+      "lines": "35-49",
+      "result": "passed",
+      "note": "项目未完成时读取 memory 并建议下一个 tasksubsession，同时等待用户确认。"
+    },
+    {
+      "case": "TC-E-06",
+      "file": "1paperprdasprompt.md",
+      "lines": "38-42",
+      "result": "passed",
+      "note": "项目全部完成时输出完成提示和迭代建议，不再建议新的 tasksubsession。"
+    },
+    {
+      "case": "TC-BEH-04",
+      "file": "1paperprdasprompt.md",
+      "lines": "19-23,707",
+      "result": "passed",
+      "note": "需求文档未确认前必须停在 Session 0a，禁止直接进入 Session 0b。"
+    }
+  ],
+  "next_session": "R2"
+}

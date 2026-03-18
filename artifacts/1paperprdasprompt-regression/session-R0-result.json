@@ -1,0 +1,25 @@
+{
+  "session": "R0",
+  "status": "passed",
+  "covered_cases": [],
+  "failed_cases": [],
+  "blocked_cases": [],
+  "evidence": [
+    {
+      "file": "tests/test-1paperprdasprompt-execution-plan.md",
+      "lines": "152-180",
+      "note": "R0 定义为建立回归基线，只固化流程，不做正式判定。"
+    },
+    {
+      "file": "tests/test-1paperprdasprompt-execution-plan.md",
+      "lines": "371-412",
+      "note": "后续轮次必须由 test-memory 驱动；失败时禁止推进。"
+    },
+    {
+      "file": "docs/progress-loop.md",
+      "lines": "96-103",
+      "note": "工作流禁止跳过状态推进与 summary/manifest 记录。"
+    }
+  ],
+  "next_session": "R1"
+}

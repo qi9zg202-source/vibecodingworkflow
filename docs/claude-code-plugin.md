@@ -1,284 +1,245 @@
-# VibeCoding VSCode Extension
+# VibeCoding VS Code Extension
 
-VSCode 扩展是 VibeCoding 工作流的 IDE 集成层，提供可视化 Dashboard、状态栏、Runner 控制和 **HITL 验收按钮**，但**不拥有 workflow 真相**——所有状态来源仍是 `memory.md` 和 Python driver。
+> 2026-03-17 设计更新：本说明对齐“LangGraph Local Server 常驻 + 单 session 显式触发 + runner 完成后先人工验收”的执行模型。
 
----
+## 定位
+
+VS Code 插件是 VibeCoding 工作流的 IDE 集成层：
+
+- 提供 Dashboard、状态栏、文件打开器、Approve / Reject 入口
+- 提供 LangSmith Studio deep-link，便于查看 thread / node / checkpoint
+- 调用 LangGraph Local Server 读取状态、触发执行、提交验收结论
+- 不拥有 workflow 真相，不自行决定 `next_session`
+
+业务真相与运行时真相分层如下：
+
+- `memory.md`：官方 workflow 进度与业务 gate
+- LangGraph runtime：本次 run 的执行状态、checkpoint、interrupt / resume
+- VS Code 插件：展示这两层状态，并转发用户动作
 
 ## 整体架构
 
-```
-VSCode Extension (UI Layer)
+```text
+VS Code Extension (UI Shell)
     │
-    ├── Activity Bar Sidebar → 迷你启动器（Open Dashboard 按钮）
-    ├── Dashboard Webview Panel → 全屏控制台
-    ├── Status Bar → 实时显示 session/gate 状态
-    └── Commands → 触发 inspect / prepare / runner / 验收操作
+    ├── Activity Bar / Dashboard / Status Bar
+    ├── Open Memory / Work Plan / Session Prompt
+    ├── Start Current Session
+    └── Approve / Reject Current Session
          │
          ▼
-Python Driver (run-vibecoding-loop.py)
+LangGraph Local Server (Long-Running Runtime)
          │
-         ▼
-memory.md / session-N-prompt.md（workflow 真相）
-         │
-         ▼
-Claude CLI（执行 Session 工作）
+         ├── GET /threads/{thread_id}/state
+         ├── POST /threads/{thread_id}/runs
+         └── POST /threads/{thread_id}/runs/{run_id}/resume
+              │
+              ▼
+memory.md + work-plan.md + session-N-prompt.md
+              │
+              ▼
+Runner subprocess (Codex / Claude Code)
 ```
 
----
+历史 Python driver 已归档到 `scripts/archived/run-vibecoding-loop.py`，当前插件设计不再把它作为主路径；仅在 LangGraph 离线时保留极小范围的 `memory.md` 直写兜底。
 
-## 安装与配置
+## 核心执行规则
+
+- LangGraph Local Server 应作为本地常驻服务运行
+- Session 0 负责生成第一版 `work-plan.md` 与后续 `session-N-prompt.md`
+- 每次 `POST /runs` 只执行一个“当前 Session 的一次 attempt”
+- runner 完成后只代表“候选结果已产出”，不代表 workflow 已推进
+- 必须先经过客户验收，再由 LangGraph 在 approve 路径下写 summary / manifest / `memory.md`
+- 验收不通过时，允许先更新 `PRD.md` / `design.md` / `task.md`，再修订 `work-plan.md` 与当前/后续 prompt
+- `memory.md` 只在验收通过后推进；reject 不推进 `next_session`
+
+## 配置与依赖
 
 ### 前提
 
-- VSCode ≥ 1.85
-- Python ≥ 3.9（用于执行 driver）
-- `run-vibecoding-loop.py` 已在本地可用
+- VS Code >= 1.85
+- 本机可访问 LangGraph Local Server，默认 `http://localhost:2024`
+- workflow 项目包含 `memory.md`、`work-plan.md`、`session-N-prompt.md` 等标准文件
 
-### 配置项
+### 主要配置
 
-打开 VSCode 设置（`Cmd+,`），搜索 `vibeCoding`：
+| 设置项 | 作用 |
+|---|---|
+| `vibeCoding.langGraphServerUrl` | LangGraph Local Server 地址 |
+| `vibeCoding.defaultProjectRoot` | 默认 workflow 根目录 |
+| `vibeCoding.runnerCommandTemplate` | 触发当前 Session 时传给 LangGraph 的 runner 模板 |
 
-| 设置项 | 默认值 | 说明 |
-|--------|--------|------|
-| `vibeCoding.pythonPath` | `python3` | Python 可执行路径 |
-| `vibeCoding.driverPath` | `""` | `run-vibecoding-loop.py` 的绝对路径（留空则用内置默认路径） |
-| `vibeCoding.defaultProjectRoot` | `""` | workflow 项目根目录（留空自动用当前 workspace）|
-| `vibeCoding.runnerCommandTemplate` | `""` | fresh session 启动命令模板（用于 `--action run`）|
+补充说明：
 
----
+- 当前实现仍保留部分历史设置项，但它们不再属于推荐设计基线。
+- `Refresh Workflow Status` 与 `Start Runner In Terminal` 依赖 LangGraph 在线；插件会先探测服务状态，并尝试自动启动本地 `start-langgraph-dev.sh`。
+- `Approve / Reject` 在线时走 LangGraph resume；离线时仅回退到直接更新 `memory.md` 的兼容路径。
 
 ## UI 组件
 
-### Activity Bar Sidebar — 迷你启动器
+### Activity Bar / Dashboard
 
-点击 Activity Bar 的 VibeCoding 图标打开侧边栏，侧边栏显示一个 **Open Dashboard** 按钮。点击后在编辑器区域打开全屏 Dashboard Webview Panel。
+Dashboard 是主控制台，至少需要展示：
 
-### Dashboard Webview Panel — 全屏控制台
+- workflow business state：`ready` / `blocked` / `done` / `invalid`
+- runtime run state：`pending` / `running` / `interrupted` / `success` / `error`
+- 当前 `next_session` 与 `next_session_prompt`
+- 候选 summary / manifest / 测试结果路径
+- Approve / Reject / 打开关键文档动作
 
-Dashboard 是主要操作界面，包含以下区域：
+Dashboard 中的 Session 时间线不能只显示“未执行 / 执行中 / 完成”三态。对客户可见的最小状态机应至少覆盖：
 
-**顶栏（Top Bar）**
-- 左：VibeCoding 品牌标识
-- 中：Phase pill、Gate pill、Runner 状态 pill
-- 右：**Debug** 按钮（点击展开/收起调试信息面板，显示 `sessionGate`、`projectRoot`、`result` 等状态）
+| 场景 | UI 状态 | 说明 |
+|---|---|---|
+| 当前 session 已就绪但还没点 Start | `待启动` | 等待用户显式触发，不是“未执行原因不明” |
+| run 已创建但 runner 还没接管 | `排队中` / `启动中` | 正在从调度层切换到 runner |
+| runner 正在执行 | `执行中` | 当前 session attempt 正在运行 |
+| runner 被中止或挂起 | `已暂停` | 等待恢复或人工处理 |
+| runner 产出候选结果后进入 interrupt | `待验收` | 等待 Approve / Reject |
+| 上一次 run 失败 | `失败待重试` | 当前 session 还没重新开始 |
+| reject 后 workflow 卡住 | `已阻塞` | 必须先处理 review notes |
+| 后续 session 尚未轮到 | `等待前序` | 前序 session 未完成前不会自动开始 |
 
-**HITL 验收 Banner（核心功能）**
+每个 session 行除了状态 pill，还应展示一句原因说明，例如“上一轮 run 失败，当前 session 尚未重新触发”或“当前 next_session 是 session-5，前序未完成前不会开始这里”。
 
-| `session_gate` | Banner 颜色 | 可操作按钮 |
-|---------------|------------|-----------|
-| `pending_review` | 琥珀色 | ✅ 批准，推进下一 Session / ❌ 驳回 |
-| `blocked` | 红色 | 🔄 重新开放本 Session |
+Dashboard 负责业务动作，不负责替代 LangGraph 调试视图：
 
-- **✅ 批准**：直接将 `memory.md` 中的 `session_gate` 改为 `ready`，无需手动编辑文件
-- **❌ 驳回**：弹出输入框填写驳回原因，自动写入 `review_notes` 并将 `session_gate` 改为 `blocked`
-- **🔄 重新开放**：将 `session_gate` 重置为 `ready`，允许重新执行本 Session
+- 应在 Dashboard 中完成：
+  - `Start Current Session`
+  - `Approve / Reject Current Session`
+  - 打开 `memory.md`、`startup-prompt.md`、当前 session prompt、summary、loop log
+- 不应要求普通使用者进入 Studio 才能完成 session 推进
 
-**进度统计行**
-- 已完成 Session / 共 N 个（含进度条）
-- 下一个 Session 编号和 prompt 文件名
-- 工作流总数
-- 完成百分比
+### LangSmith Studio
 
-**调度驱动器卡片**
-- 当前进程信息（PID、启动时间、运行时长、心跳）
-- 启动 / 停止 / killpid 控制按钮
+LangSmith Studio 是辅助调试界面，不是 workflow 主控制台。
 
-**双面板：工作流列表 + Session 时间线**
-- 左：所有 workflow 项目列表，可切换选中
-- 右：Session prompt 文件列表，含完成状态、时间、打开按钮
+- 适合：
+  - 查看 thread history
+  - 查看 node traversal / checkpoint / state
+  - 做 fork、checkpoint rerun、interrupt 调试
+- 不适合承担：
+  - “当前该不该推进到下一个 Session”的主交互
+  - 使用者视角下的主验收按钮入口
 
-### Status Bar（底部状态栏）
+推荐实现：
 
-| 显示 | 含义 |
-|------|------|
-| `Vibe: idle` | 未检测到项目或尚未刷新 |
-| `Vibe: S3 \| ready` | Session 3 待执行，gate = ready |
-| `Vibe: S3 \| pending_review` | Session 3 完成，等待人工验收 |
-| `Vibe: S3 \| blocked` | Session 3 被拒绝或遇到阻塞 |
-| `Vibe: S3 \| running` | Runner 正在执行 Session 3 |
-| `Vibe: done` | 全部 Session 完成 |
+- Dashboard 显示当前 `thread_id`、`run_id` 与 Studio deep-link
+- 出现复杂运行时问题时再跳转到 Studio 深挖
+- 默认用户路径仍然停留在 Dashboard
 
-鼠标悬停状态栏可查看完整 tooltip：`status`、`session_gate`、`next_session`、`next_session_prompt`、`last_completed_session_tests` 等。
+### Status Bar
 
----
+状态栏必须把 workflow state 与 runtime state 分开显示，避免把“run 执行完成”误读为“业务状态已推进”。
 
-## 命令列表
+推荐示例：
 
-通过命令面板（`Cmd+Shift+P`）搜索 `VibeCoding`：
+- `Vibe: W ready | S3`
+- `Vibe: W blocked | S3`
+- `Vibe: W ready | R running | S3`
+- `Vibe: W ready | R review | S3`
+- `Vibe: workflow done`
 
-| 命令 | 作用 |
-|------|------|
-| `VibeCoding: Open Dashboard` | 打开全屏 Webview 控制台 |
-| `VibeCoding: Refresh Workflow Status` | 调用 `driver inspect`，读取 `memory.md`，刷新 UI |
-| `VibeCoding: Open Memory` | 在编辑器中打开 `memory.md` |
-| `VibeCoding: Open Startup Prompt` | 打开 `startup-prompt.md` |
-| `VibeCoding: Open Next Session Prompt` | 打开当前 `next_session` 对应的 `session-N-prompt.md` |
-| `VibeCoding: Prepare Fresh Session` | 调用 `driver prepare`，生成 `session-N-spec.json` |
-| `VibeCoding: Start Runner In Terminal` | 在集成终端启动 `driver --action run`（持续驱动循环）|
-| `VibeCoding: Open Loop Log` | 查看 `outputs/session-logs/vibecoding-loop.jsonl` |
-| `VibeCoding: Configure Python Driver Path` | 快速跳转到 `driverPath` 设置项 |
+其中：
 
-> Dashboard Banner 按钮对应内部命令 `vibeCoding.approveSession` / `vibeCoding.rejectSession`，无需手动触发，点击 Banner 按钮即可。
+- `W ...` 来自 `memory.md` 对应的业务 gate
+- `R ...` 来自 LangGraph run API 的运行时状态
 
----
+## 命令设计
 
-## 使用流程（HITL 循环）
+推荐主命令：
 
-### 1. 初始化：Refresh Workflow Status
+- `VibeCoding: Refresh Workflow Status`
+- `VibeCoding: Open Memory`
+- `VibeCoding: Open Startup Prompt`
+- `VibeCoding: Open Work Plan`
+- `VibeCoding: Open Next Session Prompt`
+- `VibeCoding: Start Runner In Terminal`
+- `VibeCoding: Approve Current Session`
+- `VibeCoding: Reject Current Session`
+- `VibeCoding: Open Loop Log`
+- `VibeCoding: Configure LangGraph Server URL`
 
-打开项目后先执行一次 Refresh，扩展调用 `driver inspect`，解析 `memory.md` 并更新状态栏和 Dashboard。
+说明：
 
-> **注意**：`session_gate` 直接从 `memory.md` 读取，无需等待 driver 调用。Dashboard 打开即可看到当前验收状态。
+- 当前 UI 命令名仍保留 `Prepare Fresh Session` 与 `Start Runner In Terminal`，但其实现已经切换到 LangGraph read path / run path，而不是调用 Python driver。
+- `Open in Studio` 更适合作为 Dashboard 中的上下文链接，而不是要求用户记忆的主命令。
+- 若未来补充独立命令，也只应服务于运行时排障，不应承载业务审批语义。
 
-### 2. 检查 session_gate
+## 标准使用流程
 
-Dashboard 顶栏 Gate pill 和 Banner 会同步显示当前状态：
+### 1. Refresh
 
-| gate 状态 | Dashboard 表现 | 下一步操作 |
-|-----------|--------------|-----------|
-| `ready` | 无 Banner | 执行 Prepare Fresh Session |
-| `pending_review` | **琥珀色 Banner + 验收按钮** | 审核后点击批准或驳回 |
-| `blocked` | **红色 Banner + 重新开放按钮** | 查看 `review_notes`，修复后点击重新开放 |
-| `in_progress` | Gate pill 显示执行中 | 等待 Runner 完成 |
-| `done` | Gate pill 显示已完成 | 全部流程结束 |
+插件调用 `GET /threads/{thread_id}/state`，读取：
 
-### 3. 准备并执行 Session
+- `current_phase`
+- `session_gate`
+- `next_session`
+- `next_session_prompt`
+- 最近已通过验收的 session 信息
 
-```
-Prepare Fresh Session
-  → driver prepare → 写 outputs/session-specs/session-N-spec.json
-  → Open Next Session Prompt（查看本次要做什么）
-  → Start Runner In Terminal（驱动 Claude CLI 执行 Session）
-```
+### 2. Start Current Session
 
-Runner 启动后，终端会显示 Claude CLI 的执行过程。Session 完成后 Claude 会：
+用户触发 `Start Runner In Terminal` 后：
+
+- 插件先探测 LangGraph；若离线则尝试自动启动本地服务
+- 只有 LangGraph 在线时才会真正触发 run
+- LangGraph 读取 `memory.md`
+- 只执行当前 `next_session` 的一次 attempt
+- runner 在 fresh context 中消费 `startup-prompt.md` 和当前 `session-N-prompt.md`
+
+### 3. Wait For Review
+
+runner 完成后，run 进入 `interrupted`，表示：
+
+- 候选产物已经生成
+- 正在等待客户验收
+- 业务状态尚未正式推进
+
+### 4. Approve
+
+用户批准后，插件调用 `POST /runs/{run_id}/resume`，LangGraph 执行：
+
 - 写 `artifacts/session-N-summary.md`
 - 写 `artifacts/session-N-manifest.json`
-- 更新 `memory.md`，设 `session_gate = pending_review`
+- 更新 `memory.md`
+- 必要时把 `next_session` 推进到下一轮，或将 workflow 标记为 `done`
 
-### 4. 人工验收（HITL Review Gate）
+### 5. Reject / Rework
 
-Dashboard 顶栏变为 **Gate: 待验收** pill，同时展示**琥珀色验收 Banner**：
+用户驳回后：
 
-```
-┌─────────────────────────────────────────────────────────┐
-│ ⏸  等待人工验收 — Session 已完成                          │
-│    请检查产出物和代码变更，确认无误后批准推进，或驳回并填写原因 │
-│    [ ✅ 批准，推进下一 Session ]  [ ❌ 驳回 ]              │
-└─────────────────────────────────────────────────────────┘
-```
+- 当前 `next_session` 保持不变
+- 驳回原因写入 `review_notes` / runtime interrupt payload
+- 允许先修改 `PRD.md`、`design.md`、`task.md`
+- 再修订 `work-plan.md` 与当前/后续 `session-N-prompt.md`
+- 然后重新触发同一个 Session 的下一次 attempt
 
-**验收通过：**
-1. 阅读 `artifacts/session-N-summary.md`
-2. 检查代码变更
-3. 点击 **✅ 批准，推进下一 Session**
-4. 扩展自动将 `memory.md` 中 `session_gate` 改为 `ready`，刷新 Dashboard
+如果此时 LangGraph 离线，当前实现只会把 `session_gate` / `review_notes` 回退写回 `memory.md`，作为兼容兜底，而不是完整替代 resume 语义。
 
-**验收拒绝：**
-1. 点击 **❌ 驳回**
-2. 在弹出的输入框中填写驳回原因
-3. 扩展自动写入 `review_notes` 并将 `session_gate` 改为 `blocked`
-4. 下一轮 Claude 执行时会读取 `review_notes`，针对性修复
+## Session 0 特别约束
 
-**重新开放（blocked 状态）：**
-- 红色 Banner 显示 **🔄 重新开放本 Session**，点击后 `session_gate` 重置为 `ready`
+Session 0 不是业务实现轮，而是规划轮。它的目标是：
 
-### 5. 完整循环图
+- 生成第一版 `work-plan.md`
+- 生成后续 `session-N-prompt.md`
+- 为后续开发阶段建立可执行的 session 切分与验收顺序
 
-```
-Refresh → 检查 gate
-  ↓ ready
-Prepare Fresh Session → Start Runner
-  ↓ 执行完成
-session_gate = pending_review
-  ↓ Dashboard 显示琥珀色 Banner
-  ✅ 点击批准 → session_gate = ready → next_session = N+1 → 回到 Refresh
-  ❌ 点击驳回 + 填写原因 → session_gate = blocked → review_notes 已写入
-       ↓ 修复后点击重新开放
-       session_gate = ready → 重做本 Session → 回到 Refresh
-```
+只有 Session 0 验收通过后，workflow 才能进入开发阶段。
 
----
+## 契约边界
 
-## Runner 状态持久化
+- 业务状态定义：见 `memory.md`
+- LangGraph HTTP 契约：见 `integrations/vibecoding-vscode-extension/interfaces/langgraph-runtime-contract.md`
+- Python fallback 契约：见 `integrations/vibecoding-vscode-extension/interfaces/python-driver-contract.md`
 
-Runner 状态保存在：
+插件不能：
 
-```
-<project-root>/.vibecoding/runner-state.sqlite
-```
+- 绕过 `memory.md` 自己决定 `next_session`
+- 把本地缓存当作 workflow 真相
+- 把 `run.status = success` 解释成 session 已正式通过
+- 在 reject 后自动跳过当前 Session 去执行后续 Session
 
-重启 VSCode 后扩展会自动从 SQLite 恢复 runner 状态（`starting` / `running` / `paused`）。
+## 开发提示
 
----
-
-## 与 Python Driver 的契约
-
-扩展通过 `pythonDriver.ts` 调用 driver，driver 以 `--json` 返回结构化结果，扩展校验以下必填字段：
-
-| 字段 | 类型 | 含义 |
-|------|------|------|
-| `schema_version` | string | 契约版本 |
-| `status` | string | `ready` / `blocked` / `invalid` / `done` / `runner_failed` |
-| `message` | string | 人类可读的状态描述 |
-| `requested_action` | string | 请求的 action（`inspect` / `prepare` / `run`）|
-| `effective_action` | string | 实际执行的 action |
-| `project_root` | string | 项目绝对路径 |
-| `exit_code` | number | driver 退出码 |
-| `artifacts` | object | 产出文件路径 |
-| `next_action` | object | 扩展/用户的下一步建议 |
-
-> `session_gate` 直接从 `memory.md` 读取（无需 driver 调用），Dashboard 初始化时即可显示正确的验收状态和 Banner。
-
-字段校验失败会显示 `Vibe: invalid` 并输出错误到 Output Channel（`VibeCoding Workflow`）。
-
----
-
-## 扩展开发 & 更新（修改源码后如何生效）
-
-VSCode 加载的是已安装目录（`~/.vscode/extensions/`）中的编译产物，**直接修改源码不会自动生效**。每次修改 TypeScript 源码后，必须执行以下两步：
-
-### 第一步：编译并同步
-
-在仓库根目录执行一键脚本：
-
-```bash
-./integrations/vibecoding-vscode-extension/build-and-sync.sh
-```
-
-脚本做了两件事：
-1. 在 `vscode-ext/` 目录执行 `tsc -p ./`，将 TypeScript 编译为 `out/` 目录下的 JS
-2. 将 `out/` 同步到 `~/.vscode/extensions/beckliu.vibecoding-vscode-extension-0.1.10/out/`
-
-输出示例：
-```
-▶ Compiling...
-▶ Syncing to ~/.vscode/extensions/beckliu.vibecoding-vscode-extension-0.1.10...
-✅ Done. Reload VSCode window to apply changes.
-```
-
-### 第二步：Reload VSCode Window
-
-在 VSCode 中执行：
-
-```
-Cmd+Shift+P → Developer: Reload Window
-```
-
-Reload 后扩展重新加载，新代码立即生效。
-
----
-
-> **注意**：如果扩展版本号升级（`package.json` 中的 `version` 字段变更），需要同步更新 `build-and-sync.sh` 中的目标路径：
-> ```bash
-> VSCODE_EXT=~/.vscode/extensions/beckliu.vibecoding-vscode-extension-<新版本号>
-> ```
-
----
-
-## 相关文档
-
-- [workflow-standard.md](workflow-standard.md) — 工作流整体架构和层次职责
-- [progress-loop.md](progress-loop.md) — Session 循环和 HITL Review Gate 详细规范
-- [hitl-review-gate.md](hitl-review-gate.md) — 人工验收机制说明
-- [user-guide.md](user-guide.md) — 手动使用工作流（不依赖扩展）的完整指南
+如果当前实现仍依赖 Python driver，请把它视为兼容层，不要再围绕 driver 扩展新的主流程设计。后续 UI、状态展示和命令语义都应以 LangGraph runtime contract 为准。

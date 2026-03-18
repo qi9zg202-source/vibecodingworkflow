@@ -74,7 +74,7 @@ After migration:
 Recommended verification:
 
 ```bash
-python3 ./scripts/run-vibecoding-loop.py /path/to/legacy-project --action inspect --json
+python3 ./scripts/archived/run-vibecoding-loop.py /path/to/legacy-project --action inspect --json
 ```
 
 ```mermaid

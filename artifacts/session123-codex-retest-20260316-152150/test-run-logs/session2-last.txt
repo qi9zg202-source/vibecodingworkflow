@@ -1,0 +1,5 @@
+Session 2 complete
+Tests: passed
+Next: session-3-prompt.md
+Summary: artifacts/session-2-summary.md
+Start a fresh session before running the next startup-prompt.md

@@ -1,13 +1,19 @@
 # Python Driver Contract
 
+> **[已废弃 - 历史归档参考]**
+> 架构决策（2026-03-16）：LangGraph Local Server 已确认为执行运行时，替代 `run-vibecoding-loop.py`。
+> `pythonDriver.ts` 已删除，`run-vibecoding-loop.py` 已归档到 `scripts/archived/`。
+> 本文档仅保留为历史接口参考，不再描述当前实现依赖。
+> 新接口定义请参见：`interfaces/langgraph-runtime-contract.md`
+
 ## Scope
-- 本文档定义 `run-vibecoding-loop.py` 在 Session 2 后提供给 VS Code 插件消费的稳定接口。
+- 本文档定义历史 `run-vibecoding-loop.py` 在 Session 2 后提供给 VS Code 插件消费的稳定接口。
 - 插件应优先消费 JSON 输出，不应自行把 markdown 解析结果当成推进依据。
-- `memory.md` 仍然是唯一状态源，Python driver 仍然是唯一 orchestration engine。
+- `memory.md` 仍然是唯一业务状态源。
 
 ## Driver Path
-- 当前核心脚本：
-- `/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/run-vibecoding-loop.py`
+- 归档脚本：
+- `/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow/scripts/archived/run-vibecoding-loop.py`
 
 ## CLI Inputs
 - `project_root`
@@ -171,7 +177,7 @@
 - Session 9 已完成边界回归验证。
 - Session 10 已完成收尾文档整理。
 - Session 11 已完成双 workflow 真实场景验证。
-- 2026-03-12 已重新执行插件编译、smoke、regression 与真实场景脚本，并确认测试宿主 teardown 已补齐，脚本不会在写出报告后残留 open handle。
+- 2026-03-17 已重新执行插件编译、smoke、regression 与真实场景脚本，并确认测试宿主 teardown 与 dashboard mock 已补齐，脚本会在写出报告后自行退出。
 - 已验证链路：
 - `compile`
 - `inspect`
