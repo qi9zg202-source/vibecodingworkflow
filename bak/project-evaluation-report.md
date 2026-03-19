@@ -133,7 +133,7 @@ templates/
 **优势**:
 - 文档层次清晰
 - 模板可直接复用
-- 有完整的 demo 项目（`demo/stic-fab-chiller-strategy/`）
+- 有完整的 demo 项目（`demo/TSMC-fab-chiller-strategy/`）
 
 **不足**:
 - 缺少架构决策记录（ADR）
@@ -148,7 +148,7 @@ templates/
 
 **现有测试**:
 - ✅ VSCode Extension 集成测试（3 个 smoke test）
-- ✅ Demo 项目验证（`demo/stic-fab-chiller-strategy/`）
+- ✅ Demo 项目验证（`demo/TSMC-fab-chiller-strategy/`）
 - ✅ Fixture 测试项目（3 个 mock 项目）
 - ❌ 缺少 Python Driver 单元测试
 - ❌ 缺少端到端测试（E2E）

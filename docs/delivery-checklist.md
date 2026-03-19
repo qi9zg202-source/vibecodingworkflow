@@ -105,14 +105,14 @@
 
 ## 核心交付物示例
 
-基于真实业务场景（STIC 北方创新中心 Fab 厂务平台 — 制冷机房优化策略管理）：
+基于真实业务场景（TSMC 北方创新中心 Fab 厂务平台 — 制冷机房优化策略管理）：
 
 | 交付物 | 内容 | 用途 |
 |--------|------|------|
 | **PRD.md** | 问题定义、用户价值、功能范围、验收标准 | 产品评审核心文档 |
-| **chiller-strategy.html** | 可交互 HTML 原型，含基于 STIC 业务背景的模拟数据（机组列表、策略包、EER 趋势、执行记录等） | 演示核心产物，可直接浏览器打开 |
+| **chiller-strategy.html** | 可交互 HTML 原型，含基于 TSMC 业务背景的模拟数据（机组列表、策略包、EER 趋势、执行记录等） | 演示核心产物，可直接浏览器打开 |
 
-示例文件位置：`demo/stic-fab-chiller-strategy/`
+示例文件位置：`demo/TSMC-fab-chiller-strategy/`
 
 ---
 
@@ -149,7 +149,7 @@
 
 - [x] 核心文件已准备：1paperprdasprompt.md、user-guide.md
 - [x] 回归测试已通过：64/64 用例，覆盖率 100%
-- [x] 示例文件已验证：demo/stic-fab-chiller-strategy/
+- [x] 示例文件已验证：demo/TSMC-fab-chiller-strategy/
 - [x] 文档索引已完整：用户手册、规范文档、测试报告
 - [x] 版本号已更新：v2.2
 

@@ -4,7 +4,7 @@
 - 2026-03-18
 
 ## Objective
-- 搭建 STIC Fab CUS Strategy Workbench 的四大业务区域骨架：
+- 搭建 TSMC Fab CUS Strategy Workbench 的四大业务区域骨架：
   - Operations Overview
   - Strategy Workbench
   - Approval & Execution

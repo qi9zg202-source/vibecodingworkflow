@@ -1,10 +1,10 @@
-# STIC Fab CUS Strategy Demo
+# TSMC Fab CUS Strategy Demo
 
 本 demo 是 `vibecodingworkflow` 仓库内专门用于完整流程测试的业务样板项目。
 
 ## 业务场景
 
-- 客户对象：STIC 北方创新中心 Fab 厂务机械课
+- 客户对象：TSMC 北方创新中心 Fab 厂务机械课
 - 测试主题：Fab CUS 制冷站节能策略编排与执行验证工作台
 - 业务边界：中温环路、低温环路、热回收协同、审批执行闭环
 
@@ -31,7 +31,7 @@
 1. 开始前先执行标准 reset：
 
    ```bash
-   ./scripts/reset-demo-stic-fab-cus.sh
+   ./scripts/reset-demo-TSMC-fab-cus.sh
    ```
 
 2. 必须从 `startup-prompt.md` 进入，不得直接跳 `session-N-prompt.md`
@@ -57,9 +57,9 @@
 ## 推荐验证路径
 
 ```bash
-./scripts/reset-demo-stic-fab-cus.sh
-python3 ./scripts/run-vibecoding-loop.py demo/stic-fab-chiller-strategy --action inspect --json
-python3 ./scripts/run-vibecoding-loop.py demo/stic-fab-chiller-strategy --action prepare --json
+./scripts/reset-demo-TSMC-fab-cus.sh
+python3 ./scripts/run-vibecoding-loop.py demo/TSMC-fab-chiller-strategy --action inspect --json
+python3 ./scripts/run-vibecoding-loop.py demo/TSMC-fab-chiller-strategy --action prepare --json
 ```
 
 如启用 LangGraph：

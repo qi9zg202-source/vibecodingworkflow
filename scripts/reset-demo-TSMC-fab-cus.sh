@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_ROOT="/Users/beckliu/Documents/0agentproject2026/vibecodingworkflow"
-DEMO_ROOT="$REPO_ROOT/demo/stic-fab-chiller-strategy"
+DEMO_ROOT="$REPO_ROOT/demo/TSMC-fab-chiller-strategy"
 MEMORY_PATH="$DEMO_ROOT/memory.md"
 ARTIFACTS_DIR="$DEMO_ROOT/artifacts"
 LOGS_DIR="$DEMO_ROOT/outputs/session-logs"
