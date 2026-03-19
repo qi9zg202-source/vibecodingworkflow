@@ -1055,7 +1055,8 @@ Session 4 读取 → artifacts/session-3-summary.md
     </div>
     <div class="faq-item">
       <div class="faq-q">客户资料文件太大读不完怎么办？</div>
-      <div class="faq-a">Agent 会采用分段读���策略：结构化文件（Excel/CSV）优先读取表头和前 50 行，提取字段名、单位、采集频率等元数据；非结构化文件（Word/PDF）按章节分段读取，每段确认后继续。如果文件超出单次读取限制，Agent 会告知已读取的范围和提取结果，你可以决定是否继续读取剩余部分。核心目标是提取"有哪些数据、数据结构是什么"，而非读完全部原始数据。</div>
+      <div class="faq-a">Agent 会采用分段读取策略：结构化文件（Excel/CSV）优先读取表头和前 50 行，提取字段名、单位、采集频率等元数据；非结构化文件（Word/PDF）按章节分段读取，每段确认后继续。如果文件超出单次读取限制，Agent 会告知已读取的范围和提取结果，你可以决定是否继续读取剩余部分。核心目标是提取"有哪些数据、数据结构是什么"，而非读完全部原始数据。<br><br>
+      <strong>推荐做法：</strong>将所有客户提供的背景资料文件统一放入项目根目录下的 <code>customer_context/</code> 文件夹，在问卷「客户资料」字段填写相对路径（如 <code>customer_context/点位表.xlsx</code>），便于 Agent 定位和管理。</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">Roo Code <code>/run-session</code> 和手动发送指令有什么区别？</div>
