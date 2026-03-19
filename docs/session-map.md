@@ -1,6 +1,6 @@
 # Session Map
 
-> 2026-03-17 设计更新：本地图同步到“Session 0 生成第一版计划，开发阶段按需修订计划；LangGraph 每次只执行一个 Session attempt，执行后必须人工验收”。
+> 2026-03-19 设计更新：Session 0 生成第一版计划，开发阶段按需修订计划；每次只执行一个 Session attempt，执行后必须人工验收。
 
 This map describes the recommended session split for one task.  
 Use one `startup-prompt.md` and one `memory.md` per task, then let multiple
@@ -55,7 +55,7 @@ flowchart TD
 
 目标：
 
-- LangGraph 每次只执行当前 `next_session`
+- 每次只执行当前 `next_session`
 - 每个 Session 完成一个可测试 deliverable
 - runner 完成后进入人工验收
 - 验收通过才推进到下一轮
@@ -75,7 +75,7 @@ flowchart TD
 
 1. Session 0 只负责生成第一版计划，不保证后续永不修改。
 2. 开发阶段允许在 reject 后修订 `work-plan.md` 和当前/后续 prompts。
-3. LangGraph server 可以常驻，但每次 run 只处理一个 Session attempt。
+3. 每次 run 只处理一个 Session attempt。
 4. runner 成功不等于 workflow 推进成功。
 5. `memory.md` 只在验收通过后推进。
 
@@ -111,7 +111,7 @@ If customer review rejects the current session:
 Each `session-N-prompt.md` is an independent acceptance unit.
 
 - One prompt corresponds to one scoped deliverable, one review gate, and one official advancement decision.
-- LangGraph may execute only the prompt pointed to by `memory.md -> next_session` and `next_session_prompt`.
+- Runner 只执行 `memory.md -> next_session` 和 `next_session_prompt` 指向的 prompt。
 - Approval means the current prompt's deliverable is accepted and the workflow may advance to `session-(N+1)`.
 - Rejection means the current prompt is still the active unit of work; the workflow must not advance to `session-(N+1)`.
 - After rejection, the team may revise `task.md`, `PRD.md`, `design.md`, `work-plan.md`, and the current/downstream `session-N-prompt.md` files before rerunning the same session number.

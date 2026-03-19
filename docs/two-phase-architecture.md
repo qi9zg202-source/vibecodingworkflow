@@ -1,12 +1,11 @@
 # 两阶段架构详解
 
-> 2026-03-17 设计更新：本文同步到“LangGraph 常驻服务 + 单 session 显式触发 + 人工验收通过后才推进”的目标架构。
+> 2026-03-19 设计更新：本文同步到”单 session 显式触发 + 人工验收通过后才推进”的目标架构。
 
 ## 概述
 
 VibeCoding Workflow 仍然采用两阶段模型，但开发阶段的推进口径改为：
 
-- LangGraph Server 常驻
 - 每次 run 只执行当前 `next_session` 的一次 attempt
 - runner 完成后先进入人工验收
 - 只有验收通过，才写 summary / manifest 并推进 `memory.md`
@@ -15,7 +14,7 @@ VibeCoding Workflow 仍然采用两阶段模型，但开发阶段的推进口径
 | 阶段 | current_phase | Sessions | 目标 | 产出 |
 |------|--------------|----------|------|------|
 | **设计阶段** | `design` | Session 0 | 产出初始规划文档、初始 `work-plan.md`、初始 Session prompts | 文档 + prompts |
-| **开发阶段** | `development` | Sessions 1–10 | LangGraph 每次只执行一个 Session，人工验收通过后再推进 | 代码 + 测试 + 验收 |
+| **开发阶段** | `development` | Sessions 1–10 | 每次只执行一个 Session，人工验收通过后再推进 | 代码 + 测试 + 验收 |
 | **完成** | `done` | — | 流程结束 | — |
 
 ## Phase 1 — 设计阶段
@@ -72,7 +71,7 @@ flowchart TD
 
 ### 目标
 
-逐个执行 Session 1 到 Session 10。每次 LangGraph run 最多推进一个 Session attempt：
+逐个执行 Session 1 到 Session 10。每次最多推进一个 Session attempt：
 
 1. 读取 `memory.md`
 2. 解析 `next_session` 与 `next_session_prompt`
@@ -85,7 +84,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    SERVER["LangGraph Server 常驻"] --> TRIGGER["显式触发本次 run"]
+    TRIGGER["显式触发本次 run"]
     TRIGGER --> READ["读取 memory.md"]
     READ --> CHECK{"current_phase?"}
 
@@ -114,26 +113,22 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant U as 用户
-    participant L as LangGraph Server
     participant M as memory.md
     participant P as session-N-prompt.md
     participant R as Runner
     participant A as artifacts/
 
-    U->>L: POST /threads/{thread_id}/runs
-    L->>M: 读取 current_phase + next_session
-    M-->>L: development, next_session: N
-    L->>P: 读取 session-N-prompt.md
+    U->>M: 读取 current_phase + next_session
+    M-->>U: development, next_session: N
+    U->>P: 读取 session-N-prompt.md
     P-->>R: Session N 执行指令
     R->>R: 完成 deliverable + tests
-    R-->>L: runner result
-    L-->>U: interrupt / 等待验收
+    R-->>U: 等待验收
 
     alt 验收通过
-        U->>L: resume approve
-        L->>A: 写 session-N-summary.md
-        L->>A: 写 session-N-manifest.json
-        L->>M: 更新 next_session = N+1
+        U->>A: 写 session-N-summary.md
+        U->>A: 写 session-N-manifest.json
+        U->>M: 更新 next_session = N+1
     else 验收不通过
         U->>M: 保持 next_session = N
         U->>P: 修订当前/后续 Session prompt
@@ -152,7 +147,7 @@ sequenceDiagram
 2. **runner 成功不等于 workflow 官方推进**
 
 - 只有客户验收通过后，才能写 summary / manifest 并推进 `memory.md`
-- LangGraph 的 runtime 成功只代表“本次尝试跑完了”
+- runner 成功只代表”本次尝试跑完了”
 
 3. **`memory.md` 是唯一路由真相**
 
@@ -202,7 +197,7 @@ Session 0 生成第一版
 验收驳回后，可以修订 work-plan 和当前/后续 prompts
 ```
 
-### ❌ 误解 2：LangGraph 会自动批量执行所有 Sessions
+### ❌ 误解 2：会自动批量执行所有 Sessions
 
 **错误理解**
 
@@ -213,7 +208,7 @@ Session 0 生成第一版
 **正确理解**
 
 ```text
-LangGraph server 常驻，但每次 run 只处理一个 Session attempt
+每次 run 只处理一个 Session attempt
 执行完后等待人工验收与下一次显式触发
 ```
 
@@ -236,8 +231,7 @@ Session 3 runner 成功 -> 人工验收 -> approve 后才推进到 Session 4
 两阶段架构的新口径是：
 
 1. Session 0 生成第一版规划文档和 Session prompts。
-2. LangGraph 作为常驻执行运行时存在。
-3. 每次只执行一个当前 Session。
+2. 每次只执行一个当前 Session。
 4. 每次执行后必须经过客户验收。
 5. 验收不通过时，允许先修订规划文档，再重跑同一 Session。
 6. `memory.md` 只在验收通过后推进。

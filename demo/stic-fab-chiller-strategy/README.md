@@ -8,7 +8,7 @@
 - 测试主题：Fab CUS 制冷站节能策略编排与执行验证工作台
 - 业务边界：中温环路、低温环路、热回收协同、审批执行闭环
 
-与旧版本不同，本 demo 不再用于展示“中途 handoff 状态”，而是作为下一轮完整 workflow / LangGraph 联调的起始底座。
+与旧版本不同，本 demo 不再用于展示”中途 handoff 状态”，而是作为下一轮完整 workflow 联调的起始底座。
 
 ## 当前基线状态
 
@@ -66,18 +66,11 @@
 
 ```bash
 ./scripts/reset-demo-stic-fab-cus.sh
-./scripts/reset-langgraph-test-data.sh
-./.venv/bin/python scripts/test_langgraph_e2e.py
-./.venv/bin/python scripts/test_langgraph_http_smoke.py
-./.venv/bin/python scripts/test_langgraph_hitl_http.py
-./.venv/bin/python scripts/run_langgraph_test_suite.py
 ```
 
 其中：
 
 - `./scripts/reset-demo-stic-fab-cus.sh` 负责把本 demo 收回到 Session 0 干净基线
-- `./scripts/reset-langgraph-test-data.sh` 负责把 `session8-smoke-project` fixture 收回到 Session 4 -> 5 的 LangGraph 测试基线
-- `scripts/run_langgraph_test_suite.py` 会在 suite 开始前和结束后自动执行上述 LangGraph fixture reset，并串行覆盖 sync / async / unit / E2E / HTTP / HITL 全测试链路
 
 如需查看旧外部 driver 行为，只能使用归档脚本：
 

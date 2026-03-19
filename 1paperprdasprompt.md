@@ -53,7 +53,7 @@ ELSE IF memory.md 存在：
 - 需求文档（CLAUDE.md / task.md / PRD.md）先稳定，再做技术拆分
 - 每个 `tasksubsessionN.md` 是一个自包含的执行单元
 - 用户手动控制执行节奏：决定何时执行下一个 Session
-- 不依赖任何运行时（无 LangGraph、无 VSCode 插件）
+- 不依赖任何运行时（无 VSCode 插件）
 
 ---
 

@@ -1,20 +1,12 @@
 [project]
-name = "vibecodingworkflow-langgraph"
+name = "vibecodingworkflow"
 version = "0.1.0"
-description = "Minimal LangGraph app for the vibecodingworkflow repository"
+description = "VibeCoding Workflow"
 requires-python = ">=3.11"
 dependencies = [
-    "langgraph>=0.2",
-    "langgraph-checkpoint-sqlite>=1.0",
     "typing-extensions>=4.8",
 ]
 
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]

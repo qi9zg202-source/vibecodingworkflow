@@ -1,9 +1,0 @@
-{
-  "$schema": "https://langgra.ph/schema.json",
-  "dependencies": ["."],
-  "graphs": {
-    "vibecoding_workflow": "./src/vibecoding_langgraph/graph.py:graph"
-  },
-  "env": ".env",
-  "image_distro": "wolfi"
-}

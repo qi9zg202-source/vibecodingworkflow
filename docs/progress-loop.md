@@ -1,6 +1,6 @@
 # Progress Loop
 
-> 2026-03-17 设计更新：Progress loop 以“LangGraph 常驻 + 单 session 显式触发 + 人工验收后推进”为准。
+> 2026-03-19 设计更新：Progress loop 以”单 session 显式触发 + 人工验收后推进”为准。
 
 ## Two-Phase Structure
 

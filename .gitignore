@@ -3,3 +3,8 @@ generated/
 .env
 .env.local
 .env.*.local
+__pycache__/
+*.pyc
+*.egg-info/
+.langgraph_api/
+.vibecoding/

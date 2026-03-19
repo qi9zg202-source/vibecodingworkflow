@@ -2,9 +2,8 @@
 
 Standalone workflow kit for multi-session webcoding projects.
 
-> 2026-03-17 设计更新：推荐执行模型已调整为”LangGraph Local Server 常驻 + 单 session 显式触发 + 人工验收后才推进”。
 > 2026-03-18 交付模型更新：新增 `1paperprdasprompt.md` 单文件交付模式，客户无需 clone 整个工程。
-> 2026-03-19 执行层更新：引入 Roo Code `/run-session` slash command，替代手动触发 Session 的摩擦。LangGraph 集成暂停，执行层回归文档驱动 + Roo Code 辅助触发。
+> 2026-03-19 执行层更新：引入 Roo Code `/run-session` slash command，简化 Session 触发流程。
 
 This project is intentionally generic. It does not contain business data, business
 source code, or any feature-specific runtime logic. It only provides:
@@ -20,13 +19,13 @@ source code, or any feature-specific runtime logic. It only provides:
 - reference docs for evidence, output shape, and testing
 - a bootstrap script to generate a new workflow-driven project
 - a migration script for older prompt-only workflow projects
-- a LangGraph-oriented orchestration model (paused; replaced by Roo Code slash command for session triggering), with the legacy fresh-session driver archived for reference only
+- a legacy fresh-session driver archived for reference only
 
 This repository also now carries one companion integration module under
 `integrations/`:
 
 - `integrations/vibecoding-vscode-extension/`: VS Code UI shell for the fresh-session workflow, including fixtures, reports, and extension validation scripts
-- Current checkout validation on 2026-03-17 confirmed `./scripts/verify-vibecoding-workflow.sh`, `PYTHONPATH=src ./.venv/bin/python -m unittest discover -s tests -p 'test_*.py'`, `PYTHONPATH=src ./.venv/bin/python scripts/run_langgraph_test_suite.py`, `PYTHONPATH=src ./.venv/bin/python scripts/test_langgraph_hitl_http.py`, `npm run smoke:session8`, `npm run regression:session9`, and `npm run smoke:session11` all pass.
+- Current checkout validation on 2026-03-19 confirmed `./scripts/verify-vibecoding-workflow.sh`, `npm run smoke:session8`, `npm run regression:session9`, and `npm run smoke:session11` all pass.
 
 ## Execution Model
 
@@ -36,7 +35,7 @@ The recommended model is:
 - Session 0 produces all planning docs + pre-generates `tasksubsession1.md ~ tasksubsessionN.md`
 - User triggers each session via Roo Code `/run-session` command (or manually: `"请读取 tasksubsessionN.md 并执行"`)
 - `memory.md` is a human-readable progress log, not a runtime routing source
-- No LangGraph server required — zero runtime dependencies beyond Roo Code (optional)
+- No runtime dependencies beyond Roo Code (optional)
 
 ## Roo Code Integration
 
@@ -87,31 +86,7 @@ Typical operator loop:
 
 This means the orchestrator may know that a run is currently active, resumable, interrupted, or failed, but only `memory.md` decides whether Session N is officially complete and whether Session N+1 may start.
 
-## LangSmith Studio Setup
-
-This repository's [`langgraph.json`](./langgraph.json) declares `env: ".env"`.
-When you open a local thread in LangSmith Studio, the local LangGraph server must
-therefore start from the repository root with a `.env` file that includes
-`LANGSMITH_API_KEY`.
-
-Minimal setup:
-
-```bash
-cp .env.example .env
-```
-
-Then edit `.env` and set your real LangSmith key:
-
-```bash
-LANGSMITH_API_KEY=lsv2_pt_...
-```
-
-If Studio shows `Not seeing LangSmith runs?`, first confirm:
-
-- `.env` exists in the repository root
-- `LANGSMITH_API_KEY` is set in that file
-- you restarted `langgraph dev` after editing `.env`
-- your Studio link still points at the active local server, typically `http://127.0.0.1:2024` or `http://localhost:2024`
+## Workflow Status Contract
 
 The workflow status contract is:
 
@@ -219,7 +194,7 @@ This repository also includes:
 python3 ./scripts/archived/run-vibecoding-loop.py /path/to/project --print-startup
 ```
 
-It is an archived external orchestration prototype kept only for historical comparison and emergency manual inspection. The active runtime and design baseline are now LangGraph Local Server.
+It is an archived external orchestration prototype kept only for historical comparison and emergency manual inspection.
 
 The next-session spec contract is documented in
 [templates/references/output-schema.md](./templates/references/output-schema.md).

@@ -1,6 +1,6 @@
 # Workflow Standard
 
-> 2026-03-19 设计更新：Orchestration Layer 从 LangGraph Local Server 切换为 Roo Code `/run-session` slash command。单 session 显式触发 + 人工验收后才推进业务状态的核心机制不变。
+> 2026-03-19 设计更新：Orchestration Layer 使用 Roo Code `/run-session` slash command。单 session 显式触发 + 人工验收后才推进业务状态的核心机制不变。
 
 ## Two-Phase Architecture
 

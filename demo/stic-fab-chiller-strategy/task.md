@@ -46,6 +46,5 @@ STIC 北方创新中心 Fab CUS 制冷站节能策略编排与执行验证工作
 
 ## Allowed Tools
 - Codex
-- Python driver
-- LangGraph runtime
+- Roo Code / Claude Code
 - VS Code thin entry

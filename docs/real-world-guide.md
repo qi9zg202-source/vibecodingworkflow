@@ -60,13 +60,13 @@ flowchart TD
 验收通过   → next_session = N+1，session_gate = ready
 ```
 
-如果使用 LangGraph / driver / Codex，这条规则也不变。调度器只负责“跑”，不负责替代 `memory.md` 成为业务真相。
+如果使用 Roo Code / driver / Codex，这条规则也不变。调度器只负责”跑”，不负责替代 `memory.md` 成为业务真相。
 
 ```mermaid
 flowchart LR
     A["task.md / design.md / work-plan.md"] --> B["memory.md\n官方 workflow 状态"]
     B --> C["startup-prompt.md\n统一入口"]
-    C --> D["LangGraph / driver runtime\n当前执行状态"]
+    C --> D["Roo Code / runner runtime\n当前执行状态"]
     D --> E["codex / claude\nfresh session 执行"]
     E --> F["summary / tests / artifacts"]
     F --> B
