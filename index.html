@@ -807,7 +807,7 @@
         <text x="90" y="324" font-size="11" fill="#64748b">│   └── </text><text x="138" y="324" font-size="11" fill="#fbbf24">verify-vibecoding-workflow.sh</text>  <text x="430" y="324" font-size="11" fill="#475569">← 模板一致性校验</text>
 
         <text x="36" y="348" font-size="12" fill="#94a3a0">├── </text><text x="72" y="348" font-size="12" fill="#fbbf24">docs/</text>                <text x="200" y="348" font-size="11" fill="#475569">← workflow-standard / progress-loop / session-map / user-guide</text>
-        <text x="36" y="368" font-size="12" fill="#94a3a0">├── </text><text x="72" y="368" font-size="12" fill="#fbbf24">demo/</text>                <text x="200" y="368" font-size="11" fill="#475569">← stic-fab-chiller-strategy/ (Session 3→4 handoff 示例)</text>
+        <text x="36" y="368" font-size="12" fill="#94a3a0">├── </text><text x="72" y="368" font-size="12" fill="#fbbf24">demo/</text>                <text x="200" y="368" font-size="11" fill="#475569">← TSMC-fab-chiller-strategy/ (Session 3→4 handoff 示例)</text>
         <text x="36" y="388" font-size="12" fill="#94a3a0">└── </text><text x="72" y="388" font-size="12" fill="#c4b5fd">integrations/</text>        <text x="200" y="388" font-size="11" fill="#475569">← vibecoding-vscode-extension/ (UI shell only)</text>
         <text x="36" y="408" font-size="12" fill="#94a3a0">    </text><text x="72" y="408" font-size="12" fill="#fef9c3">index.html</text>           <text x="200" y="408" font-size="11" fill="#475569">← 本文档（可视化总览）</text>
       </svg>
@@ -967,7 +967,7 @@
           <li>先验证图可 import，并确认 <code>vibecoding_workflow</code> 可加载。</li>
           <li>再验证进程内同步入口 <code>graph.invoke(...)</code>。</li>
           <li>再验证进程内异步入口 <code>graph.ainvoke(...)</code>。</li>
-          <li>之后使用 deterministic mock runner 执行多 Session E2E。</li>
+          <li>之后使用 determiniTSMC mock runner 执行多 Session E2E。</li>
           <li>最后通过 LangGraph Local Server 做 HTTP <code>/runs/wait</code> + <code>/state</code> smoke。</li>
         </ul>
       </article>
@@ -1013,7 +1013,7 @@
     <div class="callout" style="margin-top:16px;">
       标准测试文档：
       <code>tests/langgraph-test-standard.md</code>
-      。标准判断以 deterministic runner 结果为准；真实外部模型账号只作为补充环境验证，不作为唯一通过门。
+      。标准判断以 determiniTSMC runner 结果为准；真实外部模型账号只作为补充环境验证，不作为唯一通过门。
     </div>
   </section>
 
