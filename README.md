@@ -264,4 +264,6 @@ In other words:
 - `CLAUDE.md` is project-level and shared across tasks
 - `customer_context/` stores client-provided background files at project level
 - `task.md` / `PRD.md` / `design.md` / `work-plan.md` / `tasksubsessionN.md` / `memory.md` / `artifacts/` / `scripts/` / `outputs/` are task-level
+- if one task only needs a subset of files from `customer_context/`, list those required file paths in `task.md` under a `Required Customer Context` section
+- the final `[feature-name].html` is generated directly under the current `task_root`
 - even if a project currently has only one feature task, the One Paper contract still uses `tasks/<task-slug>/`

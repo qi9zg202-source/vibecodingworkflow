@@ -105,6 +105,7 @@ Rules:
 - each feature-level task owns its own `task.md`, `PRD.md`, `design.md`,
   `work-plan.md`, `tasksubsessionN.md`, `memory.md`, `artifacts/`, `scripts/`,
   and `outputs/`
+- when a task only depends on a subset of project-level background files, that required subset should be recorded in `task.md` under a `Required Customer Context` section
 - the standard contract always uses `tasks/<task-slug>/`, even for a single active task
 
 ```mermaid

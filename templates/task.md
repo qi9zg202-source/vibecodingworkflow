@@ -24,6 +24,11 @@ __FEATURE_NAME__
 ## Constraints
 - 业务、技术、流程约束
 
+## Required Customer Context
+- 当前 Task 执行前必须读取的客户资料文件
+- 路径统一写 `project_root/customer_context/...`
+- 每项建议写明：文件路径 + 用途 + 为什么本 Task 必读
+
 ## Acceptance Criteria
 - 可验证的通过条件
 

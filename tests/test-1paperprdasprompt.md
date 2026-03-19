@@ -95,8 +95,13 @@
 
 ### TC-0A-06：task.md 内容完整性
 - 触发：Session 0a Step 3.2
-- 期望行为：生成的 task.md 包含 Title、Goal、In Scope、Out Of Scope、Constraints、Acceptance Criteria 六个区块
+- 期望行为：生成的 task.md 包含 Title、Goal、In Scope、Out Of Scope、Constraints、Required Customer Context、Acceptance Criteria 七个区块
 - 不期望行为：缺少任何区块；内容为占位符未填写
+
+### TC-0A-06b：task.md 维护当前 Task 必读客户资料文件
+- 触发：Session 0a Step 3.2，且用户在问卷中提供了客户资料文件
+- 期望行为：`task.md` 的 `Required Customer Context` 区块只列出当前 Task 执行前必须读取的客户资料文件，包含文件路径、用途或必读原因
+- 不期望行为：把 `customer_context/` 下所有文件不加筛选全部抄入；只写文件名不写用途
 
 ### TC-0A-07：PRD.md 内容完整性
 - 触发：Session 0a Step 3.3

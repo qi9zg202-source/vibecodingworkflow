@@ -1027,6 +1027,8 @@ Session 4 读取 → artifacts/session-3-summary.md
       <li><code>CLAUDE.md</code> 是项目级，跨多个 Task 共享</li>
       <li><code>customer_context/</code> 是项目级，统一存放客户资料</li>
       <li><code>task.md</code> 是 Task 级，<code>1 Task = 1 个二级功能点</code></li>
+      <li>如果当前 Task 只需要读取部分客户资料，这份“必读文件清单”应维护在 <code>task.md</code> 的 <code>Required Customer Context</code> section</li>
+      <li><code>[功能名].html</code> 固定生成在当前 <code>task_root</code> 根目录，不放在 <code>artifacts/</code> 或 <code>outputs/</code> 下</li>
       <li><code>scripts/</code> 和 <code>outputs/</code> 也是当前 <code>task_root</code> 的标准组成部分</li>
       <li>Session 1–N 必须在当前 <code>task_root</code> 中执行，而不是在项目根目录执行</li>
     </ul>
@@ -1100,6 +1102,10 @@ Session 4 读取 → artifacts/session-3-summary.md
       <div class="faq-q">客户资料文件太大读不完怎么办？</div>
       <div class="faq-a">Agent 会采用分段读取策略：结构化文件（Excel/CSV）优先读取表头和前 50 行，提取字段名、单位、采集频率等元数据；非结构化文件（Word/PDF）按章节分段读取，每段确认后继续。如果文件超出单次读取限制，Agent 会告知已读取的范围和提取结果，你可以决定是否继续读取剩余部分。核心目标是提取"有哪些数据、数据结构是什么"，而非读完全部原始数据。<br><br>
       <strong>推荐做法：</strong>将所有客户提供的背景资料文件统一放入项目根目录下的 <code>customer_context/</code> 文件夹，在问卷「客户资料」字段填写相对路径（如 <code>customer_context/点位表.xlsx</code>），便于 Agent 定位和管理。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">如果 customer_context/ 里有很多文件，但这个 Task 只需要其中几份，应该写在哪里？</div>
+      <div class="faq-a">写在当前 <code>task_root/task.md</code> 的 <code>Required Customer Context</code> section。<code>customer_context/</code> 只是项目级资料池；真正“这个 Task 执行前必须读哪几个文件”，应由 <code>task.md</code> 明确列出路径、用途和必读原因。</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">Roo Code <code>/run-session</code> 和手动发送指令有什么区别？</div>

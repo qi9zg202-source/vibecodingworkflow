@@ -134,6 +134,7 @@ project_root/
 - `customer_context/`：客户资料统一放在 `project_root/customer_context/`
 - `tasks/`：所有二级功能任务统一放在 `project_root/tasks/`
 - `<task-slug>/`：当前功能的工作根目录，目录名使用 kebab-case，例如 `chiller-strategy`
+- `[功能名].html`：最终原型文件放在当前 `task_root/` 根目录，与 `task.md`、`PRD.md`、`design.md` 同级
 - `artifacts/`：当前 Task 的 Session summary、证据文件统一放在 `task_root/artifacts/`
 - `scripts/`：当前 Task 的辅助脚本目录，默认保留空目录
 - `outputs/`：当前 Task 的样例、报告、session 规格和日志输出目录
@@ -308,6 +309,7 @@ project_root/
 
 这些信息将分两层写入文档：
 - 原始数据结构（点位名、单位、频率）→ CLAUDE.md / Domain Data
+- 当前 Task 必读文件清单（只列本次功能真正需要读取的文件）→ task.md / Required Customer Context
 - 功能设计依据（基于点位推导的设计决策）→ PRD.md / Feature Specifications
 
 如有遗漏或需要补充说明，请告知。
@@ -320,6 +322,7 @@ project_root/
 | 内容类型 | 写入位置 | 示例 |
 |---------|---------|------|
 | 原始数据结构：点位名、单位、采集频率、系统边界 | `CLAUDE.md / Domain Data` | `低温冷冻水系统：12 个电表点位，采集频率 15min，单位 kWh` |
+| 当前 Task 必读资料文件清单：路径、用途、读取原因 | `task.md / Required Customer Context` | ``project_root/customer_context/chiller-points.xlsx`：确认点位字段、单位、采集频率；本 Task 的指标看板和策略收益测算都依赖该文件`` |
 | 功能设计依据：基于点位推导出的设计决策 | `PRD.md / Feature Specifications` 对应模块 | `EER 计算模块需覆盖低温/中温两套系统全部 20 个电表点位，支持 15min 粒度趋势展示` |
 
 ### Step 2：引导用户收集功能需求
@@ -425,6 +428,11 @@ project_root/
 
 ## Constraints
 - [基于用户描述填写：业务规则、技术限制、流程约束]
+
+## Required Customer Context
+- [只列本 Task 执行前必须读取的客户资料文件，路径统一写为 `project_root/customer_context/...`]
+- [每项写明用途，如：确认点位字段 / 对齐设备命名 / 校验审批规则]
+- [如果当前 Task 不依赖客户资料，明确写：`无`]
 
 ## Acceptance Criteria
 - [基于用户确认的验收标准，列出可验证的通过条件]
