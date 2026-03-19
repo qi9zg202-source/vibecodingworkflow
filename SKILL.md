@@ -22,7 +22,7 @@ Use this skill when the user wants to:
 4. Read [`docs/progress-loop.md`](./docs/progress-loop.md) when the user asks about session restarts or orchestration.
 5. Use [`scripts/init-web-vibecoding-project.sh`](./scripts/init-web-vibecoding-project.sh) to generate a new project from the templates.
 6. Use [`scripts/migrate-vibecoding-project.sh`](./scripts/migrate-vibecoding-project.sh) when an older workflow project must be upgraded to the new task-centered layout without overwriting existing files.
-7. Use [`scripts/run-vibecoding-loop.py`](./scripts/run-vibecoding-loop.py) when you need an external fresh-session driver prototype with task and session-summary handoff.
+7. Use [`.roo/commands/run-session.md`](./.roo/commands/run-session.md) (Roo Code `/run-session` slash command) as the recommended way to trigger a session execution. It reads `memory.md`, resolves `next_session`, and executes the corresponding session prompt. For manual triggering, instruct the user to send the session prompt directly in their AI chat window.
 8. Only read files under [`templates/`](./templates/) when you need to inspect or adjust the generated prompt/doc contents.
 
 ## Boundaries

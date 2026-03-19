@@ -1,6 +1,6 @@
 # Workflow Standard
 
-> 2026-03-17 设计更新：目标执行模型为“LangGraph Local Server 常驻 + 单 session 显式触发 + 人工验收后才推进业务状态”。
+> 2026-03-19 设计更新：Orchestration Layer 从 LangGraph Local Server 切换为 Roo Code `/run-session` slash command。单 session 显式触发 + 人工验收后才推进业务状态的核心机制不变。
 
 ## Two-Phase Architecture
 
@@ -103,10 +103,10 @@ flowchart TB
     D --> D4["artifacts/session-N-summary.md"]
 
     C --> E["Orchestration Layer"]
-    E --> E1["LangGraph Local Server\nlong-running process"]
-    E1 --> E2["POST /threads/{thread_id}/runs"]
+    E --> E1["Roo Code /run-session\nslash command trigger"]
+    E1 --> E2["读取 memory.md，解析 next_session"]
     E2 --> E3["单次只执行一个 Session attempt"]
-    E3 --> E4["interrupt / resume / re-run"]
+    E3 --> E4["等待人工验收 / 驳回重跑"]
     E1 --> E5["outputs/session-logs/vibecoding-loop.jsonl"]
 
     D --> F["Execution Layer"]
@@ -128,10 +128,31 @@ flowchart TB
 
 - `Initialization`: create a new workflow project or migrate an old prompt-only project into the current contract.
 - `Workflow Truth`: keep routing and handoff state in files, not in chat memory or UI cache.
-- `Orchestration`: keep LangGraph Local Server alive, read `memory.md`, execute one session attempt per trigger, and pause for human review before official advancement.
+- `Orchestration`: Roo Code `/run-session` slash command 读取 `memory.md`，执行一个 session attempt，然后暂停等待人工验收后才推进。
 - `Execution`: complete one scoped deliverable per run, then wait for acceptance before updating `memory.md` and writing official artifacts.
 - `Integration`: expose the same flow in VS Code without taking ownership of workflow truth.
 - `Verification`: prove the contract with repository checks, fixtures, and integration scripts.
+
+## Session 0a Sub-Steps
+
+Session 0a（需求阶段）现在包含三个顺序子步骤，全部在同一对话窗口内完成：
+
+| 子步骤 | 触发条件 | Agent 行为 | 产出 |
+|--------|----------|-----------|------|
+| **Step 1a — 问卷收集** | 首次运行，无 memory.md | 引导用户填写项目背景、功能范围、对标目标、客户资料路径 | 结构化问卷回答 |
+| **Step 1b — 背景搜索** | 问卷填写完成 | 自动搜索三类信息：客户基本信息、对标行业地位、对标最佳实践；输出摘要等待确认 | Benchmark Reference 内容草稿 |
+| **Step 1c — 资料读取** | Step 1b 确认后 | 分段读取客户资料文件（结构化文件读表头+前50行，非结构化按章节分段）；输出提取摘要等待确认 | Domain Data 内容草稿 |
+
+三个子步骤全部确认后，Agent 产出需求文档：
+
+- `CLAUDE.md` — 项目业务上下文，包含两个新 section：
+  - `Benchmark Reference`：对标目标的行业地位与最佳实践事实（来自 Step 1b 搜索结果）
+  - `Domain Data`：客户资料提���结果，原始数据字段、单位、采集频率等（来自 Step 1c 读取结果）
+- `task.md` — 功能目标与验收标准
+- `PRD.md` — 产品需求文档，包含新 section：
+  - `Design Standard`：基于对标水准的设计要求，放入评审文档供评审方参考
+
+Session 0a 完成后停止，等待用户确认需求文档，再继续 Session 0b（规划阶段）。
 
 ## Claude Planning And Execution Strategy
 
@@ -172,7 +193,7 @@ Recommended operator loop:
 The workflow deliberately keeps two different kinds of state:
 
 - `memory.md`: the business/workflow truth
-- orchestration runtime state: LangGraph checkpoint, run status, interrupt state, runner output
+- orchestration runtime state: Roo Code run status, session execution output, runner stdout/stderr
 
 They are related, but they are not the same layer and must not replace each other.
 
@@ -186,7 +207,7 @@ They are related, but they are not the same layer and must not replace each othe
 | Layer | Canonical artifact | Main question it answers |
 |---|---|---|
 | Business truth | `memory.md` | What is the official workflow status for this task? |
-| Runtime orchestration | LangGraph checkpoint / `WorkflowRuntimeState` / run status | What is happening inside this execution run right now? |
+| Runtime orchestration | Roo Code run output / session execution log | What is happening inside this execution run right now? |
 
 ### State Relationship Diagram
 
@@ -194,7 +215,7 @@ They are related, but they are not the same layer and must not replace each othe
 flowchart LR
     A["task.md / PRD.md / design.md"] --> B["work-plan.md / session prompts"]
     B --> C["memory.md\nBusiness / workflow truth"]
-    C --> D["LangGraph runtime\ncheckpoint / run status"]
+    C --> D["Roo Code /run-session\nslash command trigger"]
     D --> E["codex / claude runner\nfresh execution"]
     E --> F["tests / review / artifacts"]
     F --> C
@@ -209,7 +230,7 @@ flowchart LR
 Interpretation:
 
 - `memory.md` decides official workflow progress.
-- LangGraph runtime decides current execution progress.
+- Roo Code `/run-session` triggers current execution.
 - runner output becomes official only after artifacts are written, customer review passes, and `memory.md` is updated.
 
 ## Persistence Design
@@ -222,7 +243,7 @@ The workflow persists three different classes of data. They serve different reco
 |---|---|---|---|
 | Business persistence | `memory.md` | workflow contract | Persist the official task/session status and routing truth |
 | Artifact persistence | `artifacts/session-N-summary.md`, `artifacts/session-N-manifest.json` | accepted session output | Persist evidence that one session attempt was accepted |
-| Runtime persistence | LangGraph checkpoint / thread state / `outputs/session-logs/vibecoding-loop.jsonl` | orchestration runtime | Persist resumable execution state, review wait state, and run audit trail |
+| Runtime persistence | Roo Code session output / `outputs/session-logs/vibecoding-loop.jsonl` | orchestration runtime | Persist run audit trail and execution context |
 
 ### Persistence Flow Diagram
 
@@ -230,7 +251,7 @@ The workflow persists three different classes of data. They serve different reco
 flowchart LR
     A["task.md / PRD.md / design.md"] --> B["work-plan.md / session prompts"]
     B --> C["memory.md\n业务持久化\n官方状态真相"]
-    C --> D["LangGraph checkpoint / thread state\n运行时持久化"]
+    C --> D["Roo Code /run-session\n触发执行"]
     D --> E["Runner execution\nClaude / Codex / custom command"]
     E --> F["summary / manifest\n产物持久化"]
     F --> G["human review\napprove / reject"]
@@ -249,7 +270,7 @@ flowchart LR
 ### Persistence Rules
 
 - `memory.md` is the only business-truth persistence layer. UI cache, thread state, or local variables must not replace it.
-- LangGraph checkpoint is resumable runtime persistence, not workflow truth. It answers whether a run can continue, not whether a session is officially complete.
+- Roo Code `/run-session` is the trigger mechanism, not workflow truth. It answers whether a run was triggered, not whether a session is officially complete.
 - `session-N-summary.md` and `session-N-manifest.json` are acceptance evidence. They should represent an accepted session output, not a transient draft result.
 - `outputs/session-logs/vibecoding-loop.jsonl` is an append-only audit trail for runs. It records what happened during execution even if the business state does not advance.
 - Reject means restoring the current session as the official position: keep `next_session` unchanged, write `review_notes`, and block advancement until the current slice is corrected.
@@ -258,7 +279,6 @@ flowchart LR
 
 - Recover business status from `memory.md`.
 - Recover accepted deliverable evidence from `artifacts/`.
-- Recover in-flight execution context from LangGraph checkpoint and thread state.
 - Recover historical run trace from `outputs/session-logs/vibecoding-loop.jsonl`.
 
 ## Runtime Sequence
@@ -266,35 +286,34 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     participant U as Engineer or Reviewer
-    participant L as LangGraph Server
+    participant R as Roo Code /run-session
     participant M as memory.md
     participant P as session-N-prompt.md
     participant X as Runner
     participant A as artifacts
 
-    U->>L: POST /threads/{thread_id}/runs
-    L->>M: read workflow status
-    M-->>L: next_session / gate / tests
-    L->>P: resolve current session prompt
+    U->>R: /run-session (slash command)
+    R->>M: read workflow status
+    M-->>R: next_session / gate / tests
+    R->>P: resolve current session prompt
     P-->>X: enter session-N work
-    X-->>L: runner result
-    L-->>U: interrupted for human review
+    X-->>R: runner result
+    R-->>U: output for human review
 
     alt approve
-        U->>L: POST /resume {decision: approve}
-        L->>A: write summary / manifest
-        L->>M: update completed session and next gate
+        U->>A: write summary / manifest
+        U->>M: update completed session and next gate
     else reject
         U->>M: keep next_session unchanged, add review notes
         U->>P: revise current or downstream prompt
-        U->>L: POST /runs again after edits
+        U->>R: /run-session again after edits
     end
 ```
 
 ## Core Rules
 
-- LangGraph server is expected to be a long-running local service.
-- Each `POST /runs` handles at most one current-session execution attempt.
+- Roo Code `/run-session` is the recommended trigger for starting a session execution.
+- Each `/run-session` handles at most one current-session execution attempt.
 - Each `session-N-prompt.md` is an independent acceptance unit. Reject keeps the workflow on the same session number until that prompt passes review.
 - A runner success does not mean the workflow has advanced.
 - Official advancement happens only after customer acceptance, artifact write, and `memory.md` update.
@@ -308,19 +327,19 @@ sequenceDiagram
 - `session_gate = in_progress` means a session is currently running.
 - `session_gate = blocked` means the session failed review or hit a blocker and must be reworked.
 - `session_gate = done` means the entire workflow is complete.
-- runtime `runs.status = interrupted` means LangGraph is waiting for human acceptance; it is not a new business enum.
+- Roo Code `/run-session` is a trigger mechanism; its run status is not a business state enum.
 
 ```text
 ready
-  -> trigger run
+  -> /run-session (Roo Code slash command)
   -> in_progress
   -> runner finished
-  -> interrupted (runtime only, waiting for review)
+  -> waiting for human review
   -> approve -> ready / done
   -> reject  -> blocked
 
 blocked
   -> update PRD/design/task if needed
   -> revise work-plan/session prompt
-  -> trigger same session again
+  -> /run-session same session again
 ```

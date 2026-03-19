@@ -4,6 +4,7 @@ Standalone workflow kit for multi-session webcoding projects.
 
 > 2026-03-17 设计更新：推荐执行模型已调整为”LangGraph Local Server 常驻 + 单 session 显式触发 + 人工验收后才推进”。
 > 2026-03-18 交付模型更新：新增 `1paperprdasprompt.md` 单文件交付模式，客户无需 clone 整个工程。
+> 2026-03-19 执行层更新：引入 Roo Code `/run-session` slash command，替代手动触发 Session 的摩擦。LangGraph 集成暂停，执行层回归文档驱动 + Roo Code 辅助触发。
 
 This project is intentionally generic. It does not contain business data, business
 source code, or any feature-specific runtime logic. It only provides:
@@ -19,7 +20,7 @@ source code, or any feature-specific runtime logic. It only provides:
 - reference docs for evidence, output shape, and testing
 - a bootstrap script to generate a new workflow-driven project
 - a migration script for older prompt-only workflow projects
-- a LangGraph-oriented orchestration model, with the legacy fresh-session driver archived for reference only
+- a LangGraph-oriented orchestration model (paused; replaced by Roo Code slash command for session triggering), with the legacy fresh-session driver archived for reference only
 
 This repository also now carries one companion integration module under
 `integrations/`:
@@ -33,9 +34,22 @@ The recommended model is:
 
 - `Project -> Task -> Session -> Artifact`
 - Session 0 produces all planning docs + pre-generates `tasksubsession1.md ~ tasksubsessionN.md`
-- User manually executes each session: `"请读取 tasksubsessionN.md 并执行"`
+- User triggers each session via Roo Code `/run-session` command (or manually: `"请读取 tasksubsessionN.md 并执行"`)
 - `memory.md` is a human-readable progress log, not a runtime routing source
-- No LangGraph server, no VSCode extension required — zero runtime dependencies
+- No LangGraph server required — zero runtime dependencies beyond Roo Code (optional)
+
+## Roo Code Integration
+
+A `.roo/commands/run-session.md` slash command is provided for simplified session triggering:
+
+```
+/run-session          # 执行 memory.md 中 next_session 指定的 Session
+/run-session 3        # 执行指定 Session 编号
+```
+
+The command reads `memory.md` to determine the current session, loads the corresponding `tasksubsessionN.md`, executes it, and waits for human acceptance before updating `memory.md`. This replaces the manual step of opening a new chat window and typing the trigger phrase.
+
+**Roo Code is optional.** The workflow works identically without it — just trigger sessions manually.
 
 ## Claude Code Usage
 
@@ -120,11 +134,11 @@ flowchart TB
     D --> D3["memory.md"]
     D --> D4["artifacts/session-N-summary.md"]
 
-    C --> E["LangGraph Orchestration"]
-    E --> E1["LangGraph Local Server\nlong-running process"]
-    E1 --> E2["POST /threads/{thread_id}/runs"]
-    E2 --> E3["single session attempt"]
-    E3 --> E4["interrupt / resume / re-run"]
+    C --> E["Orchestration Layer (Optional)"]
+    E --> E1["Roo Code /run-session\nslash command"]
+    E1 --> E2["读取 memory.md → 执行 tasksubsessionN.md"]
+    E2 --> E3["HITL 验收门控"]
+    E3 --> E4["更新 memory.md"]
 
     D --> F["Current Session Execution"]
     F --> F1["Resolve next_session from memory.md"]
@@ -133,8 +147,8 @@ flowchart TB
     F3 --> F4["summary / manifest / memory update"]
     F4 --> E1
 
-    E1 --> G["VS Code UI Shell"]
-    G --> G1["integrations/vibecoding-vscode-extension"]
+    E1 --> G["VS Code / Roo Code"]
+    G --> G1["integrations/vibecoding-vscode-extension\n或 .roo/commands/run-session.md"]
 ```
 
 See [docs/workflow-standard.md](./docs/workflow-standard.md) for the full `Project / Task / Session / Artifact / Memory` model and diagram.
@@ -164,6 +178,16 @@ Use this project before or during webcoding development when you need:
 ```
 
 大模型会自动判断项目状态，引导你完成 Session 0（产出全部规划文档），然后按 Session 循环推进开发。
+
+**执行阶段（Session 1–N）推荐使用 Roo Code：**
+
+在 VS Code 中安装 Roo Code 后，项目目录下输入：
+
+```
+/run-session
+```
+
+Roo Code 会自动读取 `memory.md`，执行当前 Session，完成后等待你验收。验收通过后再次运行 `/run-session` 继续下一个。
 
 ### 方式二：脚手架初始化（适合需要完整模板结构的团队）
 
