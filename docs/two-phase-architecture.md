@@ -10,6 +10,7 @@ VibeCoding Workflow 仍然采用两阶段模型，但开发阶段的推进口径
 - runner 完成后先进入人工验收
 - 只有验收通过，才写 summary / manifest 并推进 `memory.md`
 - 验收不通过时，可以先修订 `PRD.md`、`design.md`、`task.md`，再更新 `work-plan.md` 和当前/后续 Session prompt
+- 目录 contract 固定为 `project_root / task_root`，不再使用 task 文件直接铺在项目根目录的旧布局
 
 | 阶段 | current_phase | Sessions | 目标 | 产出 |
 |------|--------------|----------|------|------|
@@ -23,15 +24,17 @@ VibeCoding Workflow 仍然采用两阶段模型，但开发阶段的推进口径
 
 Session 0 产出：
 
-1. `CLAUDE.md`
-2. `task.md`
-3. `PRD.md`
-4. `design.md`
-5. `work-plan.md`
-6. `memory.md`
-7. 第一版 `session-0-prompt.md` 到 `session-10-prompt.md`
-8. `artifacts/session-0-summary.md`
-9. `artifacts/session-0-manifest.json`
+1. `project_root/CLAUDE.md`
+2. `project_root/customer_context/`
+3. `task_root/task.md`
+4. `task_root/PRD.md`
+5. `task_root/design.md`
+6. `task_root/work-plan.md`
+7. `task_root/memory.md`
+8. 第一版 `task_root/session-0-prompt.md` 到 `task_root/session-10-prompt.md`
+9. `task_root/artifacts/session-0-summary.md`
+10. `task_root/artifacts/session-0-manifest.json`
+11. `task_root/scripts/` 与 `task_root/outputs/`
 
 ### 流程图
 
@@ -66,6 +69,7 @@ flowchart TD
 1. Session 0 负责生成第一版计划，而不是生成永不变化的计划。
 2. `work-plan.md` 和 `session-N-prompt.md` 是规划产物，不是只读合同。
 3. 只要客户在后续验收中调整范围、顺序或验收口径，就允许回写规划文档。
+4. Session 0 在 `project_root` 建目录，Session 1–10 必须在当前 `task_root` 中执行。
 
 ## Phase 2 — 开发阶段
 

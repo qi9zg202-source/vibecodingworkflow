@@ -39,7 +39,7 @@ This workflow avoids that by using a fixed loop:
 
 This loop has two handoff layers:
 
-- `memory.md`: machine routing truth
+- `task_root/memory.md`: machine routing truth
 - `artifacts/session-N-summary.md`: human/model handoff evidence
 - `artifacts/session-N-manifest.json`: machine-verifiable completion record
 
@@ -86,6 +86,7 @@ Record:
 After a session ends, the model should not guess which session comes next.  
 `startup-prompt.md` exists to:
 
+- run inside the current `task_root`
 - read `memory.md`
 - read `task.md`
 - read the previous session summary when it exists

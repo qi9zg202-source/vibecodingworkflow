@@ -6,6 +6,12 @@ This map describes the recommended session split for one task.
 Use one `startup-prompt.md` and one `memory.md` per task, then let multiple
 sessions advance that task one deliverable at a time.
 
+Directory contract:
+
+- `project_root` 固定包含 `CLAUDE.md`、`customer_context/`、`tasks/`
+- `task_root = project_root/tasks/<task-slug>/`
+- 当前 task 的 `startup-prompt.md`、`memory.md`、`artifacts/`、`scripts/`、`outputs/` 都属于 `task_root`
+
 ## Before You Start
 
 If you have not created `CLAUDE.md` and `task.md` yet, run the onboarding flow first:
@@ -38,6 +44,7 @@ Then trigger Session 0 to generate the first planning set.
 - 产出第一版 `work-plan.md`
 - 产出第一版 `session-0-prompt.md` 到 `session-10-prompt.md`
 - 初始化 `memory.md`
+- 预建当前 `task_root/artifacts/`、`task_root/scripts/`、`task_root/outputs/`
 
 ```mermaid
 flowchart TD

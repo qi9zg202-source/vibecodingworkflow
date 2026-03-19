@@ -76,6 +76,7 @@ shape:
 project-root/
 ├── 1paperprdasprompt.md
 ├── CLAUDE.md
+├── customer_context/
 ├── tasks/
 │   ├── task-a/
 │   │   ├── task.md
@@ -85,10 +86,14 @@ project-root/
 │   │   ├── tasksubsession1.md
 │   │   ├── tasksubsession2.md
 │   │   ├── memory.md
+│   │   ├── scripts/
+│   │   ├── outputs/
 │   │   └── artifacts/
 │   └── task-b/
 │       ├── task.md
 │       ├── PRD.md
+│       ├── scripts/
+│       ├── outputs/
 │       └── ...
 └── app/ or shared source files
 ```
@@ -96,10 +101,11 @@ project-root/
 Rules:
 
 - `CLAUDE.md` is project-level and should be shared by all tasks
+- `customer_context/` is project-level and stores client-provided background materials
 - each feature-level task owns its own `task.md`, `PRD.md`, `design.md`,
-  `work-plan.md`, `tasksubsessionN.md`, `memory.md`, and `artifacts/`
-- if the project currently has only one active task, a simplified single-task
-  root layout is allowed; that does not change the underlying ownership model
+  `work-plan.md`, `tasksubsessionN.md`, `memory.md`, `artifacts/`, `scripts/`,
+  and `outputs/`
+- the standard contract always uses `tasks/<task-slug>/`, even for a single active task
 
 ```mermaid
 flowchart TD

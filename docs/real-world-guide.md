@@ -116,7 +116,7 @@ flowchart LR
 
 ```
 新建 Claude Code 窗口
-→ 粘贴：工作目录切到 <你的项目目录>，请执行 startup-prompt.md 中的启动流程
+→ 粘贴：工作目录切到 <当前 task_root>，请执行 startup-prompt.md 中的启动流程
 → Agent 自动读 memory.md，路由到当前 session task
 ```
 

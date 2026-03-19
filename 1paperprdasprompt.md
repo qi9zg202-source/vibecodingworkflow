@@ -1,8 +1,8 @@
 # VibeCoding Workflow — One Paper
-> 版本：v2.5 | 适用模型：Claude / GPT-4o 及同等能力大模型
+> 版本：v2.6 | 适用模型：Claude / GPT-4o 及同等能力大模型
 > 执行模型：文档驱动 + 用户手动逐步执行，零运行时依赖
 > 适用角色：产品经理（Web 功能原型场景）
-> 核心交付物：`prd.md`（产品需求文档）+ `[功能名].html`（可交互原型，含基于真实业务背景的模拟数据）
+> 核心交付物：`PRD.md`（产品需求文档）+ `[功能名].html`（可交互原型，含基于真实业务背景的模拟数据）
 
 ---
 
@@ -59,6 +59,8 @@ ELSE IF memory.md 存在：
 **目录工作约定（强制）：**
 - `project_root` = `1paperprdasprompt.md` 所在目录
 - `task_root` = `project_root/tasks/<task-slug>/`
+- 标准目录骨架：`project_root` 固定包含 `CLAUDE.md`、`customer_context/`、`tasks/`
+- `task_root` 固定包含 `task.md`、`PRD.md`、`design.md`、`work-plan.md`、`memory.md`、`tasksubsessionN.md`、`artifacts/`、`scripts/`、`outputs/`
 - 初始化时必须先创建标准目录，再写入文档文件
 - Session 0a / 0b 可在 `project_root` 执行；Session 1–N 必须在 `task_root` 中执行
 
@@ -118,6 +120,13 @@ project_root/
         ├── ...
         ├── [功能名].html
         ├── memory.md
+        ├── scripts/
+        │   └── .gitkeep
+        ├── outputs/
+        │   ├── samples/
+        │   ├── reports/
+        │   ├── session-specs/
+        │   └── session-logs/
         └── artifacts/
 ```
 
@@ -126,6 +135,8 @@ project_root/
 - `tasks/`：所有二级功能任务统一放在 `project_root/tasks/`
 - `<task-slug>/`：当前功能的工作根目录，目录名使用 kebab-case，例如 `chiller-strategy`
 - `artifacts/`：当前 Task 的 Session summary、证据文件统一放在 `task_root/artifacts/`
+- `scripts/`：当前 Task 的辅助脚本目录，默认保留空目录
+- `outputs/`：当前 Task 的样例、报告、session 规格和日志输出目录
 
 ### 执行流程
 
@@ -347,6 +358,11 @@ project_root/
 - `project_root/tasks/`（若已存在则保留）
 - `project_root/tasks/<task-slug>/`
 - `project_root/tasks/<task-slug>/artifacts/`
+- `project_root/tasks/<task-slug>/scripts/`
+- `project_root/tasks/<task-slug>/outputs/samples/`
+- `project_root/tasks/<task-slug>/outputs/reports/`
+- `project_root/tasks/<task-slug>/outputs/session-specs/`
+- `project_root/tasks/<task-slug>/outputs/session-logs/`
 
 创建完成后，后续所有 Task 级文件均写入 `task_root = project_root/tasks/<task-slug>/`。
 
@@ -484,6 +500,8 @@ Session 0a 完成！需求文档已生成：
 - customer_context/                    客户资料目录
 - tasks/<task-slug>/                   当前功能工作目录
 - tasks/<task-slug>/artifacts/         Session 产出目录
+- tasks/<task-slug>/scripts/           Task 辅助脚本目录
+- tasks/<task-slug>/outputs/...        Task 输出目录（samples / reports / session-specs / session-logs）
 
 【需求文档】
 - CLAUDE.md          项目背景与约束

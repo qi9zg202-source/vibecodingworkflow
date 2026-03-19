@@ -28,6 +28,8 @@ The recommended model is:
 - `Project -> Task -> Session -> Artifact`
 - `1 project -> multiple tasks`，`CLAUDE.md` 是项目级，`task.md` 是每个二级功能各自维护的一份 Task 文档
 - One Paper 初始化统一创建 `project_root/tasks/<task-slug>/`
+- `project_root` 固定包含 `CLAUDE.md`、`customer_context/`、`tasks/`
+- `task_root` 固定补齐 `artifacts/`、`scripts/`、`outputs/`
 - Session 0 produces all planning docs + pre-generates `tasksubsession1.md ~ tasksubsessionN.md`
 - User triggers each session via Roo Code `/run-session` command (or manually: `"请读取 tasksubsessionN.md 并执行"`)
 - `memory.md` is a human-readable progress log, not a runtime routing source
@@ -164,6 +166,8 @@ my-project/
         ├── tasksubsession1.md
         ├── ...
         ├── memory.md
+        ├── scripts/
+        ├── outputs/
         └── artifacts/
 ```
 
@@ -242,10 +246,14 @@ my-project/
 │   │   ├── tasksubsession1.md
 │   │   ├── ...
 │   │   ├── memory.md
+│   │   ├── scripts/
+│   │   ├── outputs/
 │   │   └── artifacts/
 │   └── feature-b/
 │       ├── task.md
 │       ├── PRD.md
+│       ├── scripts/
+│       ├── outputs/
 │       ├── ...
 │       └── artifacts/
 └── shared-src-or-app-files/
@@ -255,5 +263,5 @@ In other words:
 
 - `CLAUDE.md` is project-level and shared across tasks
 - `customer_context/` stores client-provided background files at project level
-- `task.md` / `PRD.md` / `design.md` / `work-plan.md` / `tasksubsessionN.md` / `memory.md` are task-level
+- `task.md` / `PRD.md` / `design.md` / `work-plan.md` / `tasksubsessionN.md` / `memory.md` / `artifacts/` / `scripts/` / `outputs/` are task-level
 - even if a project currently has only one feature task, the One Paper contract still uses `tasks/<task-slug>/`

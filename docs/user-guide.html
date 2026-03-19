@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VibeCoding Workflow 用户手册 v2.4</title>
+<title>VibeCoding Workflow 用户手册 v2.5</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap');
 
@@ -362,7 +362,7 @@
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-badge">VibeCoding Workflow · v2.4 · 用户手册</div>
+  <div class="hero-badge">VibeCoding Workflow · v2.5 · 用户手册</div>
   <h1>从需求到 HTML 原型<br>全流程 AI 协作指南</h1>
   <p>适用角色：产品经理 &nbsp;|&nbsp; 输入：口述需求 &nbsp;|&nbsp; 输出：PRD.md + 可交互 HTML 原型</p>
   <div class="hero-tags">
@@ -370,7 +370,7 @@
     <span class="hero-tag">单文件交付</span>
     <span class="hero-tag">Session 隔离</span>
     <span class="hero-tag">需求大改支持</span>
-    <span class="hero-tag">v2.4 新增：对标搜索 + 客户资料读取</span>
+    <span class="hero-tag">v2.5 新增：project_root / task_root contract</span>
   </div>
 </div>
 
@@ -504,18 +504,16 @@
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <h4>触发执行（推荐：Roo Code slash command）</h4>
-          <p>方式一（推荐）：在 VS Code 中使用 Roo Code 发送：</p>
-          <pre>/run-session</pre>
-          <p>方式二（手动）：在 Codex/Claude 对话框发送：</p>
+          <h4>首次启动时，先在 project_root 手动执行 Session 0</h4>
+          <p>在 Codex/Claude 对话框发送：</p>
           <pre>请读取 1paperprdasprompt.md，然后按照其中的入口协议开始执行。</pre>
         </div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
-          <h4>按 Agent 引导回答问题，逐步确认</h4>
-          <p>Agent 会引导你填写项目背景和功能需求，每个 Session 完成后等待你验收。</p>
+          <h4>Session 0 完成后进入 task_root，继续后续 Session</h4>
+          <p>先按 Agent 引导完成 Session 0；之后进入当前 <code>task_root</code>，再用 <code>/run-session</code> 或手动方式推进后续 Session。</p>
         </div>
       </div>
     </div>
@@ -532,7 +530,7 @@
     <div class="section-subtitle">目标：产出所有稳定规划文档，不写任何业务代码</div>
 
     <div class="callout">
-      Session 0 分两步：<strong>0a（需求阶段）</strong>先初始化 <code>customer_context/</code> 和 <code>tasks/&lt;task-slug&gt;/</code>，再产出 CLAUDE.md / task.md / PRD.md；<strong>0b（规划阶段）</strong>在同一窗口继续，在 <code>task_root</code> 下产出 design.md / work-plan.md / tasksubsession1~N.md / memory.md。
+      Session 0 分两步：<strong>0a（需求阶段）</strong>先初始化 <code>customer_context/</code>、<code>tasks/&lt;task-slug&gt;/</code> 及标准子目录，再产出 CLAUDE.md / task.md / PRD.md；<strong>0b（规划阶段）</strong>在同一窗口继续，在 <code>task_root</code> 下产出 design.md / work-plan.md / tasksubsession1~N.md / memory.md。
     </div>
     <div class="callout orange">
       <strong>v2.4 新增 — Session 0a 三个子步骤（全部在同一窗口内完成）：</strong><br><br>
@@ -677,6 +675,8 @@
       <tr><td><span class="badge badge-gray">0b</span></td><td><code>tasks/&lt;task-slug&gt;/design.md</code></td><td>技术架构与模块设计</td></tr>
       <tr><td><span class="badge badge-gray">0b</span></td><td><code>tasks/&lt;task-slug&gt;/work-plan.md</code></td><td>Session 1–N 开发计划</td></tr>
       <tr><td><span class="badge badge-gray">0b</span></td><td><code>tasks/&lt;task-slug&gt;/tasksubsession1~N.md</code></td><td>自包含执行单元，每个 Session 的指令文件</td></tr>
+      <tr><td><span class="badge badge-gray">0b</span></td><td><code>tasks/&lt;task-slug&gt;/scripts/</code></td><td>Task 辅助脚本目录</td></tr>
+      <tr><td><span class="badge badge-gray">0b</span></td><td><code>tasks/&lt;task-slug&gt;/outputs/</code></td><td>Task 输出目录（samples / reports / session-specs / session-logs）</td></tr>
       <tr><td><span class="badge badge-gray">0b</span></td><td><code>tasks/&lt;task-slug&gt;/memory.md</code></td><td>进度日志（初始状态）</td></tr>
     </table>
   </div>
@@ -753,8 +753,8 @@
   <!-- 上下文链说明 -->
   <rect x="10" y="240" width="440" height="60" rx="10" fill="rgba(0,0,0,0.04)" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
   <text x="20" y="262" fill="#5a6b65" font-size="11" font-weight="600" font-family="sans-serif">上下文读取链（自动）</text>
-  <text x="20" y="280" fill="#5a6b65" font-size="10" font-family="sans-serif">Session 1: ../../CLAUDE.md + task.md + design.md</text>
-  <text x="20" y="295" fill="#5a6b65" font-size="10" font-family="sans-serif">Session N: ../../CLAUDE.md + task.md + design.md + artifacts/session-(N-1)-summary.md</text>
+  <text x="20" y="280" fill="#5a6b65" font-size="10" font-family="sans-serif">Session 1: project_root/CLAUDE.md（相对路径 ../../CLAUDE.md）+ task.md + design.md</text>
+  <text x="20" y="295" fill="#5a6b65" font-size="10" font-family="sans-serif">Session N: project_root/CLAUDE.md + task.md + design.md + artifacts/session-(N-1)-summary.md</text>
 </svg>
     </div>
     <div class="legend">
@@ -963,7 +963,7 @@ Session 4 读取 → artifacts/session-3-summary.md
     <pre>当前进度：Session 3 已完成。
 
 建议执行 tasksubsession4.md。
-先进入当前 task_root，再发送 "请读取 tasksubsession4.md 并按其中步骤执行" 即可继续。</pre>
+先进入当前 task_root，再触发对应执行方式即可继续。</pre>
 
     <h3>项目完成终态</h3>
     <p>当 memory.md 包含"项目状态: 全部完成"时，Agent 输出：</p>
@@ -988,6 +988,8 @@ Session 4 读取 → artifacts/session-3-summary.md
         ├── tasksubsession2.md
         ├── ...
         ├── memory.md
+        ├── scripts/
+        ├── outputs/
         └── artifacts/
             ├── session-1-summary.md
             ├── session-2-summary.md
@@ -1010,6 +1012,8 @@ Session 4 读取 → artifacts/session-3-summary.md
 │   │   ├── tasksubsession1.md
 │   │   ├── tasksubsession2.md
 │   │   ├── memory.md
+│   │   ├── scripts/
+│   │   ├── outputs/
 │   │   └── artifacts/
 │   └── alarm-dashboard/
 │       ├── task.md
@@ -1023,6 +1027,7 @@ Session 4 读取 → artifacts/session-3-summary.md
       <li><code>CLAUDE.md</code> 是项目级，跨多个 Task 共享</li>
       <li><code>customer_context/</code> 是项目级，统一存放客户资料</li>
       <li><code>task.md</code> 是 Task 级，<code>1 Task = 1 个二级功能点</code></li>
+      <li><code>scripts/</code> 和 <code>outputs/</code> 也是当前 <code>task_root</code> 的标准组成部分</li>
       <li>Session 1–N 必须在当前 <code>task_root</code> 中执行，而不是在项目根目录执行</li>
     </ul>
 
@@ -1035,6 +1040,7 @@ Session 4 读取 → artifacts/session-3-summary.md
       <tr><td><code>tasksubsessionN.md</code></td><td>自包含执行单元，你执行时发送给 Agent 的指令文件</td></tr>
       <tr><td><code>artifacts/session-N-summary.md</code></td><td>Session 完成报告，下一 Session 的上下文交接</td></tr>
       <tr><td><code>memory.md</code></td><td>人类可读的进度日志</td></tr>
+      <tr><td><code>project_root / task_root</code></td><td>项目根目录 / 当前任务工作根目录</td></tr>
       <tr><td><code>CLAUDE.md</code></td><td>项目级背景，跨所有功能共享，基本不变</td></tr>
       <tr><td><code>PRD.md</code></td><td>核心交付物①，产品评审文档</td></tr>
       <tr><td><code>[功能名].html</code></td><td>核心交付物②，可直接演示的交互原型</td></tr>
@@ -1097,14 +1103,14 @@ Session 4 读取 → artifacts/session-3-summary.md
     </div>
     <div class="faq-item">
       <div class="faq-q">Roo Code <code>/run-session</code> 和手动发送指令有什么区别？</div>
-      <div class="faq-a">效果相同，触发方式不同。<code>/run-session</code> 会在当前 <code>task_root</code> 下自动读取 <code>memory.md</code> 解析 <code>next_session</code>，省去手动确认当前进度的步骤。手动方式需要你自己判断该执行哪个 tasksubsession 文件。两种方式都支持，可以混用。正常推进时用 <code>/run-session</code> 更省心；需要跳过某个 Session、重新执行特定 Session 或执行 Session 0b 重新规划时，建议手动触发。</div>
+      <div class="faq-a">效果相同，触发方式不同。<code>/run-session</code> 适合 Session 0 完成后的常规推进：进入当前 <code>task_root</code> 后，它会自动读取 <code>memory.md</code> 解析 <code>next_session</code>。手动方式更适合首次启动 Session 0，或需要明确指定当前执行文件的情况。两种方式都支持，可以混用。</div>
     </div>
   </div>
 
 </div><!-- /container -->
 
 <div class="footer">
-  <strong>VibeCoding Workflow</strong> v2.4 &nbsp;·&nbsp; 适用角色：产品经理 &nbsp;·&nbsp; 最后更新：2026-03-19<br>
+  <strong>VibeCoding Workflow</strong> v2.5 &nbsp;·&nbsp; 适用角色：产品经理 &nbsp;·&nbsp; 最后更新：2026-03-19<br>
   <span style="margin-top:8px;display:block;">输入口述需求 → 输出 PRD.md + 可交互 HTML 原型</span>
 </div>
 
