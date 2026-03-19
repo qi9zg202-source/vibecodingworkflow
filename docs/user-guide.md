@@ -1,6 +1,10 @@
 # VibeCoding Workflow 用户手册
 
-> 适用版本：v2.5 | 适用角色：产品经理 | 最后更新：2026-03-19
+> 适用版本：v2.6 | 适用角色：产品经理 | 最后更新：2026-03-19
+>
+> **v2.6 新增能力：**
+> - 最终评审原型固定收敛为 `task.html`
+> - `task.html` 必须为单文件交付，CSS / JS / 模拟数据全部内联，便于产品经理直接分发给开发评审
 >
 > **v2.5 新增能力：**
 > - 标准目录 contract 固定为 `project_root / task_root`
@@ -24,7 +28,7 @@
 
 **输出：**
 - `PRD.md` — 产品需求文档（评审核心文档）
-- `[功能名].html` — 可交互 HTML 原型，含基于真实业务背景的模拟数据（演示核心产物）
+- `task.html` — 可交互 HTML 原型，含基于真实业务背景的模拟数据，且为可直接分发的单文件评审包
 
 **你需要做的事只有三件：**
 
@@ -278,7 +282,7 @@ Agent 分两批生成文件并报告进度：
 | Session 2 | 策略包列表与详情页 | 列表可筛选，详情展示收益区间和风险等级 |
 | Session 3 | 策略执行下发与反馈模块 | 下发流程完整，反馈可记录 |
 | Session 4 | 稳态验证与回退逻辑 | 验证流程完整，回退操作可执行 |
-| **Session 5（固定）** | **`chiller-strategy.html` 可交互原型** | HTML 可直接浏览器打开，模拟数据符合 TSMC 业务背景 |
+| **Session 5（固定）** | **`task.html` 可交互原型** | HTML 可直接浏览器打开，模拟数据符合 TSMC 业务背景，且 CSS / JS / HTML 全部内联 |
 
 ---
 
@@ -486,7 +490,7 @@ Agent 读取文件，进入 HTML 原型生成模式。执行清单：
 ✅ artifacts/session-4-summary.md  上一轮交接
 ```
 
-Agent 生成 `chiller-strategy.html`，模拟数据严格按照 CLAUDE.md 业务背景编写：
+Agent 生成 `task.html`，模拟数据严格按照 CLAUDE.md 业务背景编写：
 
 | 模拟数据项 | 内容示例 |
 |-----------|---------|
@@ -501,7 +505,7 @@ Agent 生成完成后，先输出结果等待验收：
 Session 5 测试通过
 Tests: passed ✅
 
-chiller-strategy.html 已生成，可在浏览器直接打开。
+task.html 已生成，可在浏览器直接打开。
 模拟数据覆盖：机组列表、策略包、EER 趋势、执行记录，均基于 TSMC 业务背景。
 
 请确认结果是否符合预期：
@@ -515,14 +519,14 @@ chiller-strategy.html 已生成，可在浏览器直接打开。
 ✅ 核心交付物已完成：
 
 - tasks/chiller-strategy/PRD.md（产品需求文档）
-- tasks/chiller-strategy/chiller-strategy.html（可交互原型 + 模拟数据）
+- tasks/chiller-strategy/task.html（可交互原型 + 模拟数据）
 
 Session 5 完成
 Summary: artifacts/session-5-summary.md
 memory.md 已更新 → 项目状态: 全部完成
 ```
 
-**小王直接用 `chiller-strategy.html` 在浏览器中演示给评审方。**
+**小王直接把 `task.html` 发给开发和评审方，在浏览器中即可打开查看。**
 
 ---
 
@@ -539,7 +543,7 @@ my-project/
         ├── PRD.md                     ← ✅ 核心交付物①：产品需求文档
         ├── design.md                  ← 四层架构设计
         ├── work-plan.md               ← Session 1–5 计划
-        ├── chiller-strategy.html      ← ✅ 核心交付物②：可交互原型
+        ├── task.html                  ← ✅ 核心交付物②：可交互原型（单文件评审包）
         ├── tasksubsession1.md         ← 已执行
         ├── tasksubsession2.md         ← 已执行
         ├── tasksubsession3.md         ← 已执行
@@ -600,7 +604,8 @@ my-project/
 - `customer_context/` 是项目级，统一存放客户资料
 - `task.md` 是 Task 级，`1 Task = 1 个二级功能点`
 - 如果当前 Task 只需要读取部分客户资料，这份“必读文件清单”应维护在 `task.md` 的 `Required Customer Context` section
-- `[功能名].html` 固定生成在当前 `task_root/` 根目录，不放在 `artifacts/` 或 `outputs/` 下
+- `task.html` 固定生成在当前 `task_root/` 根目录，不放在 `artifacts/` 或 `outputs/` 下
+- `task.html` 必须内联 CSS、JavaScript 和模拟数据，不再额外输出 `styles.css`、`app.js`、`core-models.js` 等运行时文件
 - Session 1–N 必须在当前 `task_root` 中执行，而不是在项目根目录执行
 
 ---
@@ -731,7 +736,7 @@ Agent 发现 `memory.md` 已存在，会主动推断并建议：
 如果 memory.md 中包含"项目状态: 全部完成"，Agent 会输出：
 
 ```
-✅ 项目已全部完成。核心交付物：PRD.md + chiller-strategy.html
+✅ 项目已全部完成。核心交付物：PRD.md + task.html
 
 如需迭代新功能，请更新当前 task_root 下的 task.md / PRD.md 后告知我，我将重新规划。
 ```
@@ -753,7 +758,7 @@ Agent 不会建议执行不存在的后续 tasksubsession。
 | **project_root / task_root**       | 项目根目录 / 当前任务工作根目录              |
 | **CLAUDE.md**                      | 项目级背景，跨所有功能共享，基本不变             |
 | **PRD.md**                         | 核心交付物①，产品评审文档                  |
-| **[功能名].html**                     | 核心交付物②，可直接演示的交互原型              |
+| **task.html**                       | 核心交付物②，可直接分发评审的单文件交互原型        |
 
 ---
 
@@ -790,6 +795,9 @@ A: 不会。Agent 会输出复用评估表，逐条评估每个已完成 Session
 
 **Q: 最终 HTML 的模拟数据从哪里来？**
 A: Agent 从 `CLAUDE.md` 的业务背景中提取行业、角色、场景等信息，结合 `PRD.md` 的功能范围生成。你在 Session 0 填写的业务背景越详细，模拟数据越贴近真实。
+
+**Q: 给开发评审时，需要再带 `styles.css`、`app.js` 这些文件吗？**
+A: 不需要。最终原型固定为 `task.html`，CSS / JavaScript / 模拟数据全部内联在这个文件里。产品经理分发给开发或评审方时，只需要这一份文件。
 
 **Q: 只有一个文件 `1paperprdasprompt.md` 就够了吗？**
 A: 是的。这是单文件交付模式的核心设计——客户只需获取这一个文件，大模型即运行时，零依赖。

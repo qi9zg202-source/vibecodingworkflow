@@ -1,8 +1,8 @@
 # VibeCoding Workflow — One Paper
-> 版本：v2.6 | 适用模型：Claude / GPT-4o 及同等能力大模型
+> 版本：v2.7 | 适用模型：Claude / GPT-4o 及同等能力大模型
 > 执行模型：文档驱动 + 用户手动逐步执行，零运行时依赖
 > 适用角色：产品经理（Web 功能原型场景）
-> 核心交付物：`PRD.md`（产品需求文档）+ `[功能名].html`（可交互原型，含基于真实业务背景的模拟数据）
+> 核心交付物：`PRD.md`（产品需求文档）+ `task.html`（可交互原型，含基于真实业务背景的模拟数据，且 CSS / JS / HTML 全部内联）
 
 ---
 
@@ -38,7 +38,7 @@ ELSE IF memory.md 存在：
 
     IF memory.md 中包含"项目状态: 全部完成"：
         → 输出：
-           "✅ 项目已全部完成。核心交付物：PRD.md + [功能名].html
+           "✅ 项目已全部完成。核心交付物：PRD.md + task.html
             如需迭代新功能，请更新当前 task_root 下的 task.md / PRD.md 后告知我，我将重新规划。"
         → 等待用户指令，不建议执行任何 tasksubsession
 
@@ -88,8 +88,8 @@ ELSE IF memory.md 存在：
 | `work-plan.md`                   | Task 级     | Session 拆分计划：列出 Session 1–N，最后一个 Session 固定为 HTML 交付，每条含 Deliverable + Test Gate | Session 0b 自动生成           | 基本稳定，重大变更时修订     |
 | `tasksubsession1.md`             | Session 级  | Session 1 的自包含执行单元：上下文读取清单、子任务列表、测试 Gate、完成后操作                                   | Session 0b 预生成            | 执行前可按需修订         |
 | `tasksubsession2.md`             | Session 级  | Session 2 的自包含执行单元（同上）                                                           | Session 0b 预生成            | 执行前可按需修订         |
-| `tasksubsessionN.md`             | Session 级  | **最后一个 Session**：固定产出可交互 HTML 原型，模拟数据必须基于 CLAUDE.md 业务背景和 PRD.md 功能范围            | Session 0b 预生成            | 执行前可按需修订         |
-| `[功能名].html`                     | **核心交付物②** | 可交互 HTML 原型：完整 UI 交互 + 模拟数据（数据内容贴合客户真实业务场景），评审核心产物                               | 最后一个 Session 执行后生成        | 按评审反馈迭代          |
+| `tasksubsessionN.md`             | Session 级  | **最后一个 Session**：固定产出 `task.html`，模拟数据必须基于 CLAUDE.md 业务背景和 PRD.md 功能范围，且资源全部内联到单文件中 | Session 0b 预生成            | 执行前可按需修订         |
+| `task.html`                      | **核心交付物②** | 可交互 HTML 原型：完整 UI 交互 + 模拟数据（数据内容贴合客户真实业务场景），供产品经理直接分发给开发评审的单文件产物           | 最后一个 Session 执行后生成        | 按评审反馈迭代          |
 | `memory.md`                      | 进度日志       | 项目进度日志：已完成 Session 记录、跨 Session 稳定决策、已知风险，供人工查阅和大模型参考                            | Session 0b 创建，每 Session 追加 | 每个 Session 完成后追加 |
 | `artifacts/session-N-summary.md` | 产出物        | Session N 的完成报告：完成了什么、关键决策、下一 Session 注意事项，作为下一 Session 的上下文交接                   | 每个 Session 执行完成后生成        | 只写不改             |
 
@@ -118,7 +118,7 @@ project_root/
         ├── tasksubsession1.md
         ├── tasksubsession2.md
         ├── ...
-        ├── [功能名].html
+        ├── task.html
         ├── memory.md
         ├── scripts/
         │   └── .gitkeep
@@ -134,7 +134,7 @@ project_root/
 - `customer_context/`：客户资料统一放在 `project_root/customer_context/`
 - `tasks/`：所有二级功能任务统一放在 `project_root/tasks/`
 - `<task-slug>/`：当前功能的工作根目录，目录名使用 kebab-case，例如 `chiller-strategy`
-- `[功能名].html`：最终原型文件放在当前 `task_root/` 根目录，与 `task.md`、`PRD.md`、`design.md` 同级
+- `task.html`：最终原型文件固定放在当前 `task_root/` 根目录，与 `task.md`、`PRD.md`、`design.md` 同级
 - `artifacts/`：当前 Task 的 Session summary、证据文件统一放在 `task_root/artifacts/`
 - `scripts/`：当前 Task 的辅助脚本目录，默认保留空目录
 - `outputs/`：当前 Task 的样例、报告、session 规格和日志输出目录
@@ -399,8 +399,9 @@ project_root/
 - [文件名]：[提取的关键点位、指标、字段、单位等]
 
 ## Tech Stack
-- Charts: D3.js + Highcharts.js（CDN 引入）
-- UI Framework: SAP Fiori 风格，纯 HTML/CSS 内联，无外部依赖
+- Runtime: 原生 HTML / CSS / JavaScript，图形优先使用内联 SVG / Canvas
+- Delivery: 最终评审产物固定为 `task.html`，禁止拆分 `styles.css`、`app.js`、`core-models.js` 等运行时文件
+- UI Framework: SAP Fiori 风格，纯 HTML/CSS/JS 内联，无外部依赖
 - Layout: 纵向滚动允许，横向禁止出现滚动条，所有内容宽度自适应视口
 - Element IDs: 页面内每个 HTML 元素必须有唯一 id，命名格式 [模块]-[功能]-[类型]
 ```
@@ -619,9 +620,10 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 [...中间 Session 按需拆分...]
 
 ## Session N（最终 Session，固定）
-- Deliverable: `[功能名].html` — 可交互 HTML 原型，包含完整 UI 交互和模拟数据
+- Deliverable: `task.html` — 可交互 HTML 原型，包含完整 UI 交互和模拟数据
 - Test Gate:
   - HTML 文件可在浏览器直接打开，无需服务器
+  - 目录中不存在额外运行时前端资源文件（如 `styles.css`、`app.js`、`core-models.js`）
   - 所有核心交互流程可操作（点击、表单、状态切换等）
   - 模拟数据内容符合 CLAUDE.md 中的客户业务背景
   - 模拟数据覆盖 PRD.md 中定义的核心功能场景
@@ -635,7 +637,7 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 写入路径：`task_root/tasksubsession1.md ~ task_root/tasksubsessionN.md`
 
 生成时注意：
-- `## 工作对象` 中的目标文件名必须填写具体文件名（如 `chiller-strategy.html`），不得留占位符
+- `## 工作对象` 中的目标文件名固定填写为 `task.html`，不得改成 `index.html`、`[功能名].html` 或其他命名
 - Session 1：操作方式填"从零新建"，执行前检查填"无需检查"
 - Session 2 起：操作方式填"读取已有文件，在此基础上继续开发"，执行前检查填"先读取 [文件名] 当前内容，再执行子任务"
 
@@ -662,9 +664,9 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 
 > 注意：本工作流所有 Session 均围绕同一 HTML 文件迭代构建，每个 Session 在上一 Session 的基础上继续开发。
 
-- 目标文件：`[功能名].html`
+- 目标文件：`task.html`
 - 操作方式：[Session 1 填"从零新建" / Session N>1 填"读取已有文件，在此基础上继续开发"]
-- 执行前检查：[Session 1 填"无需检查" / Session N>1 填"先读取 [功能名].html 当前内容，再执行子任务"]
+- 执行前检查：[Session 1 填"无需检查" / Session N>1 填"先读取 task.html 当前内容，再执行子任务"]
 
 ## 子任务
 
@@ -714,17 +716,17 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 
 ## 本 Session 目标
 
-产出 `[功能名].html`：一个可在浏览器直接打开的可交互 HTML 原型，包含完整 UI 交互和符合客户业务背景的模拟数据。
+产出 `task.html`：一个可在浏览器直接打开的可交互 HTML 原型，包含完整 UI 交互和符合客户业务背景的模拟数据，供产品经理直接分发给开发评审。
 
 ## HTML 交付规范（强制约束）
 
 以下规范不可省略，优先级高于任何其他设计决策：
 
-- **引用库**：D3.js + Highcharts.js（CDN 引入），如 CLAUDE.md Tech Stack 有覆盖则以 CLAUDE.md 为准
+- **运行时约束**：默认使用原生 HTML / CSS / JavaScript 与内联 SVG / Canvas；如 CLAUDE.md Tech Stack 有覆盖，运行时代码仍必须完整内嵌在 `task.html` 中，禁止 CDN 和网络依赖
 - **UI 风格**：SAP Fiori 风格——清晰规整，整齐是最高优先级；使用 SAP 标准色系（#0070F2 主色、#354A5E 深色、#F5F6F7 背景）
 - **布局约束**：纵向滚动允许，**横向绝对禁止出现滚动条**；所有内容宽度自适应视口
 - **元素 ID**：页面内每个 HTML 元素必须有唯一 `id`，命名格式 `[模块]-[功能]-[类型]`（如 `dashboard-eer-chart`）
-- **单文件**：CSS 和 JS 全部内联，无外部依赖文件，浏览器直接打开即可运行
+- **单文件**：CSS、JavaScript、图标/小型素材和模拟数据全部写在 `task.html` 内；禁止输出 `styles.css`、`app.js`、`core-models.js` 等拆分运行时文件
 
 ## 模拟数据要求（核心约束）
 
@@ -740,11 +742,12 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 - [ ] 实现各核心页面/模块的 UI
 - [ ] 按 CLAUDE.md 业务背景编写模拟数据
 - [ ] 实现核心交互（点击、表单、状态切换、数据展示）
-- [ ] 确保单文件可独立运行（CSS/JS 全部内联）
+- [ ] 确保 `task.html` 单文件可独立运行（CSS / JS / 模拟数据全部内联）
 
 ## 测试 Gate
 
 - [ ] HTML 文件可在浏览器直接打开，无需服务器
+- [ ] 最终交付目录中只有一个可分发评审的前端原型文件：`task.html`
 - [ ] 所有核心交互流程可操作
 - [ ] 模拟数据内容符合 CLAUDE.md 中的客户业务背景
 - [ ] 模拟数据覆盖 PRD.md 中定义的核心功能场景
@@ -754,21 +757,21 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 
 **阶段一（测试 Gate 通过后）：**
 
-确认 `[功能名].html` 已生成且可正常打开，输出结果等待用户验收。不写 summary，不更新 memory.md。
+确认 `task.html` 已生成且可正常打开，输出结果等待用户验收。不写 summary，不更新 memory.md。
 
 **阶段二（用户验收通过后）：**
 
 1. 写 `artifacts/session-[N]-summary.md`
 2. 追加更新 `memory.md`：
    ```
-   - Session [N]: [功能名].html 已交付 | tests: passed | [日期]
+   - Session [N]: task.html 已交付 | tests: passed | [日期]
    - 项目状态: 全部完成
    ```
 3. 输出最终交付确认：
    ```
    ✅ 核心交付物已完成：
    - PRD.md（产品需求文档）
-   - [功能名].html（可交互原型 + 模拟数据）
+   - task.html（可交互原型 + 模拟数据，单文件评审包）
    ```
 ```
 

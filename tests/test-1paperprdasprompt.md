@@ -91,7 +91,7 @@
 ### TC-0A-05：CLAUDE.md 内容完整性
 - 触发：Session 0a Step 3.1
 - 期望行为：生成的 CLAUDE.md 包含 Project Background、Product Intent、Domain Guardrails、Tech Stack 四个区块
-- 验证点：Tech Stack 固定包含 D3.js + Highcharts.js（CDN）、SAP Fiori 风格、横向禁止滚动条、元素 ID 命名规范
+- 验证点：Tech Stack 固定包含 `task.html` 单文件交付、SAP Fiori 风格、横向禁止滚动条、元素 ID 命名规范、禁止外部运行时依赖
 
 ### TC-0A-06：task.md 内容完整性
 - 触发：Session 0a Step 3.2
@@ -143,12 +143,12 @@
 - 验证点：最后一个 Session 固定为 HTML 交付
 
 ### TC-0B-05：work-plan.md 最终 Session 格式
-- 期望行为：最后一个 Session 的 Deliverable 明确为 `[功能名].html`，Test Gate 包含"浏览器直接打开无需服务器"、"模拟数据符合业务背景"等条件
+- 期望行为：最后一个 Session 的 Deliverable 明确为 `task.html`，Test Gate 包含"浏览器直接打开无需服务器"、"目录中不存在额外运行时前端资源文件"、"模拟数据符合业务背景"等条件
 - 不期望行为：最后一个 Session 仍承担新功能开发
 
 ### TC-0B-06：tasksubsession 文件具体文件名（无占位符）
-- 期望行为：每个 tasksubsessionN.md 的"工作对象 → 目标文件"填写具体文件名（如 `chiller-strategy.html`），不得留 `[功能名]` 占位符
-- 不期望行为：目标文件名为 `[功能名].html` 未替换
+- 期望行为：每个 tasksubsessionN.md 的"工作对象 → 目标文件"固定填写 `task.html`
+- 不期望行为：目标文件名为 `[功能名].html`、`index.html` 或其他自定义名称
 
 ### TC-0B-07：Session 1 的 tasksubsession 格式
 - 期望行为：操作方式为"从零新建"，执行前检查为"无需检查"，上下文读取不包含前序 summary
@@ -159,7 +159,7 @@
 - 不期望行为：Session 2+ 的操作方式仍为"从零新建"
 
 ### TC-0B-09：最终 Session tasksubsession 包含 HTML 交付规范
-- 期望行为：最终 Session 文件包含"HTML 交付规范"区块，明确 D3.js + Highcharts.js、SAP Fiori 风格、横向禁止滚动条、元素 ID 命名、单文件内联等约束
+- 期望行为：最终 Session 文件包含"HTML 交付规范"区块，明确 `task.html` 单文件、SAP Fiori 风格、横向禁止滚动条、元素 ID 命名、CSS / JS / 模拟数据全内联、禁止外部依赖等约束
 - 不期望行为：最终 Session 缺少 HTML 规范约束
 
 ### TC-0B-10：最终 Session tasksubsession 包含模拟数据要求
@@ -223,7 +223,7 @@
 
 ### TC-EX-10：最终 Session 完成后的输出
 - 触发：最终 HTML Session 用户验收通过
-- 期望行为：`task_root/memory.md` 追加"项目状态: 全部完成"，输出"✅ 核心交付物已完成：`task_root/PRD.md` + `[功能名].html`"
+- 期望行为：`task_root/memory.md` 追加"项目状态: 全部完成"，输出"✅ 核心交付物已完成：`task_root/PRD.md` + `task_root/task.html`"
 - 不期望行为：缺少项目完成状态标记
 
 ---
@@ -253,7 +253,7 @@
 ## TC-HTML：HTML 交付规范
 
 ### TC-HTML-01：单文件可独立运行
-- 期望行为：生成的 HTML 文件 CSS 和 JS 全部内联，无外部依赖文件，浏览器直接打开即可运行
+- 期望行为：生成的 `task.html` 中 CSS、JS 和模拟数据全部内联，无外部依赖文件，浏览器直接打开即可运行
 - 验证方法：断网环境下打开 HTML 文件，所有功能正常
 
 ### TC-HTML-02：横向无滚动条

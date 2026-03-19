@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VibeCoding Workflow 用户手册 v2.5</title>
+<title>VibeCoding Workflow 用户手册 v2.6</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap');
 
@@ -403,7 +403,7 @@
           <strong>输入：</strong>你的业务背景 + 功能需求（口述即可）<br><br>
           <strong>输出：</strong><br>
           · <code>PRD.md</code> — 产品需求文档（评审核心文档）<br>
-          · <code>[功能名].html</code> — 可交互 HTML 原型，含真实业务模拟数据
+          · <code>task.html</code> — 可交互 HTML 原型，含真实业务模拟数据，且为单文件评审包
         </div>
         <h3>你只需做三件事</h3>
         <div class="steps">
@@ -471,13 +471,13 @@
 
   <rect x="40" y="282" width="200" height="50" rx="12" fill="#d97706"/>
   <text x="140" y="304" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="sans-serif">最终 Session</text>
-  <text x="140" y="322" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="11" font-family="sans-serif">生成 [功能名].html 可交互原型</text>
+  <text x="140" y="322" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="11" font-family="sans-serif">生成 task.html 单文件原型</text>
 
   <line x1="140" y1="332" x2="140" y2="356" stroke="#0f766e" stroke-width="2" marker-end="url(#arr-main)"/>
 
   <rect x="50" y="357" width="180" height="44" rx="12" fill="#1e2926" stroke="#6ee7b7" stroke-width="1.5"/>
   <text x="140" y="377" text-anchor="middle" fill="#6ee7b7" font-size="13" font-weight="600" font-family="sans-serif">✅ 核心交付物</text>
-  <text x="140" y="393" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="11" font-family="sans-serif">PRD.md + [功能名].html</text>
+  <text x="140" y="393" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="11" font-family="sans-serif">PRD.md + task.html</text>
 </svg>
         </div>
         <div class="legend">
@@ -791,7 +791,7 @@ Session 4 读取 → artifacts/session-3-summary.md
     <div class="section-subtitle">核心交付物产出阶段，生成可直接在浏览器演示的交互原型</div>
 
     <div class="callout">
-      最后一个 Session 固定产出 <code>[功能名].html</code>，模拟数据严格按照 CLAUDE.md 业务背景编写，可直接用于评审演示。
+      最后一个 Session 固定产出 <code>task.html</code>，模拟数据严格按照 CLAUDE.md 业务背景编写，可直接用于评审演示。
     </div>
 
     <h3>HTML Session 上下文读取</h3>
@@ -967,7 +967,7 @@ Session 4 读取 → artifacts/session-3-summary.md
 
     <h3>项目完成终态</h3>
     <p>当 memory.md 包含"项目状态: 全部完成"时，Agent 输出：</p>
-    <pre>✅ 项目已全部完成。核心交付物：PRD.md + [功能名].html
+    <pre>✅ 项目已全部完成。核心交付物：PRD.md + task.html
 
 如需迭代新功能，请更新当前 task_root 下的 task.md / PRD.md 后告知我，我将重新规划。</pre>
     <p>Agent 不会建议执行不存在的后续 tasksubsession。</p>
@@ -983,7 +983,7 @@ Session 4 读取 → artifacts/session-3-summary.md
         ├── PRD.md
         ├── design.md
         ├── work-plan.md
-        ├── [功能名].html
+        ├── task.html
         ├── tasksubsession1.md
         ├── tasksubsession2.md
         ├── ...
@@ -1028,7 +1028,8 @@ Session 4 读取 → artifacts/session-3-summary.md
       <li><code>customer_context/</code> 是项目级，统一存放客户资料</li>
       <li><code>task.md</code> 是 Task 级，<code>1 Task = 1 个二级功能点</code></li>
       <li>如果当前 Task 只需要读取部分客户资料，这份“必读文件清单”应维护在 <code>task.md</code> 的 <code>Required Customer Context</code> section</li>
-      <li><code>[功能名].html</code> 固定生成在当前 <code>task_root</code> 根目录，不放在 <code>artifacts/</code> 或 <code>outputs/</code> 下</li>
+      <li><code>task.html</code> 固定生成在当前 <code>task_root</code> 根目录，不放在 <code>artifacts/</code> 或 <code>outputs/</code> 下</li>
+      <li><code>task.html</code> 必须内联 CSS、JavaScript 和模拟数据，不再额外输出 <code>styles.css</code>、<code>app.js</code>、<code>core-models.js</code> 等运行时文件</li>
       <li><code>scripts/</code> 和 <code>outputs/</code> 也是当前 <code>task_root</code> 的标准组成部分</li>
       <li>Session 1–N 必须在当前 <code>task_root</code> 中执行，而不是在项目根目录执行</li>
     </ul>
@@ -1045,7 +1046,7 @@ Session 4 读取 → artifacts/session-3-summary.md
       <tr><td><code>project_root / task_root</code></td><td>项目根目录 / 当前任务工作根目录</td></tr>
       <tr><td><code>CLAUDE.md</code></td><td>项目级背景，跨所有功能共享，基本不变</td></tr>
       <tr><td><code>PRD.md</code></td><td>核心交付物①，产品评审文档</td></tr>
-      <tr><td><code>[功能名].html</code></td><td>核心交付物②，可直接演示的交互原型</td></tr>
+      <tr><td><code>task.html</code></td><td>核心交付物②，可直接分发评审的单文件交互原型</td></tr>
     </table>
   </div>
 
