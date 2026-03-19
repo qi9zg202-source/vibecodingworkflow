@@ -3,7 +3,7 @@
 你现在进入的是一个多 Session 开发流程。
 
 当前 Task：
-- TSMC 北方创新中心 Fab CUS 制冷站节能策略编排与执行验证工作台
+- TSMC 台积电 Fab CUS 制冷站节能策略编排与执行验证工作台
 
 启动规则：
 - 先读取 `memory.md` 的 `Session Status`
