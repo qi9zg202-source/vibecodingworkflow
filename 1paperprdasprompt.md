@@ -1,5 +1,5 @@
 # VibeCoding Workflow — One Paper
-> 版本：v2.4 | 适用模型：Claude / GPT-4o 及同等能力大模型
+> 版本：v2.5 | 适用模型：Claude / GPT-4o 及同等能力大模型
 > 执行模型：文档驱动 + 用户手动逐步执行，零运行时依赖
 > 适用角色：产品经理（Web 功能原型场景）
 > 核心交付物：`prd.md`（产品需求文档）+ `[功能名].html`（可交互原型，含基于真实业务背景的模拟数据）
@@ -12,33 +12,34 @@
 
 ```
 IF 当前目录下不存在 memory.md：
-    # 进入设计阶段，根据文档状态选择子路径（见 SECTION 2）
+    # 当前通常位于 project_root，按 project_root / task_root 的文件状态进入设计阶段
 
-    IF CLAUDE.md / task.md / PRD.md 均不存在：
-        → 执行 Session 0a：引导用户 Q&A，产出 CLAUDE.md, task.md, PRD.md
+    IF `project_root/CLAUDE.md` 不存在，且 `task_root` 尚不存在：
+        → 执行 Session 0a：引导用户 Q&A，初始化标准目录，产出 `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md`
         → 停止，等待用户确认需求文档
 
-    ELSE IF CLAUDE.md / task.md / PRD.md 部分存在（不是全部都有）：
+    ELSE IF `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md` 部分存在（不是全部都有）：
         → 执行 Session 0a：补全缺失的需求文档
         → 停止，等待用户确认需求文档
 
-    ELSE IF CLAUDE.md / task.md / PRD.md 均已存在，但 work-plan.md 不存在：
-        → 执行 Session 0b：读取已有需求文档，产出 design.md, work-plan.md, tasksubsession1~N.md, memory.md
+    ELSE IF `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md` 均已存在，但 `task_root/work-plan.md` 不存在：
+        → 执行 Session 0b：读取已有需求文档，在 `task_root/` 下产出 `design.md`、`work-plan.md`、`tasksubsession1~N.md`、`memory.md`
         → 停止，等待用户确认
 
-    ELSE IF CLAUDE.md / task.md / PRD.md / work-plan.md 均已存在：
-        → 检测到全部规划文档已存在，但 memory.md 缺失（可能是 Session 0b 中断或 memory.md 被删除）
-        → 告知用户："检测到规划文档已完成，但进度日志缺失。我将创建 memory.md 并初始化为 Session 0 完成状态。"
-        → 创建 memory.md，标记 Session 0 已完成
+    ELSE IF `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md`、`task_root/work-plan.md` 均已存在：
+        → 检测到全部规划文档已存在，但 `task_root/memory.md` 缺失（可能是 Session 0b 中断或 memory.md 被删除）
+        → 告知用户："检测到规划文档已完成，但进度日志缺失。我将创建 task_root/memory.md 并初始化为 Session 0 完成状态。"
+        → 创建 `task_root/memory.md`，标记 Session 0 已完成
         → 停止，等待用户确认
 
 ELSE IF memory.md 存在：
+    # 当前目录应为 task_root
     → 读取 memory.md，解析已完成 Session 记录
 
     IF memory.md 中包含"项目状态: 全部完成"：
         → 输出：
            "✅ 项目已全部完成。核心交付物：PRD.md + [功能名].html
-            如需迭代新功能，请更新 task.md / PRD.md 后告知我，我将重新规划。"
+            如需迭代新功能，请更新当前 task_root 下的 task.md / PRD.md 后告知我，我将重新规划。"
         → 等待用户指令，不建议执行任何 tasksubsession
 
     ELSE：
@@ -54,6 +55,12 @@ ELSE IF memory.md 存在：
 - 每个 `tasksubsessionN.md` 是一个自包含的执行单元
 - 用户手动控制执行节奏：决定何时执行下一个 Session
 - 不依赖任何运行时（无 VSCode 插件）
+
+**目录工作约定（强制）：**
+- `project_root` = `1paperprdasprompt.md` 所在目录
+- `task_root` = `project_root/tasks/<task-slug>/`
+- 初始化时必须先创建标准目录，再写入文档文件
+- Session 0a / 0b 可在 `project_root` 执行；Session 1–N 必须在 `task_root` 中执行
 
 ---
 
@@ -84,12 +91,49 @@ ELSE IF memory.md 存在：
 | `memory.md`                      | 进度日志       | 项目进度日志：已完成 Session 记录、跨 Session 稳定决策、已知风险，供人工查阅和大模型参考                            | Session 0b 创建，每 Session 追加 | 每个 Session 完成后追加 |
 | `artifacts/session-N-summary.md` | 产出物        | Session N 的完成报告：完成了什么、关键决策、下一 Session 注意事项，作为下一 Session 的上下文交接                   | 每个 Session 执行完成后生成        | 只写不改             |
 
+### 目录粒度约定
+
+- `CLAUDE.md` 是**项目级**文件，一个 project 通常只维护一份，跨多个二级功能共享
+- `task.md` 是**Task 级**文件，`1 Task = 1 个二级功能点`，每个二级功能应独立维护自己的 `task.md`
+- 与 `task.md` 同级的 `PRD.md`、`design.md`、`work-plan.md`、`tasksubsessionN.md`、`memory.md` 也都属于该 Task
+- 本 One Paper 版本在初始化时统一创建 `tasks/<task-slug>/`，即使当前只做一个功能也不例外，避免后续新增功能时再迁移目录
+
+### 工程目录要求（初始化时必须创建）
+
+初始化完成后，工程目录至少应满足以下结构：
+
+```text
+project_root/
+├── 1paperprdasprompt.md
+├── CLAUDE.md
+├── customer_context/
+└── tasks/
+    └── <task-slug>/
+        ├── task.md
+        ├── PRD.md
+        ├── design.md
+        ├── work-plan.md
+        ├── tasksubsession1.md
+        ├── tasksubsession2.md
+        ├── ...
+        ├── [功能名].html
+        ├── memory.md
+        └── artifacts/
+```
+
+目录规则：
+- `customer_context/`：客户资料统一放在 `project_root/customer_context/`
+- `tasks/`：所有二级功能任务统一放在 `project_root/tasks/`
+- `<task-slug>/`：当前功能的工作根目录，目录名使用 kebab-case，例如 `chiller-strategy`
+- `artifacts/`：当前 Task 的 Session summary、证据文件统一放在 `task_root/artifacts/`
+
 ### 执行流程
 
 ```
 [Session 0a] 大模型读 1paperprdasprompt.md
     → 引导用户 Q&A（项目背景 + 功能需求）
-    → 产出 CLAUDE.md, task.md, PRD.md
+    → 创建标准工程目录
+    → 产出 CLAUDE.md, tasks/<task-slug>/task.md, tasks/<task-slug>/PRD.md
     → 停止，等待用户确认需求文档
 
 [用户] 检查需求文档，在同一窗口回复：
@@ -98,12 +142,12 @@ ELSE IF memory.md 存在：
 [Session 0b] 大模型在同一窗口继续执行（无需开新窗口）
     【Claude Code 用户】先切 plan 模式输出草稿 → 确认后切 acceptEdits 写入文件
     【其他环境用户】大模型直接输出内容，用户手动创建文件
-    → 产出 design.md, work-plan.md, tasksubsession1~N.md, memory.md
+    → 在 tasks/<task-slug>/ 下产出 design.md, work-plan.md, tasksubsession1~N.md, memory.md
     → 停止，等待用户确认
 
 [用户] 检查规划文档，确认无误后关闭此窗口
 
-[Session 1] 开启新窗口，发送："请读取 tasksubsession1.md 并执行"
+[Session 1] 进入 tasks/<task-slug>/ 后开启新窗口，发送："请读取 tasksubsession1.md 并执行"
     → 大模型执行 → 测试 Gate 通过
     → 输出结果，等待用户验收
 
@@ -122,7 +166,7 @@ ELSE IF memory.md 存在：
 
 ### Session 0a — 需求阶段
 
-**触发条件：** 当前目录下不存在 `memory.md`，且 CLAUDE.md / task.md / PRD.md 至少有一个不存在（全部不存在，或部分存在）
+**触发条件：** 当前位于 `project_root`，且 `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md` 至少有一个不存在（全部不存在，或部分存在）
 
 #### Step 1：引导用户收集项目背景
 
@@ -274,6 +318,7 @@ ELSE IF memory.md 存在：
 
 【功能基本信息】
 - 功能名称（简短）：
+- Task 目录名（英文 kebab-case，可选；如不填写，由我根据功能名称自动生成）：
 - 功能目标（一句话）：
 
 【功能范围】
@@ -288,9 +333,26 @@ ELSE IF memory.md 存在：
 
 #### Step 3：产出需求文档（Session 0a 产出物）
 
-按以下顺序创建文件，**每批创建后向用户报告进度**：
+按以下顺序创建目录和文件，**每批创建后向用户报告进度**：
+
+#### 3.0 创建标准工程目录
+
+先根据用户填写的「Task 目录名」确定 `task-slug`：
+- 若用户已填写合法 kebab-case 名称，直接使用
+- 若用户未填写，则根据功能名称自动生成 kebab-case 名称
+- 若生成结果不适合作为目录名，需先向用户确认后再创建
+
+然后创建以下目录：
+- `project_root/customer_context/`（若已存在则保留，不清空）
+- `project_root/tasks/`（若已存在则保留）
+- `project_root/tasks/<task-slug>/`
+- `project_root/tasks/<task-slug>/artifacts/`
+
+创建完成后，后续所有 Task 级文件均写入 `task_root = project_root/tasks/<task-slug>/`。
 
 #### 3.1 创建 `CLAUDE.md`
+
+写入路径：`project_root/CLAUDE.md`
 
 ```markdown
 # CLAUDE.md
@@ -328,6 +390,8 @@ ELSE IF memory.md 存在：
 
 > **填写要求：所有 `[...]` 占位符必须替换为基于用户确认内容的具体文字，不得保留占位符原文。**
 
+写入路径：`task_root/task.md`
+
 ```markdown
 # task.md
 
@@ -353,6 +417,8 @@ ELSE IF memory.md 存在：
 #### 3.3 创建 `PRD.md`
 
 > **填写要求：所有 `[...]` 占位符必须替换为基于用户确认内容的具体文字，不得保留占位符原文。Feature Specifications 中的模块名和字段值均需按实际功能填写。**
+
+写入路径：`task_root/PRD.md`
 
 ```markdown
 # PRD.md
@@ -414,16 +480,21 @@ ELSE IF memory.md 存在：
 ```
 Session 0a 完成！需求文档已生成：
 
+【目录结构】
+- customer_context/                    客户资料目录
+- tasks/<task-slug>/                   当前功能工作目录
+- tasks/<task-slug>/artifacts/         Session 产出目录
+
 【需求文档】
 - CLAUDE.md          项目背景与约束
-- task.md            功能目标与验收标准
-- PRD.md             产品需求文档
+- tasks/<task-slug>/task.md            功能目标与验收标准
+- tasks/<task-slug>/PRD.md             产品需求文档
 
 下一步：
 1. 请检查以上三个文件，确认需求准确
 2. 如需修改，直接编辑对应文件
 3. 确认无误后，在本窗口回复："需求已确认，请继续规划"
-   → 我将立即执行 Session 0b，产出 design.md、work-plan.md、tasksubsession1~N.md
+   → 我将立即执行 Session 0b，在 `tasks/<task-slug>/` 下产出 design.md、work-plan.md、tasksubsession1~N.md
 ```
 
 **然后停止，等待用户确认。**
@@ -432,7 +503,7 @@ Session 0a 完成！需求文档已生成：
 
 ### Session 0b — 规划阶段
 
-**触发条件：** CLAUDE.md / task.md / PRD.md 均已存在，且 `work-plan.md` 不存在
+**触发条件：** `project_root/CLAUDE.md` 与 `task_root/task.md` / `task_root/PRD.md` 均已存在，且 `task_root/work-plan.md` 不存在
 
 > 注意：若 `design.md` 已存在（0b 中途中断后恢复），**不得重新生成 design.md**，直接读取已有内容，从 work-plan.md 开始继续产出。
 
@@ -443,8 +514,8 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 ```
 第一步：plan 模式（只读分析，不写文件）
   claude --model opusplan --permission-mode plan
-  → 读取 CLAUDE.md / task.md / PRD.md
-  → 输出 design.md、work-plan.md、tasksubsession1~N.md 的完整内容草稿
+  → 读取 project_root/CLAUDE.md、task_root/task.md、task_root/PRD.md
+  → 输出 task_root/design.md、task_root/work-plan.md、task_root/tasksubsession1~N.md 的完整内容草稿
   → 停止，等待用户审阅和确认
 
 第二步：acceptEdits 模式（写入文件）
@@ -456,13 +527,15 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 > 如果不使用 Claude Code（如 Claude.ai 网页版），直接在同一对话窗口完成即可，大模型输出内容后用户手动创建文件。
 
 大模型必须先读取以下文件：
-- `CLAUDE.md`（项目背景）
-- `task.md`（功能目标与范围）
-- `PRD.md`（功能规格与验收标准）
+- `project_root/CLAUDE.md`（项目背景）
+- `task_root/task.md`（功能目标与范围）
+- `task_root/PRD.md`（功能规格与验收标准）
 
 然后按以下顺序产出规划文档：
 
 #### 0b-1 创建 `design.md`
+
+写入路径：`task_root/design.md`
 
 ```markdown
 # design.md
@@ -487,6 +560,8 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 ```
 
 #### 0b-2 创建 `work-plan.md`
+
+写入路径：`task_root/work-plan.md`
 
 将功能拆分为 Session 1–N，**最后一个 Session 固定为 HTML 交付**。Session 数量按以下标准决定：
 
@@ -531,6 +606,8 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 
 **这是本工作流的核心产出。** 每个文件必须自包含，格式如下：
 
+写入路径：`task_root/tasksubsession1.md ~ task_root/tasksubsessionN.md`
+
 生成时注意：
 - `## 工作对象` 中的目标文件名必须填写具体文件名（如 `chiller-strategy.html`），不得留占位符
 - Session 1：操作方式填"从零新建"，执行前检查填"无需检查"
@@ -546,7 +623,7 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 ## 上下文读取（执行前必读）
 
 大模型必须在执行前读取以下文件：
-- `CLAUDE.md`（项目级背景与约束）
+- `../../CLAUDE.md`（项目级背景与约束）
 - `task.md`（功能目标与验收标准）
 - `design.md`（技术架构与模块边界）
 [若 N > 1]：- `artifacts/session-[N-1]-summary.md`（上一 Session 交接文档）
@@ -604,7 +681,7 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 ## 上下文读取（执行前必读）
 
 大模型必须在执行前读取以下文件：
-- `CLAUDE.md`（项目背景、客户业务场景、领域约束）
+- `../../CLAUDE.md`（项目背景、客户业务场景、领域约束）
 - `PRD.md`（功能范围、用户价值、验收标准）
 - `design.md`（架构与模块边界）
 - `artifacts/session-[N-1]-summary.md`（上一 Session 交接）
@@ -688,6 +765,8 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 
 #### 0b-4 创建 `memory.md`
 
+写入路径：`task_root/memory.md`
+
 ```markdown
 # memory.md
 
@@ -719,21 +798,22 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 Session 0b 完成！规划文档已生成：
 
 【技术设计】
-- design.md          技术架构与模块设计
-- work-plan.md       Session 1–N 开发计划
+- tasks/<task-slug>/design.md          技术架构与模块设计
+- tasks/<task-slug>/work-plan.md       Session 1–N 开发计划
 
 【执行单元（可直接使用）】
-- tasksubsession1.md Session 1 执行指令
-- tasksubsession2.md Session 2 执行指令
+- tasks/<task-slug>/tasksubsession1.md Session 1 执行指令
+- tasks/<task-slug>/tasksubsession2.md Session 2 执行指令
 - ...（共 N 个）
 
 【进度日志】
-- memory.md          当前进度记录
+- tasks/<task-slug>/memory.md          当前进度记录
 
 下一步：
 1. 请检查上述文件，确认内容准确
 2. 如需修改，直接编辑对应文件
-3. 确认无误后，开启新会话，发送：
+3. 先进入 `tasks/<task-slug>/`
+4. 确认无误后，开启新会话，发送：
    "请读取 tasksubsession1.md 并按其中步骤执行"
 ```
 
@@ -823,10 +903,10 @@ Session 0b 完成！规划文档已生成：
 1. 停止当前 Session，不写 summary，不更新 memory.md
 
 2. 开启新窗口，重新执行 Session 0b：
-   → 读取更新后的 CLAUDE.md / task.md / PRD.md
-   → design.md：若模块边界变化则重新生成，否则只更新变化部分，不整体推倒
-   → 重新产出 work-plan.md、tasksubsession1~N.md
-   → memory.md 追加变更记录：
+   → 读取更新后的 `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md`
+   → `task_root/design.md`：若模块边界变化则重新生成，否则只更新变化部分，不整体推倒
+   → 重新产出 `task_root/work-plan.md`、`task_root/tasksubsession1~N.md`
+   → `task_root/memory.md` 追加变更记录：
      "需求变更 [日期]：[一句话描述变更内容]
       变更级别：Major / 重新规划：work-plan.md 已更新"
 
@@ -854,6 +934,7 @@ Session 0b 完成！规划文档已生成：
 ### 执行每个 tasksubsession 时
 
 - 必须先读取 tasksubsession 文件中列出的上下文文件
+- 若当前目录不是 `task_root`，必须先切换到 `task_root` 再执行
 - 严格只完成本 Session 指定的子任务，不提前执行后续 Session 的内容
 - 测试 Gate 未通过时，禁止写 summary 或更新 memory.md
 - 测试通过后，必须等待用户明确验收，禁止自行写 summary 或更新 memory.md
@@ -885,7 +966,7 @@ memory.md 检查结果：
 
 ### 禁止行为
 
-- 禁止在未读取 CLAUDE.md 和 task.md 的情况下开始执行
+- 禁止在未读取 `../../CLAUDE.md` 和 `task.md` 的情况下开始执行
 - 禁止一次性执行多个 tasksubsession；若用户要求同时执行多个，回复：
   "每次只能执行一个 Session。建议先执行 tasksubsession[最小编号].md，完成验收后再继续下一个。"
 - 禁止在测试未通过时将 Session 标记为完成

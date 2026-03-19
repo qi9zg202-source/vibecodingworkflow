@@ -1,4 +1,4 @@
-工作目录切到 __PROJECT_ROOT__
+工作目录切到 __TASK_ROOT__
 
 你现在进入的是一个两阶段多 Session webcoding 开发流程。
 
@@ -30,17 +30,17 @@
 ### 设计阶段（current_phase = design）
 
 - 只执行 Session 0
-- Session 0 产出：`CLAUDE.md`, `task.md`, `PRD.md`, `design.md`, `work-plan.md`, `memory.md`
+- Session 0 产出：`__PROJECT_ROOT__/CLAUDE.md`、`__TASK_ROOT__/task.md`、`__TASK_ROOT__/PRD.md`、`__TASK_ROOT__/design.md`、`__TASK_ROOT__/work-plan.md`、`__TASK_ROOT__/memory.md`
 - Session 0 通过后：`current_phase` 转为 `development`，`next_session: 1`
 
 ### 开发阶段（current_phase = development）
 
 必须先读取：
 - `__PROJECT_ROOT__/CLAUDE.md`
-- `__PROJECT_ROOT__/task.md`
-- `__PROJECT_ROOT__/design.md`
-- `__PROJECT_ROOT__/work-plan.md`
-- `__PROJECT_ROOT__/memory.md`
+- `__TASK_ROOT__/task.md`
+- `__TASK_ROOT__/design.md`
+- `__TASK_ROOT__/work-plan.md`
+- `__TASK_ROOT__/memory.md`
 
 补充规则：
 - 若 `last_completed_session > 0` 且存在 `artifacts/session-{last_completed_session}-summary.md`，必须在进入下一轮前读取上一轮 summary

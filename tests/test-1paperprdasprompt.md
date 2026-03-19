@@ -11,36 +11,45 @@
 
 ---
 
+## 路径约定
+
+- `project_root` 固定包含 `CLAUDE.md`、`customer_context/`
+- `task_root = project_root/tasks/<task-slug>/`
+- 除 `CLAUDE.md` 外，`task.md`、`PRD.md`、`design.md`、`work-plan.md`、`memory.md`、`tasksubsessionN.md`、`artifacts/`、`outputs/` 均位于 `task_root`
+- 下文若未显式写全路径，默认按以上目录 contract 解释
+
+---
+
 ## TC-E：入口协议（SECTION 0）
 
 ### TC-E-01：全新项目，无任何文件
-- 前置条件：目录为空，无 memory.md、CLAUDE.md、task.md、PRD.md
+- 前置条件：`project_root` 为空，无 `project_root/CLAUDE.md`，也无任何 `task_root` 文档
 - 输入：大模型读取 1paperprdasprompt.md
 - 期望行为：触发 Session 0a，向用户发出 Q&A 问卷（项目基本信息 + 业务背景 + 领域约束）
 - 不期望行为：直接生成代码；直接进入 Session 0b；询问用户"要做什么"而不给出结构化问卷
 
 ### TC-E-02：CLAUDE.md 存在，task.md / PRD.md 缺失
-- 前置条件：仅 CLAUDE.md 存在，无 memory.md
-- 期望行为：触发 Session 0a，补全缺失的 task.md 和 PRD.md
+- 前置条件：仅 `project_root/CLAUDE.md` 存在，无 `task_root/memory.md`
+- 期望行为：触发 Session 0a，在 `task_root` 补全缺失的 `task.md` 和 `PRD.md`
 - 不期望行为：跳过 Q&A 直接进入 Session 0b
 
 ### TC-E-03：CLAUDE.md + task.md + PRD.md 均存在，work-plan.md 缺失，memory.md 缺失
-- 前置条件：三份需求文档齐全，无 work-plan.md，无 memory.md
-- 期望行为：触发 Session 0b，读取三份文档后产出 design.md、work-plan.md、tasksubsession1~N.md、memory.md
-- 不期望行为：重新询问需求；重新生成 CLAUDE.md / task.md / PRD.md
+- 前置条件：`project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md` 齐全，无 `task_root/work-plan.md`，无 `task_root/memory.md`
+- 期望行为：触发 Session 0b，读取三份文档后在 `task_root` 产出 `design.md`、`work-plan.md`、`tasksubsession1~N.md`、`memory.md`
+- 不期望行为：重新询问需求；重新生成 `project_root/CLAUDE.md` / `task_root/task.md` / `task_root/PRD.md`
 
 ### TC-E-04：全部规划文档存在，memory.md 缺失（0b 中断恢复场景）
-- 前置条件：CLAUDE.md + task.md + PRD.md + work-plan.md 均存在，memory.md 不存在
-- 期望行为：告知用户"检测到规划文档已完成，但进度日志缺失"，创建 memory.md 并初始化为 Session 0 完成状态，停止等待确认
-- 不期望行为：重新执行 Session 0b；覆盖已有 work-plan.md
+- 前置条件：`project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md`、`task_root/work-plan.md` 均存在，`task_root/memory.md` 不存在
+- 期望行为：告知用户"检测到规划文档已完成，但进度日志缺失"，创建 `task_root/memory.md` 并初始化为 Session 0 完成状态，停止等待确认
+- 不期望行为：重新执行 Session 0b；覆盖已有 `task_root/work-plan.md`
 
 ### TC-E-05：memory.md 存在，Session 3 已完成
-- 前置条件：memory.md 存在，记录 Session 0–3 已完成
-- 期望行为：读取 memory.md，推断下一步为 tasksubsession4.md，主动告知用户当前进度和建议，等待用户确认
+- 前置条件：`task_root/memory.md` 存在，记录 Session 0–3 已完成
+- 期望行为：读取 `task_root/memory.md`，推断下一步为 `task_root/tasksubsession4.md`，主动告知用户当前进度和建议，等待用户确认
 - 不期望行为：自动执行 tasksubsession4.md；不告知进度直接等待
 
 ### TC-E-06：memory.md 存在，所有 Session 均已完成 ❌ FAIL
-- 前置条件：memory.md 记录全部 Session 完成，项目状态为"全部完成"
+- 前置条件：`task_root/memory.md` 记录全部 Session 完成，项目状态为"全部完成"
 - 期望行为：告知用户项目已全部完成，询问是否需要迭代或新功能
 - 不期望行为：建议执行不存在的 tasksubsessionN+1.md
 - **实际结果：FAIL — 规范缺口**
@@ -51,7 +60,7 @@
 
 ### TC-E-06b：规范补丁验证（待规范修复后执行）
 - 前置条件：1paperprdasprompt.md 入口协议已补充终态分支处理逻辑
-- 期望行为：大模型读取 memory.md 后识别"项目状态: 全部完成"，输出项目完成提示，不建议执行下一个 tasksubsession
+- 期望行为：大模型读取 `task_root/memory.md` 后识别"项目状态: 全部完成"，输出项目完成提示，不建议执行下一个 tasksubsession
 - 不期望行为：建议执行不存在的 tasksubsessionN+1.md
 - 状态：⏸ 待规范修复后解封
 
@@ -96,7 +105,7 @@
 
 ### TC-0A-08：Session 0a 完成后停止等待
 - 触发：三份文档生成完毕
-- 期望行为：输出完成报告（列出三个文件），明确告知用户"确认无误后回复：需求已确认，请继续规划"，然后停止
+- 期望行为：输出完成报告（列出 `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md`），明确告知用户"确认无误后回复：需求已确认，请继续规划"，然后停止
 - 不期望行为：自动继续执行 Session 0b；不等待用户确认
 
 ### TC-0A-09：用户未确认需求文档时禁止进入 Session 0b
@@ -109,14 +118,14 @@
 ## TC-0B：Session 0b — 规划阶段
 
 ### TC-0B-01：触发条件验证
-- 前置条件：CLAUDE.md + task.md + PRD.md 均存在，work-plan.md 不存在
+- 前置条件：`project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md` 均存在，`task_root/work-plan.md` 不存在
 - 期望行为：大模型先读取三份文档，再产出规划文档
 - 不期望行为：未读取文档直接生成；重新询问需求
 
 ### TC-0B-02：design.md 已存在时不重新生成
-- 前置条件：design.md 已存在（0b 中途中断场景），work-plan.md 不存在
-- 期望行为：读取已有 design.md，从 work-plan.md 开始继续产出，不覆盖 design.md
-- 不期望行为：重新生成 design.md 覆盖已有内容
+- 前置条件：`task_root/design.md` 已存在（0b 中途中断场景），`task_root/work-plan.md` 不存在
+- 期望行为：读取已有 `task_root/design.md`，从 `task_root/work-plan.md` 开始继续产出，不覆盖 `task_root/design.md`
+- 不期望行为：重新生成 `task_root/design.md` 覆盖已有内容
 
 ### TC-0B-03：design.md 内容完整性
 - 期望行为：包含 Architecture（分层结构、模块边界、数据流）和 Key Technical Decisions 两个主区块
@@ -153,8 +162,8 @@
 - 不期望行为：模拟数据要求缺失或仅有一句话描述
 
 ### TC-0B-11：memory.md 初始内容
-- 期望行为：memory.md 包含"当前进度"（已完成 Session 0）、"Session 完成记录"（Session 0 条目）、"跨 Session 稳定决策"、"已知风险"四个区块
-- 不期望行为：memory.md 为空；缺少初始 Session 0 记录
+- 期望行为：`task_root/memory.md` 包含"当前进度"（已完成 Session 0）、"Session 完成记录"（Session 0 条目）、"跨 Session 稳定决策"、"已知风险"四个区块
+- 不期望行为：`task_root/memory.md` 为空；缺少初始 Session 0 记录
 
 ### TC-0B-12：Session 0b 完成后停止等待
 - 期望行为：输出完成报告（列出所有生成文件），告知用户"确认无误后，开启新会话，发送：请读取 tasksubsession1.md 并按其中步骤执行"，然后停止
@@ -166,7 +175,7 @@
 
 ### TC-EX-01：执行前必读上下文文件
 - 触发：用户发送"请读取 tasksubsession1.md 并执行"
-- 期望行为：大模型先读取 tasksubsession 中列出的所有上下文文件（CLAUDE.md、task.md、design.md 等），再执行子任务
+- 期望行为：大模型先读取 tasksubsession 中列出的所有上下文文件（至少包括 `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/design.md` 等），再执行子任务
 - 不期望行为：未读取上下文直接执行
 
 ### TC-EX-02：严格只执行本 Session 子任务
@@ -176,7 +185,7 @@
 
 ### TC-EX-03：测试 Gate 未通过时禁止写 summary
 - 触发：子任务执行完毕，但测试 Gate 有条件未满足
-- 期望行为：告知失败原因和建议，不写 artifacts/session-N-summary.md，不更新 memory.md，等待用户决定
+- 期望行为：告知失败原因和建议，不写 `task_root/artifacts/session-N-summary.md`，不更新 `task_root/memory.md`，等待用户决定
 - 不期望行为：测试未通过仍写 summary；将 Session 标记为完成
 
 ### TC-EX-04：测试通过后等待用户验收
@@ -186,8 +195,8 @@
 
 ### TC-EX-05：用户验收通过后写 summary 和更新 memory.md
 - 触发：用户回复"通过"/"继续"/"OK"
-- 期望行为：写 artifacts/session-N-summary.md（含完成了什么、关键决策、下一 Session 注意事项），追加更新 memory.md，输出完成确认和下一步提示
-- 不期望行为：summary 内容为空；memory.md 未追加新记录
+- 期望行为：写 `task_root/artifacts/session-N-summary.md`（含完成了什么、关键决策、下一 Session 注意事项），追加更新 `task_root/memory.md`，输出完成确认和下一步提示
+- 不期望行为：summary 内容为空；`task_root/memory.md` 未追加新记录
 
 ### TC-EX-06：用户要求修改时在同一窗口继续
 - 触发：用户回复"再改一下 X"
@@ -209,7 +218,7 @@
 
 ### TC-EX-10：最终 Session 完成后的输出
 - 触发：最终 HTML Session 用户验收通过
-- 期望行为：memory.md 追加"项目状态: 全部完成"，输出"✅ 核心交付物已完成：PRD.md + [功能名].html"
+- 期望行为：`task_root/memory.md` 追加"项目状态: 全部完成"，输出"✅ 核心交付物已完成：`task_root/PRD.md` + `[功能名].html`"
 - 不期望行为：缺少项目完成状态标记
 
 ---
@@ -222,8 +231,8 @@
 - 不期望行为：报告"session-0-summary.md 不存在"并停止
 
 ### TC-CTX-02：Session N>1，前序 summary 不存在
-- 前置条件：执行 tasksubsession3.md，但 artifacts/session-2-summary.md 不存在
-- 期望行为：立即停止，读取 memory.md，根据 memory.md 状态给出明确提示（summary 丢失 or Session 未完成），等待用户决定
+- 前置条件：执行 `task_root/tasksubsession3.md`，但 `task_root/artifacts/session-2-summary.md` 不存在
+- 期望行为：立即停止，读取 `task_root/memory.md`，根据 `task_root/memory.md` 状态给出明确提示（summary 丢失 or Session 未完成），等待用户决定
 - 不期望行为：跳过检查直接执行；假设上下文并继续
 
 ### TC-CTX-03：memory.md 记录 Session 2 完成但 summary 文件丢失
@@ -286,7 +295,7 @@
 
 ### TC-BEH-03：禁止未读 CLAUDE.md 和 task.md 就开始执行
 - 触发：执行任意 tasksubsession
-- 期望行为：执行前必须读取 CLAUDE.md 和 task.md（以及 tasksubsession 中列出的其他上下文文件）
+- 期望行为：执行前必须读取 `project_root/CLAUDE.md` 和 `task_root/task.md`（以及 tasksubsession 中列出的其他上下文文件）
 - 不期望行为：跳过上下文读取直接执行子任务
 
 ### TC-BEH-04：需求文档未确认时禁止进入 Session 0b
@@ -299,7 +308,7 @@
 - 不期望行为：输出格式随意；缺少验收提示
 
 ### TC-BEH-06：用户验收通过后输出格式正确
-- 期望行为：输出包含"Session N 完成"、summary 文件路径、"memory.md 已更新"、下一步提示四个部分
+- 期望行为：输出包含"Session N 完成"、summary 文件路径、"`task_root/memory.md` 已更新"、下一步提示四个部分
 - 不期望行为：缺少下一步提示；未告知 summary 文件路径
 
 ---
@@ -308,17 +317,17 @@
 
 ### TC-MOD-01：修改 task.md / design.md 不影响已完成 Session
 - 场景：Session 2 执行中发现 task.md 需要调整
-- 期望行为：修改 task.md / design.md 后，从当前 Session 重新执行，已完成的 Session 1 不受影响
+- 期望行为：修改 `task_root/task.md` / `task_root/design.md` 后，从当前 Session 重新执行，已完成的 Session 1 不受影响
 - 不期望行为：要求重新执行 Session 1
 
 ### TC-MOD-02：修改 work-plan.md 需更新受影响的 tasksubsession
 - 场景：work-plan.md 中 Session 3 的范围发生变化
-- 期望行为：更新 tasksubsession3.md（及后续受影响的文件），再执行
+- 期望行为：更新 `task_root/tasksubsession3.md`（及后续受影响的文件），再执行
 - 不期望行为：直接执行旧的 tasksubsession3.md
 
 ### TC-MOD-03：CLAUDE.md 基本不变
 - 场景：执行过程中用户提出修改 CLAUDE.md
-- 期望行为：提醒用户 CLAUDE.md 仅在项目级约束发生根本变化时才更新，确认是否真的需要修改
+- 期望行为：提醒用户 `project_root/CLAUDE.md` 仅在项目级约束发生根本变化时才更新，确认是否真的需要修改
 - 不期望行为：随意修改 CLAUDE.md
 
 ### TC-MOD-04：中改 — 单模块范围变化，不触发全量重规划
@@ -328,7 +337,7 @@
 
 ### TC-MOD-05：大改 — In Scope 有模块增减，触发全量重规划
 - 场景：Session 3 验收未通过，用户与 Codex 修正后 PRD.md 新增了一个功能模块
-- 期望行为：停止当前 Session（不写 summary、不更新 memory.md），开新窗口重新执行 Session 0b，重新产出 design.md（模块边界变化时）、work-plan.md、tasksubsession1~N.md，memory.md 追加变更记录
+- 期望行为：停止当前 Session（不写 summary、不更新 `task_root/memory.md`），开新窗口重新执行 Session 0b，重新产出 `task_root/design.md`（模块边界变化时）、`task_root/work-plan.md`、`tasksubsession1~N.md`，`task_root/memory.md` 追加变更记录
 - 不期望行为：继续执行当前 Session；只修改受影响的 tasksubsession 而不重新规划
 
 ### TC-MOD-06：大改后输出复用评估表
@@ -338,7 +347,7 @@
 
 ### TC-MOD-07：大改后按用户复用决策执行
 - 场景：用户确认 Session 1 复用、Session 2 复用、Session 3 重做
-- 期望行为：memory.md 追加复用决策记录，从 Session 3 开始重新执行，不重跑 Session 1 和 2
+- 期望行为：`task_root/memory.md` 追加复用决策记录，从 Session 3 开始重新执行，不重跑 Session 1 和 2
 - 不期望行为：忽略用户决策从 Session 1 重新执行；自行跳过用户标记为"重做"的 Session
 
 ### TC-MOD-08：大改时 design.md 处理

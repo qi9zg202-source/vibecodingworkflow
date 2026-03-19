@@ -1,4 +1,4 @@
-工作目录切到 __PROJECT_ROOT__
+工作目录切到 __TASK_ROOT__
 
 本次只做 Session 6。
 开始前若存在上一轮 summary，先读：

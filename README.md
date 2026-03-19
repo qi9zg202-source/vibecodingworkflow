@@ -26,6 +26,8 @@ source code, or any feature-specific runtime logic. It only provides:
 The recommended model is:
 
 - `Project -> Task -> Session -> Artifact`
+- `1 project -> multiple tasks`，`CLAUDE.md` 是项目级，`task.md` 是每个二级功能各自维护的一份 Task 文档
+- One Paper 初始化统一创建 `project_root/tasks/<task-slug>/`
 - Session 0 produces all planning docs + pre-generates `tasksubsession1.md ~ tasksubsessionN.md`
 - User triggers each session via Roo Code `/run-session` command (or manually: `"请读取 tasksubsessionN.md 并执行"`)
 - `memory.md` is a human-readable progress log, not a runtime routing source
@@ -36,10 +38,11 @@ The recommended model is:
 A `.roo/commands/run-session.md` slash command is provided for simplified session triggering:
 
 ```
-/run-session          # 执行 memory.md 中 next_session 指定的 Session
-/run-session 3        # 执行指定 Session 编号
+/run-session          # 在 task_root 中执行 memory.md 指定的当前 Session
+/run-session 3        # 在 task_root 中执行指定 Session 编号
 ```
 
+Run this command inside `task_root = tasks/<task-slug>/`.
 The command reads `memory.md` to determine the current session, loads the corresponding `tasksubsessionN.md`, executes it, and waits for human acceptance before updating `memory.md`. This replaces the manual step of opening a new chat window and typing the trigger phrase.
 
 **Roo Code is optional.** The workflow works identically without it — just trigger sessions manually.
@@ -145,17 +148,35 @@ Use this project before or during webcoding development when you need:
 请读取 1paperprdasprompt.md，然后按照其中的入口协议开始执行。
 ```
 
-大模型会自动判断项目状态，引导你完成 Session 0（产出全部规划文档），然后按 Session 循环推进开发。
+大模型会自动判断项目状态，引导你完成 Session 0，并初始化标准目录：
+
+```text
+my-project/
+├── 1paperprdasprompt.md
+├── CLAUDE.md
+├── customer_context/
+└── tasks/
+    └── <task-slug>/
+        ├── task.md
+        ├── PRD.md
+        ├── design.md
+        ├── work-plan.md
+        ├── tasksubsession1.md
+        ├── ...
+        ├── memory.md
+        └── artifacts/
+```
 
 **执行阶段（Session 1–N）推荐使用 Roo Code：**
 
-在 VS Code 中安装 Roo Code 后，项目目录下输入：
+在 VS Code 中安装 Roo Code 后，先进入当前 Task 目录，再执行：
 
-```
+```bash
+cd tasks/<task-slug>
 /run-session
 ```
 
-Roo Code 会自动读取 `memory.md`，执行当前 Session，完成后等待你验收。验收通过后再次运行 `/run-session` 继续下一个。
+Roo Code 会自动读取当前 `task_root` 下的 `memory.md`，执行当前 Session，完成后等待你验收。验收通过后再次运行 `/run-session` 继续下一个。
 
 ### 方式二：脚手架初始化（适合需要完整模板结构的团队）
 
@@ -204,3 +225,35 @@ vibecodingworkflow/
 ├── scripts/
 └── templates/
 ```
+
+For a generated business project, the standardized layout is:
+
+```text
+my-project/
+├── 1paperprdasprompt.md
+├── CLAUDE.md
+├── customer_context/
+├── tasks/
+│   ├── feature-a/
+│   │   ├── task.md
+│   │   ├── PRD.md
+│   │   ├── design.md
+│   │   ├── work-plan.md
+│   │   ├── tasksubsession1.md
+│   │   ├── ...
+│   │   ├── memory.md
+│   │   └── artifacts/
+│   └── feature-b/
+│       ├── task.md
+│       ├── PRD.md
+│       ├── ...
+│       └── artifacts/
+└── shared-src-or-app-files/
+```
+
+In other words:
+
+- `CLAUDE.md` is project-level and shared across tasks
+- `customer_context/` stores client-provided background files at project level
+- `task.md` / `PRD.md` / `design.md` / `work-plan.md` / `tasksubsessionN.md` / `memory.md` are task-level
+- even if a project currently has only one feature task, the One Paper contract still uses `tasks/<task-slug>/`

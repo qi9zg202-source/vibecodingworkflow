@@ -7,13 +7,22 @@
 VS Code 插件是 VibeCoding 工作流的 IDE 集成层：
 
 - 提供 Dashboard、状态栏、文件打开器、Approve / Reject 入口
-- 读取 `memory.md` 展示当前 workflow 进度
+- 读取当前 `task_root/memory.md` 展示当前 workflow 进度
 - 不拥有 workflow 真相，不自行决定 `next_session`
 
 业务真相分层如下：
 
-- `memory.md`：官方 workflow 进度与业务 gate
+- `project_root/CLAUDE.md`：项目级背景与长期约束
+- `task_root/memory.md`：当前任务的 workflow 进度与业务 gate
 - VS Code 插件：展示状态，并转发用户动作
+
+## 目录 Contract
+
+- `project_root`
+- 固定包含 `CLAUDE.md`、`customer_context/`
+- `task_root = project_root/tasks/<task-slug>/`
+- 固定包含 `task.md`、`PRD.md`、`design.md`、`work-plan.md`、`memory.md`、session prompt、`artifacts/`、`outputs/`
+- 插件所有任务级文件都应从 `task_root` 解析，不能再默认从 `project_root` 根目录直接读取
 
 ## 整体架构
 
@@ -26,7 +35,7 @@ VS Code Extension (UI Shell)
     └── Approve / Reject Current Session
          │
          ▼
-memory.md + work-plan.md + tasksubsessionN.md
+project_root/CLAUDE.md + task_root/{memory.md, work-plan.md, session prompt}
          │
          ▼
 Runner subprocess (Roo Code / Claude Code)
@@ -39,16 +48,16 @@ Runner subprocess (Roo Code / Claude Code)
 - Session 0 负责生成第一版 `work-plan.md` 与后续 `tasksubsessionN.md`
 - 每次执行只处理一个"当前 Session 的一次 attempt"
 - runner 完成后只代表"候选结果已产出"，不代表 workflow 已推进
-- 必须先经过客户验收，再写 summary / manifest / 更新 `memory.md`
-- 验收不通过时，允许先更新 `PRD.md` / `design.md` / `task.md`，再修订 `work-plan.md` 与当前/后续 prompt
-- `memory.md` 只在验收通过后推进；reject 不推进 `next_session`
+- 必须先经过客户验收，再写 summary / manifest / 更新 `task_root/memory.md`
+- 验收不通过时，允许先更新 `task_root/PRD.md` / `task_root/design.md` / `task_root/task.md`，再修订 `task_root/work-plan.md` 与当前/后续 prompt
+- `task_root/memory.md` 只在验收通过后推进；reject 不推进 `next_session`
 
 ## 配置与依赖
 
 ### 前提
 
 - VS Code >= 1.85
-- workflow 项目包含 `memory.md`、`work-plan.md`、`tasksubsessionN.md` 等标准文件
+- workflow 项目符合 `project_root` / `task_root` contract，且当前任务目录内包含 `memory.md`、`work-plan.md`、session prompt 等标准文件
 
 ### 主要配置
 
@@ -93,7 +102,7 @@ Dashboard 中的 Session 时间线应至少覆盖：
 
 其中：
 
-- `W ...` 来自 `memory.md` 对应的业务 gate
+- `W ...` 来自 `task_root/memory.md` 对应的业务 gate
 - `R ...` 来自当前 runner 的运行时状态
 
 ## 命令设计
@@ -114,7 +123,7 @@ Dashboard 中的 Session 时间线应至少覆盖：
 
 ### 1. Refresh
 
-插件读取 `memory.md`，解析：
+插件读取 `task_root/memory.md`，解析：
 
 - `current_phase`
 - `session_gate`
@@ -127,7 +136,7 @@ Dashboard 中的 Session 时间线应至少覆盖：
 
 - 插件在终端执行 `/run-session` 或对应的 runner 命令
 - 只执行当前 `next_session` 的一次 attempt
-- runner 在 fresh context 中消费 `startup-prompt.md` 和当前 `tasksubsessionN.md`
+- runner 在 fresh context 中消费 `task_root/startup-prompt.md` 和当前 session prompt，并按其中约定读取 `project_root/CLAUDE.md`
 
 ### 3. Wait For Review
 
@@ -139,11 +148,11 @@ runner 完成后进入等待验收状态：
 
 ### 4. Approve
 
-用户批准后，插件写入 `memory.md`：
+用户批准后，插件写入 `task_root/memory.md`：
 
-- 写 `artifacts/session-N-summary.md`
-- 写 `artifacts/session-N-manifest.json`
-- 更新 `memory.md`
+- 写 `task_root/artifacts/session-N-summary.md`
+- 写 `task_root/artifacts/session-N-manifest.json`
+- 更新 `task_root/memory.md`
 - 将 `next_session` 推进到下一轮，或将 workflow 标记为 `done`
 
 ### 5. Reject / Rework
@@ -152,8 +161,8 @@ runner 完成后进入等待验收状态：
 
 - 当前 `next_session` 保持不变
 - 驳回原因写入 `review_notes`
-- 允许先修改 `PRD.md`、`design.md`、`task.md`
-- 再修订 `work-plan.md` 与当前/后续 `tasksubsessionN.md`
+- 允许先修改 `task_root/PRD.md`、`task_root/design.md`、`task_root/task.md`
+- 再修订 `task_root/work-plan.md` 与当前/后续 session prompt
 - 然后重新触发同一个 Session 的下一次 attempt
 
 ## Session 0 特别约束
@@ -168,11 +177,11 @@ Session 0 不是业务实现轮，而是规划轮。它的目标是：
 
 ## 契约边界
 
-- 业务状态定义：见 `memory.md`
+- 业务状态定义：见 `task_root/memory.md`
 - Python fallback 契约：已移除（LangGraph 集成已废弃）
 
 插件不能：
 
-- 绕过 `memory.md` 自己决定 `next_session`
+- 绕过 `task_root/memory.md` 自己决定 `next_session`
 - 把本地缓存当作 workflow 真相
 - 在 reject 后自动跳过当前 Session 去执行后续 Session

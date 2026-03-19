@@ -67,6 +67,40 @@ Recommended relationship:
 - `1 session -> one scoped deliverable with one review gate`
 - `1 accepted session -> one session summary handoff`
 
+### Recommended Filesystem Layout
+
+When one business project contains multiple feature tasks, use this directory
+shape:
+
+```text
+project-root/
+├── 1paperprdasprompt.md
+├── CLAUDE.md
+├── tasks/
+│   ├── task-a/
+│   │   ├── task.md
+│   │   ├── PRD.md
+│   │   ├── design.md
+│   │   ├── work-plan.md
+│   │   ├── tasksubsession1.md
+│   │   ├── tasksubsession2.md
+│   │   ├── memory.md
+│   │   └── artifacts/
+│   └── task-b/
+│       ├── task.md
+│       ├── PRD.md
+│       └── ...
+└── app/ or shared source files
+```
+
+Rules:
+
+- `CLAUDE.md` is project-level and should be shared by all tasks
+- each feature-level task owns its own `task.md`, `PRD.md`, `design.md`,
+  `work-plan.md`, `tasksubsessionN.md`, `memory.md`, and `artifacts/`
+- if the project currently has only one active task, a simplified single-task
+  root layout is allowed; that does not change the underlying ownership model
+
 ```mermaid
 flowchart TD
     P["Project"] --> T1["Task A"]
