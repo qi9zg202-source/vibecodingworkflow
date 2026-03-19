@@ -316,15 +316,10 @@
   ```bash
   # Python 环境
   pip install -r requirements-dev.txt
-
-  # VS Code 扩展
-  cd integrations/vibecoding-vscode-extension
-  npm ci
   ```
 
 **交付物：**
 - `requirements-dev.txt`（新增）
-- `integrations/vibecoding-vscode-extension/package.json`（更新）
 - `README.md`（更新）
 
 **验收标准：**
@@ -493,7 +488,6 @@
 ### 修改文件（4 个）
 
 - `scripts/run-vibecoding-loop.py`（集成所有优化）
-- `integrations/vibecoding-vscode-extension/package.json`（锁定依赖）
 - `README.md`（添加徽章和开发指南）
 - `docs/workflow-standard.md`（更新状态存储规范）
 

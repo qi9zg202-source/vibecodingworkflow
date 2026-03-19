@@ -21,12 +21,6 @@ source code, or any feature-specific runtime logic. It only provides:
 - a migration script for older prompt-only workflow projects
 - a legacy fresh-session driver archived for reference only
 
-This repository also now carries one companion integration module under
-`integrations/`:
-
-- `integrations/vibecoding-vscode-extension/`: VS Code UI shell for the fresh-session workflow, including fixtures, reports, and extension validation scripts
-- Current checkout validation on 2026-03-19 confirmed `./scripts/verify-vibecoding-workflow.sh`, `npm run smoke:session8`, `npm run regression:session9`, and `npm run smoke:session11` all pass.
-
 ## Execution Model
 
 The recommended model is:
@@ -122,8 +116,7 @@ flowchart TB
     F3 --> F4["summary / manifest / memory update"]
     F4 --> E1
 
-    E1 --> G["VS Code / Roo Code"]
-    G --> G1["integrations/vibecoding-vscode-extension\n或 .roo/commands/run-session.md"]
+    E1 --> G["VS Code / Roo Code\n.roo/commands/run-session.md"]
 ```
 
 See [docs/workflow-standard.md](./docs/workflow-standard.md) for the full `Project / Task / Session / Artifact / Memory` model and diagram.
@@ -208,7 +201,6 @@ vibecodingworkflow/
 ├── SKILL.md
 ├── .gitignore
 ├── docs/
-├── integrations/
 ├── scripts/
 └── templates/
 ```

@@ -169,7 +169,7 @@ Session 0 不是业务实现轮，而是规划轮。它的目标是：
 ## 契约边界
 
 - 业务状态定义：见 `memory.md`
-- Python fallback 契约：见 `integrations/vibecoding-vscode-extension/interfaces/python-driver-contract.md`
+- Python fallback 契约：已移除（LangGraph 集成已废弃）
 
 插件不能：
 
