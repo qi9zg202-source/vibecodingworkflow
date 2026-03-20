@@ -15,8 +15,13 @@ IF 当前目录下不存在 memory.md：
     # 当前通常位于 project_root，按 project_root / task_root 的文件状态进入设计阶段
 
     IF `project_root/CLAUDE.md` 不存在，且 `task_root` 尚不存在：
-        → 执行 Session 0a：引导用户 Q&A，初始化标准目录，产出 `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md`
-        → 停止，等待用户确认需求文档
+        IF `project_root/customer_context/` 不存在：
+            → 执行 Session 0a Step 0：仅创建 `customer_context/` 和 `tasks/` 目录
+            → 提示用户将背景资料放入 `customer_context/`，完成后回复"资料已就绪"（无资料可回复"跳过"）
+            → 停止，等待用户确认
+        ELSE：
+            → 执行 Session 0a Step 1+：引导用户 Q&A，创建完整标准目录，产出 `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md`
+            → 停止，等待用户确认需求文档
 
     ELSE IF `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md` 部分存在（不是全部都有）：
         → 执行 Session 0a：补全缺失的需求文档
@@ -34,27 +39,36 @@ IF 当前目录下不存在 memory.md：
 
 ELSE IF memory.md 存在：
     # 当前目录应为 task_root
-    → 读取 memory.md，解析已完成 Session 记录
+    → 先读取 memory.md 的 `Session Status`
+    → 必须解析：`current_phase`、`last_completed_session`、`next_session`、`next_session_prompt`、`session_gate`
 
-    IF memory.md 中包含"项目状态: 全部完成"：
+    IF `session_gate = done`：
         → 输出：
-           "✅ 项目已全部完成。核心交付物：PRD.md + task.html
+           "✅ 当前 Task 已全部完成。核心交付物：PRD.md + task.html
             如需迭代新功能，请更新当前 task_root 下的 task.md / PRD.md 后告知我，我将重新规划。"
         → 等待用户指令，不建议执行任何 tasksubsession
 
+    ELSE IF `session_gate != ready`：
+        → 输出当前阻塞或未完成状态
+        → 明确说明：当前不允许进入下一 Session
+        → 等待用户处理阻塞、补充信息或确认返工
+
     ELSE：
-        → 推断下一个应执行的 tasksubsession（最后完成的 Session N → 建议执行 tasksubsessionN+1.md）
+        → 推断下一个应执行的 tasksubsession（通常 `next_session = N` → 建议执行 `tasksubsessionN.md`）
         → 主动告知用户当前进度和建议，例如：
-           "当前进度：Session 3 已完成。建议执行 tasksubsession4.md。
-            发送：'请读取 tasksubsession4.md 并执行' 即可继续。"
+           "当前进度：last_completed_session = 3，next_session = 4，session_gate = ready。
+            建议开启 fresh session，并按固定读取顺序执行 tasksubsession4.md。"
         → 等待用户确认或指定其他 tasksubsession
 ```
 
 **本工作流的核心理念：**
 - 需求文档（CLAUDE.md / task.md / PRD.md）先稳定，再做技术拆分
 - 每个 `tasksubsessionN.md` 是一个自包含的执行单元
+- 每个 fresh session 都必须先读取 `memory.md` 再决定是否进入当前 Session，不允许只凭聊天历史续跑
 - 用户手动控制执行节奏：决定何时执行下一个 Session
 - 不依赖任何运行时（无 VSCode 插件）
+
+> Fresh session 的详细读取节点图与说明单独维护在用户文档中，避免本 prompt 体积持续膨胀。
 
 **目录工作约定（强制）：**
 - `project_root` = `1paperprdasprompt.md` 所在目录
@@ -142,7 +156,12 @@ project_root/
 ### 执行流程
 
 ```
-[Session 0a] 大模型读 1paperprdasprompt.md
+[Session 0a Step 0] 大模型读 1paperprdasprompt.md
+    → 创建 customer_context/ 和 tasks/ 目录
+    → 提示用户放入背景资料
+    → 停止，等待用户回复"资料已就绪"或"跳过"
+
+[Session 0a Step 1+] 大模型继续（同一窗口）
     → 引导用户 Q&A（项目背景 + 功能需求）
     → 创建标准工程目录
     → 产出 CLAUDE.md, tasks/<task-slug>/task.md, tasks/<task-slug>/PRD.md
@@ -159,7 +178,10 @@ project_root/
 
 [用户] 检查规划文档，确认无误后关闭此窗口
 
-[Session 1] 进入 tasks/<task-slug>/ 后开启新窗口，发送："请读取 tasksubsession1.md 并执行"
+[Session 1] 进入 tasks/<task-slug>/ 后开启新窗口，发送：
+    "请先读取 memory.md，确认当前应执行 tasksubsession1.md；
+     然后读取 CLAUDE.md、task.md、PRD.md、design.md、work-plan.md；
+     最后读取 tasksubsession1.md，并只执行这一轮。"
     → 大模型执行 → 测试 Gate 通过
     → 输出结果，等待用户验收
 
@@ -168,7 +190,10 @@ project_root/
     → 更新 memory.md
     → 提示下一步
 
-[Session 2] 开启新窗口，发送："请读取 tasksubsession2.md 并执行"
+[Session 2] 开启新窗口，发送：
+    "请先读取 memory.md，确认当前应执行 tasksubsession2.md；
+     然后读取 CLAUDE.md、task.md、PRD.md、design.md、work-plan.md、artifacts/session-1-summary.md；
+     最后读取 tasksubsession2.md，并只执行这一轮。"
     → ...
 ```
 
@@ -180,7 +205,36 @@ project_root/
 
 **触发条件：** 当前位于 `project_root`，且 `project_root/CLAUDE.md`、`task_root/task.md`、`task_root/PRD.md` 至少有一个不存在（全部不存在，或部分存在）
 
+#### Step 0：初始化目录，等待客户资料就绪
+
+**触发条件：** `project_root/customer_context/` 目录不存在（首次运行）
+
+创建以下两个目录：
+- `project_root/customer_context/`
+- `project_root/tasks/`
+
+创建完成后，向用户输出：
+
+```
+目录已初始化：
+- customer_context/   ← 请将客户背景资料（点位表、系统说明等）放入此目录
+- tasks/              ← 功能任务目录（后续自动创建）
+
+准备好后请回复：
+- "资料已就绪" — 我将读取资料并开始收集项目信息
+- "跳过" — 无背景资料，直接开始填写项目信息
+```
+
+**然后停止，等待用户回复。**
+
+> 若 `customer_context/` 已存在，跳过 Step 0，直接进入 Step 1。
+
 #### Step 1：引导用户收集项目背景
+
+**进入 Step 1 前，先扫描 `customer_context/` 目录：**
+
+- 若目录存在且有文件，列出所有文件路径，在问卷「客户资料」字段中预填，让用户确认而非手填
+- 若目录为空或不存在，「客户资料」字段保持空白提示
 
 向用户提问（一次性列出，让用户填写）：
 
@@ -191,7 +245,7 @@ project_root/
 - 项目名称：
 - 系统类型（Web 功能原型）：
 - 主要服务对象（用户角色）：
-- 对标目标（业界 leader，如"台积电"）：
+- 对标目标（业界 leader，如"TSMC"）：
 
 【业务背景】
 - 这个系统是做什么的？（1-3句话）
@@ -201,11 +255,15 @@ project_root/
 - 有哪些不可违反的业务规则或安全约束？
 - 有哪些明确的技术或合规限制？
 
-【客户资料（可选）】
-- 客户提供的背景资料文件路径（可填多个，每行一个）：
-  （推荐将文件放入项目根目录下的 `customer_context/` 文件夹，例：customer_context/低温冷冻水系统点位表.xlsx）
-  （若暂无资料，留空即可，后续可补充）
+【客户资料】
+已检测到 customer_context/ 目录中的文件：
+  - customer_context/[文件1]
+  - customer_context/[文件2]
+  （若列表有误或需补充，请直接修改；若无资料请填"无"）
 ```
+
+> 若 `customer_context/` 为空或用户从"跳过"进入，「客户资料」字段改为：
+> `- 客户提供的背景资料文件路径（可填多个，每行一个；暂无可填"无"）：`
 
 收到回复后：复述摘要 → 确认准确 → 进入 Step 1b 自动搜索背景信息。
 
@@ -384,7 +442,7 @@ project_root/
 - [用户角色和核心使用场景]
 
 ## Benchmark Reference
-- 对标目标：[用户填写的业界 leader，如"台积电"]
+- 对标目标：[用户填写的业界 leader，如"TSMC"]
 - 行业地位：[搜索结果：对标目标在该行业的地位与代表性数据]
 - 相关领域最佳实践：[搜索结果：对标目标在本次功能相关领域的具体做法或行业标准]
 
@@ -457,7 +515,7 @@ project_root/
 - [用户价值]
 
 ## Design Standard
-- 对标目标：[来自 CLAUDE.md Benchmark Reference，如"台积电"]
+- 对标目标：[来自 CLAUDE.md Benchmark Reference，如"TSMC"]
 - 基线要求：本功能所有模块的能力设计必须达到或超越对标目标同类系统水平
 - 参照依据：[来自 CLAUDE.md Benchmark Reference 的相关领域最佳实践摘要]
 - 评审标准：功能评审时以"是否达到对标水准"作为验收基线之一
@@ -651,10 +709,14 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 ## 上下文读取（执行前必读）
 
 大模型必须在执行前读取以下文件：
+- `memory.md`（先确认 `session_gate = ready`、`next_session = N`，否则停止）
 - `../../CLAUDE.md`（项目级背景与约束）
 - `task.md`（功能目标与验收标准）
+- `PRD.md`（功能范围、用户价值、验收标准）
 - `design.md`（技术架构与模块边界）
-[若 N > 1]：- `artifacts/session-[N-1]-summary.md`（上一 Session 交接文档）
+- `work-plan.md`（当前 Session 的 Deliverable 与 Test Gate 来源）
+- [若 N > 1] `artifacts/session-[N-1]-summary.md`（上一 Session 交接文档）
+- 最后回到当前 `tasksubsession[N].md`，严格只执行本文件定义的内容
 
 ## 本 Session 目标
 
@@ -693,9 +755,20 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
    - 关键决策和发现
    - 下一 Session 的依赖和注意事项
 2. 追加更新 `memory.md`：
-   ```
-   - Session [N]: [交付物一句话描述] | tests: passed | [日期]
-   ```
+   - 在 `Session Progress Record` 追加：
+     `- Session [N]: [交付物一句话描述] | tests: passed | [日期]`
+   - 更新 `Session Status`：
+     - `last_completed_session: [N]`
+     - `last_completed_session_tests: passed`
+     - 若 [N] 不是最后一个 Session：
+       - `next_session: [N+1]`
+       - `next_session_prompt: tasksubsession[N+1].md`
+       - `session_gate: ready`
+     - 若 [N] 是最后一个 Session：
+       - `current_phase: done`
+       - `next_session: none`
+       - `next_session_prompt: none`
+       - `session_gate: done`
 3. 输出完成确认，提示下一步
 ```
 
@@ -709,10 +782,14 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 ## 上下文读取（执行前必读）
 
 大模型必须在执行前读取以下文件：
+- `memory.md`（先确认 `session_gate = ready`、`next_session = N`，否则停止）
 - `../../CLAUDE.md`（项目背景、客户业务场景、领域约束）
+- `task.md`（功能目标与边界）
 - `PRD.md`（功能范围、用户价值、验收标准）
 - `design.md`（架构与模块边界）
+- `work-plan.md`（当前 Session 的 Deliverable 与 Test Gate 来源）
 - `artifacts/session-[N-1]-summary.md`（上一 Session 交接）
+- 最后回到当前 `tasksubsession[N].md`，严格只执行本文件定义的内容
 
 ## 本 Session 目标
 
@@ -763,10 +840,15 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 
 1. 写 `artifacts/session-[N]-summary.md`
 2. 追加更新 `memory.md`：
-   ```
-   - Session [N]: task.html 已交付 | tests: passed | [日期]
-   - 项目状态: 全部完成
-   ```
+   - 在 `Session Progress Record` 追加：
+     `- Session [N]: task.html 已交付 | tests: passed | [日期]`
+   - 更新 `Session Status`：
+     - `last_completed_session: [N]`
+     - `last_completed_session_tests: passed`
+     - `current_phase: done`
+     - `next_session: none`
+     - `next_session_prompt: none`
+     - `session_gate: done`
 3. 输出最终交付确认：
    ```
    ✅ 核心交付物已完成：
@@ -799,24 +881,41 @@ Session 0b 分两步走，对应 Claude Code 的两个模式：
 ```markdown
 # memory.md
 
-> 本文件是项目进度日志，记录已完成的 Session 和跨 Session 的稳定结论。
+> 本文件是 Task 级 workflow 状态真相源。每个 fresh session 都必须先读本文件，再决定是否执行下一轮。
 
-## 当前进度
+## Session Status
 
-- 已完成 Session：0（设计阶段）
-- 下一步：执行 tasksubsession1.md
+- current_phase: development
+- last_completed_session: 0
+- last_completed_session_tests: passed
+- next_session: 1
+- next_session_prompt: `tasksubsession1.md`
+- session_gate: ready
+- review_notes: ""
 
-## Session 完成记录
+## Current Decisions
 
-- Session 0: 全部规划文档已产出 | [日期]
+- [跨 Session 稳定结论；只记录已经确认的决策]
 
-## 跨 Session 稳定决策
+## Known Risks
 
-- [决策描述]（理由：[原因]）
+- [会影响后续 Session 判断的风险]
 
-## 已知风险
+## Session Progress Record
 
-- [风险描述]（建议：[处理方式]）
+- Session 0: 全部规划文档已产出 | tests: passed | [日期]
+
+## Next Session Entry
+
+读取顺序（严格执行）：
+- 先读 `Session Status`
+- 再读 `../../CLAUDE.md`
+- 再读 `task.md`
+- 再读 `PRD.md`
+- 再读 `design.md`
+- 再读 `work-plan.md`
+- 若 `last_completed_session > 0` 且存在上一轮 summary，先读 `artifacts/session-[last_completed_session]-summary.md`
+- 最后只执行 `next_session_prompt` 指定的内容
 ```
 
 ### 0b-5 Session 0b 完成报告
@@ -843,7 +942,9 @@ Session 0b 完成！规划文档已生成：
 2. 如需修改，直接编辑对应文件
 3. 先进入 `tasks/<task-slug>/`
 4. 确认无误后，开启新会话，发送：
-   "请读取 tasksubsession1.md 并按其中步骤执行"
+   "请先读取 memory.md，确认当前应执行 tasksubsession1.md；
+    然后读取 CLAUDE.md、task.md、PRD.md、design.md、work-plan.md；
+    最后读取 tasksubsession1.md，并只执行这一轮。"
 ```
 
 **然后停止，等待用户确认。**
@@ -852,14 +953,15 @@ Session 0b 完成！规划文档已生成：
 
 ## [SECTION 3] 执行阶段（Session 1–N）
 
-**触发方式：** 用户发送 `"请读取 tasksubsessionN.md 并按其中步骤执行"`
+**触发方式：** 用户在 fresh session 中发送带读取顺序的启动指令，例如：
+`"请先读取 memory.md，确认当前应执行 tasksubsessionN.md；然后按约定读取其余上下文文件；最后读取 tasksubsessionN.md，并只执行这一轮。"`
 
 ### 真实执行循环
 
 一个 Session 的完整生命周期如下：
 
 ```
-[用户] 发送："请读取 tasksubsessionN.md 并按其中步骤执行"
+[用户] 发送 fresh session 启动指令
 
 [大模型] 读取上下文 → 执行子任务 → 执行测试 Gate
 
@@ -995,7 +1097,8 @@ memory.md 检查结果：
 
 ### 禁止行为
 
-- 禁止在未读取 `../../CLAUDE.md` 和 `task.md` 的情况下开始执行
+- 禁止在未读取 `memory.md`、`../../CLAUDE.md` 和 `task.md` 的情况下开始执行
+- 禁止跳过 `PRD.md`、`work-plan.md` 直接只读 `tasksubsessionN.md`
 - 禁止一次性执行多个 tasksubsession；若用户要求同时执行多个，回复：
   "每次只能执行一个 Session。建议先执行 tasksubsession[最小编号].md，完成验收后再继续下一个。"
 - 禁止在测试未通过时将 Session 标记为完成
@@ -1026,5 +1129,5 @@ Summary: artifacts/session-N-summary.md
 memory.md 已更新
 
 下一步：当你准备好后，开启新会话并发送：
-"请读取 tasksubsession[N+1].md 并按其中步骤执行"
+"请先读取 memory.md，确认当前应执行 tasksubsession[N+1].md；然后按约定读取 CLAUDE.md、task.md、PRD.md、design.md、work-plan.md、上一轮 summary；最后读取 tasksubsession[N+1].md，并只执行这一轮。"
 ```

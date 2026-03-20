@@ -1,7 +1,7 @@
 # task.md
 
 ## Title
-TSMC 台积电 Fab CUS 制冷站节能策略编排与执行验证工作台
+TSMC Fab CUS 制冷站节能策略编排与执行验证工作台
 
 ## Goal
 建设一个面向厂务机械课的策略工作台，用于管理 Fab CUS 制冷站的节能优化建议，覆盖：

@@ -1,6 +1,10 @@
 # VibeCoding Workflow 用户手册
 
-> 适用版本：v2.6 | 适用角色：产品经理 | 最后更新：2026-03-19
+> 适用版本：v2.7 | 适用角色：产品经理 | 最后更新：2026-03-20
+>
+> **v2.7 新增能力：**
+> - Session 0a 新增 Step 0：首次运行时先初始化 `customer_context/` 和 `tasks/` 目录，停下来等客户放入背景资料，再进入问卷设计阶段
+> - Step 1 问卷自动扫描 `customer_context/` 目录，预填客户资料文件列表，无需手动输入路径
 >
 > **v2.6 新增能力：**
 > - 最终评审原型固定收敛为 `task.html`
@@ -33,7 +37,7 @@
 **你需要做的事只有三件：**
 
 1. 把 `1paperprdasprompt.md` 放到你的 `project_root`
-2. 让 Codex/Claude 读取它，回答问题
+2. 让 Codex/Claude 读取它，按提示初始化目录、放入背景资料、回答问题
 3. Session 0 完成后进入当前 `task_root`，逐步确认每个 Session 的结果
 
 ---
@@ -52,13 +56,69 @@
 
 **第 1 步：** 在你的 `project_root` 放入 `1paperprdasprompt.md`
 
-**第 2 步：** 首次启动时，在 `project_root` 手动触发 Session 0
+**第 2 步：** 首次启动时，在 `project_root` 触发 Session 0
 
 ```
 请读取 1paperprdasprompt.md，然后按照其中的入口协议开始执行。
 ```
 
-**第 3 步：** Session 0 完成后进入当前 `task_root`，再用 Roo Code `/run-session` 或手动触发后续 Session。
+Codex 会先创建 `customer_context/` 和 `tasks/` 目录，然后停下来等你放入背景资料。
+
+**第 3 步：** 将客户背景资料放入 `customer_context/`，回复"资料已就绪"（无资料可回复"跳过"）。Codex 自动扫描目录、预填文件列表，进入问卷设计阶段。
+
+Session 0 完成后进入当前 `task_root`，再用 Roo Code `/run-session` 或手动触发后续 Session。
+
+---
+
+## Fresh Session 读取锁链
+
+进入 Session 1 及后续 Session 时，不要只让模型读取 `tasksubsessionN.md`。正确方式是先过 `memory.md` 的 gate，再按固定顺序补齐上下文。
+
+```mermaid
+flowchart TD
+    A["新开一个 Session 窗口"] --> B["进入当前 task_root"]
+    B --> C["读取 memory.md / Session Status"]
+    C --> D{"session_gate ?"}
+
+    D -->|"done"| D1["停止\nTask 已完成"]
+    D -->|"blocked"| D2["停止\n先处理阻塞"]
+    D -->|"in_progress"| D3["停止\n上一轮尚未收口"]
+    D -->|"ready"| E["确认 next_session / next_session_prompt"]
+
+    E --> F["读取 CLAUDE.md"]
+    F --> G["读取 task.md"]
+    G --> H["读取 PRD.md"]
+    H --> I["读取 design.md"]
+    I --> J["读取 work-plan.md"]
+    J --> K{"上一轮 summary\n存在?"}
+    K -->|"是"| L["读取 artifacts/session-(N-1)-summary.md"]
+    K -->|"否"| M["跳过"]
+    L --> N["读取 tasksubsessionN.md"]
+    M --> N
+    N --> O["只执行本轮 Session N"]
+    O --> P["测试通过后等待用户验收"]
+    P --> Q{"用户明确通过?"}
+    Q -->|"否"| Q1["继续修改/返工\n不更新 memory.md"]
+    Q -->|"是"| R["写 summary + 更新 memory.md"]
+```
+
+用户理解重点：
+
+- `memory.md` 决定“能不能进”和“该进哪一轮”
+- `CLAUDE.md` → `task.md` → `PRD.md` → `design.md` → `work-plan.md` 是固定主链
+- 上一轮 `summary` 只在存在时插入
+- `tasksubsessionN.md` 是最后读取的执行入口，不是第一个入口
+
+建议你在新窗口直接这样说：
+
+```text
+请先读取 memory.md，确认当前应执行 tasksubsessionN.md；
+然后读取 CLAUDE.md、task.md、PRD.md、design.md、work-plan.md；
+如果存在上一轮 summary 也先读取；
+最后读取 tasksubsessionN.md，并只执行这一轮。
+```
+
+更完整说明见 [`fresh-session-read-chain.md`](fresh-session-read-chain.md)。
 
 ---
 
@@ -66,7 +126,7 @@
 
 > 以下是一个真实场景的完整演示，展示整个工作流的每一步对话和产出。
 >
-> **示例背景：** 产品经理小王，负责 TSMC 台积电 Fab 厂务平台，这次要做「制冷机房优化策略管理」功能。
+> **示例背景：** 产品经理小王，负责 TSMC Fab 厂务平台，这次要做「制冷机房优化策略管理」功能。
 
 ---
 
@@ -74,7 +134,7 @@
 
 > 目标：产出所有稳定规划文档 + 预生成全量执行文件。不写任何业务代码。
 >
-> Session 0 分两步：**0a（需求阶段）** 先初始化 `customer_context/`、`tasks/<task-slug>/` 及其标准子目录，再产出 `CLAUDE.md` / `task.md` / `PRD.md`；**0b（规划阶段）** 在同一窗口继续，在 `task_root` 下产出 `design.md` / `work-plan.md` / `tasksubsession1~N.md` / `memory.md`。
+> Session 0 分两步：**0a（需求阶段）** 先初始化 `customer_context/`、`tasks/` 目录，等客户放入背景资料后扫描预填，再通过问卷产出 `CLAUDE.md` / `task.md` / `PRD.md`；**0b（规划阶段）** 在同一窗口继续，在 `task_root` 下产出 `design.md` / `work-plan.md` / `tasksubsession1~N.md` / `memory.md`。
 
 ---
 
@@ -84,26 +144,40 @@
 请读取 1paperprdasprompt.md，然后按照其中的入口协议开始执行。
 ```
 
-Agent 读取文件，发现项目根目录还没有当前 Task 的 `memory.md`，判断为**首次运行**，进入 Session 0 设计阶段。
+Agent 读取文件，发现 `customer_context/` 目录不存在，判断为**首次运行**，进入 Session 0a Step 0。
 
 ---
 
-#### Step 2 — Agent 引导收集项目背景
+#### Step 1b — Agent 初始化目录，等待客户资料
 
-Agent 输出：
+Agent 创建 `customer_context/` 和 `tasks/` 目录后输出：
 
 ```
-你好！我已读取 VibeCoding Workflow 规范。当前项目尚未初始化当前 Task 的标准目录和 memory.md，这是新项目。
+目录已初始化：
+- customer_context/   ← 请将客户背景资料（点位表、系统说明等）放入此目录
+- tasks/              ← 功能任务目录（后续自动创建）
 
-我将引导你完成 Session 0（设计阶段），产出所有规划文档。
-Session 0 不写业务代码，只产出文档。
+准备好后请回复：
+- "资料已就绪" — 我将读取资料并开始收集项目信息
+- "跳过" — 无背景资料，直接开始填写项目信息
+```
 
-请先填写项目基本信息：
+小王将两个文件放入 `customer_context/`，回复：`"资料已就绪"`
+
+---
+
+#### Step 2 — Agent 扫描资料，引导收集项目背景
+
+Agent 扫描 `customer_context/` 目录，发现两个文件，输出问卷（客户资料字段已预填）：
+
+```
+你好！我已检测到 customer_context/ 目录中的文件，请填写以下项目基本信息：
 
 【项目基本信息】
 - 项目名称：
-- 系统类型（Web / App / 后端服务 / 其他）：
+- 系统类型（Web 功能原型）：
 - 主要服务对象（用户角色）：
+- 对标目标（业界 leader，如"TSMC"）：
 
 【业务背景】
 - 这个系统是做什么的？（1-3句话）
@@ -112,6 +186,12 @@ Session 0 不写业务代码，只产出文档。
 【领域约束】
 - 有哪些不可违反的业务规则或安全约束？
 - 有哪些明确的技术或合规限制？
+
+【客户资料】
+已检测到 customer_context/ 目录中的文件：
+  - customer_context/低温冷冻水系统点位表.xlsx
+  - customer_context/中温冷冻水系统电表清单.xlsx
+  （若列表有误或需补充，请直接修改；若无资料请填"无"）
 ```
 
 小王回复：
@@ -130,7 +210,7 @@ Session 0 不写业务代码，只产出文档。
 - 不得直接控制制冷设备，所有操作需人工确认
 - 数据展示需支持 7×24h 历史趋势查询
 
-对标目标：台积电
+对标目标：TSMC
 客户资料：/path/to/低温冷冻水系统点位表.xlsx, /path/to/中温冷冻水系统电表清单.xlsx
 ```
 
@@ -149,17 +229,17 @@ Agent 自动搜索三类信息并输出摘要：
 ```
 已完成背景搜索，摘要如下：
 
-【客户基本信息 — TSMC 台积电】
-- 全称：南京先进半导体技术研究院（TSMC），台积电位于北京
+【客户基本信息 — TSMC】
+- 全称：南京先进半导体技术研究院（TSMC），TSMC位于北京
 - 业务性质：半导体制造研发，Fab 厂务系统负责全厂公用工程（冷冻水、压缩空气、纯水等）
 - 规模：中型研发 Fab，制冷机房配置离心机 + 螺杆机混合机组
 
-【对标行业地位 — 台积电】
+【对标行业地位 — TSMC】
 - 全球晶圆代工龙头，2nm 制程量产在即
-- 厂务能效管理是台积电核心竞争力之一，PUE 长期维持在 1.4 以下（行业领先水平）
-- 台积电 Fab 厂务系统已实现全厂能效数字化管控，制冷系统 EER 实时监控与自动优化
+- 厂务能效管理是TSMC核心竞争力之一，PUE 长期维持在 1.4 以下（行业领先水平）
+- TSMC Fab 厂务系统已实现全厂能效数字化管控，制冷系统 EER 实时监控与自动优化
 
-【对标最佳实践 — 台积电能效管理】
+【对标最佳实践 — TSMC能效管理】
 - 制冷系统采用分级策略管理：预测性优化 + 实时反馈 + 稳态验证三阶段闭环
 - 策略包按季节/负荷段分类，每个策略包含收益预测区间和风险等级评估
 - 所有策略执行记录可追溯，支持一键回退，人工审核节点不可绕过
@@ -252,11 +332,11 @@ Agent 分两批生成文件并报告进度：
 ✅ tasks/chiller-strategy/scripts/   Task 辅助脚本目录
 ✅ tasks/chiller-strategy/outputs/   Task 输出目录（samples / reports / session-specs / session-logs）
 ✅ CLAUDE.md                        项目背景与约束（不含工作流规则，只含业务上下文）
-                                   新增 Benchmark Reference section：台积电行业地位与能效管理最佳实践事实
+                                   新增 Benchmark Reference section：TSMC行业地位与能效管理最佳实践事实
                                    新增 Domain Data section：点位表/电表清单提取结果（点位数、关键点位、单位、采集频率）
 ✅ tasks/chiller-strategy/task.md   功能目标与验收标准
 ✅ tasks/chiller-strategy/PRD.md    产品需求文档（含 User Stories + Feature Specs）
-                                   新增 Design Standard section：设计必须达到或超越台积电对标水准
+                                   新增 Design Standard section：设计必须达到或超越TSMC对标水准
 
 → 停止，等待你确认需求文档
 ```
@@ -811,7 +891,7 @@ A: v2.2 版本将工作流规则移到了 1paperprdasprompt.md 的 SECTION 4，C
 ---
 
 **Q: 对标目标有什么用？**
-A: 对标目标（如台积电）用于两个地方：一是 Agent 在 Step 1b 搜索该对标企业的行业地位和最佳实践，写入 CLAUDE.md 的 Benchmark Reference section，作为设计参考事实；二是 PRD.md 的 Design Standard section 会明确要求"设计必须达到或超越对标水准"，让评审方看到设计依据。填写越具体（如"台积电制冷系统能效管理"），搜索结果越精准。
+A: 对标目标（如TSMC）用于两个地方：一是 Agent 在 Step 1b 搜索该对标企业的行业地位和最佳实践，写入 CLAUDE.md 的 Benchmark Reference section，作为设计参考事实；二是 PRD.md 的 Design Standard section 会明确要求"设计必须达到或超越对标水准"，让评审方看到设计依据。填写越具体（如"TSMC制冷系统能效管理"），搜索结果越精准。
 
 **Q: 客户资料文件太大读不完怎么办？**
 A: Agent 会采用分段读取策略：结构化文件（Excel/CSV）优先读取表头和前 50 行，提取字段名、单位、采集频率等元数据；非结构化文件（Word/PDF）按章节分段读取，每段确认后继续。如果文件超出单次读取限制，Agent 会告知已读取的范围和提取结果，你可以决定是否继续读取剩余部分。核心目标是提取"有哪些数据、数据结构是什么"，而非读完全部原始数据。
